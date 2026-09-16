@@ -1,0 +1,18 @@
+name = "ngo-apply"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[[r2_buckets]]
+binding = "CARIBBEAN_DATA"
+bucket_name = "caribbean-data"
+
+[[routes]]
+pattern = "caribbean.countdowns.co/api/ngo-apply*"
+zone_name = "countdowns.co"
+
+# 3 submissions per minute per IP — same as suggest (id 1003)
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1004"
+simple = { limit = 3, period = 60 }
