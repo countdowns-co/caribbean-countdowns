@@ -29,6 +29,8 @@ const VALID = {
   details: ["zouk", "kompa"], image: "https://example.com/img.webp",
   tickets: [{ name: "Website", url: "https://example.com/tickets" }],
   eco: ["water", "reusable"], notes: "2nd edition",
+  edition: "2", firstYear: "2025", attendance: "200_1000",
+  organizer: "association", priceRange: "€25-60",
 };
 
 test("valid POST → 201, object stored under suggestions/, no PII", async () => {
@@ -121,6 +123,60 @@ test("unknown eco id → 400", async () => {
 test("bad ticket shape → 400", async () => {
   const res = await worker.fetch(post({ ...VALID, tickets: ["not-an-object"] }), makeEnv());
   assert.equal(res.status, 400);
+});
+
+test("new optional fields stored when valid", async () => {
+  const env = makeEnv();
+  const res = await worker.fetch(post(VALID), env);
+  assert.equal(res.status, 201);
+  const stored = JSON.parse(env.puts[0].value);
+  assert.equal(stored.suggestion.edition, "2");
+  assert.equal(stored.suggestion.firstYear, "2025");
+  assert.equal(stored.suggestion.attendance, "200_1000");
+  assert.equal(stored.suggestion.organizer, "association");
+  assert.equal(stored.suggestion.priceRange, "€25-60");
+});
+
+test("new optional fields blank by default", async () => {
+  const bare = { ...VALID };
+  delete bare.edition; delete bare.firstYear; delete bare.attendance;
+  delete bare.organizer; delete bare.priceRange;
+  const env = makeEnv();
+  const res = await worker.fetch(post(bare), env);
+  assert.equal(res.status, 201);
+  const stored = JSON.parse(env.puts[0].value);
+  assert.equal(stored.suggestion.edition, "");
+  assert.equal(stored.suggestion.firstYear, "");
+});
+
+test("non-numeric edition → 400", async () => {
+  const res = await worker.fetch(post({ ...VALID, edition: "two" }), makeEnv());
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).field, "edition");
+});
+
+test("bad firstYear format → 400", async () => {
+  const res = await worker.fetch(post({ ...VALID, firstYear: "25" }), makeEnv());
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).field, "firstYear");
+});
+
+test("unknown attendance value → 400", async () => {
+  const res = await worker.fetch(post({ ...VALID, attendance: "huge" }), makeEnv());
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).field, "attendance");
+});
+
+test("unknown organizer value → 400", async () => {
+  const res = await worker.fetch(post({ ...VALID, organizer: "wizard" }), makeEnv());
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).field, "organizer");
+});
+
+test("priceRange over 60 chars → 400", async () => {
+  const res = await worker.fetch(post({ ...VALID, priceRange: "x".repeat(61) }), makeEnv());
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).field, "priceRange");
 });
 
 test("unknown keys are dropped, never stored", async () => {

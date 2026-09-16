@@ -11,8 +11,12 @@
 const ORIGIN   = 'https://caribbean.countdowns.co';
 const MAX_BODY = 10 * 1024;
 const DATE_RE  = /^\d{4}-\d{2}-\d{2}$/;
+const EDITION_RE = /^\d{1,3}$/;
+const YEAR_RE  = /^\d{4}$/;
 const TYPES    = ['music festival', 'carnival', 'sailing race', 'art', 'sport', 'other'];
 const ECO_IDS  = ['transport', 'no_plastic', 'reusable', 'water', 'ngo'];
+const ATTENDANCE_OPTIONS = ['under_200', '200_1000', '1000_plus'];
+const ORGANIZER_OPTIONS  = ['association', 'company', 'municipality', 'media', 'individual'];
 
 const CORS = {
   'Access-Control-Allow-Origin':  ORIGIN,
@@ -56,6 +60,11 @@ function buildSuggestion(raw) {
     tickets:     Array.isArray(raw.tickets) ? raw.tickets : [],
     eco:         Array.isArray(raw.eco) ? raw.eco : [],
     notes:       str(raw.notes),
+    edition:     str(raw.edition),
+    firstYear:   str(raw.firstYear),
+    attendance:  str(raw.attendance),
+    organizer:   str(raw.organizer),
+    priceRange:  str(raw.priceRange),
   };
 
   if (!s.name)                    return { error: 'Missing required field', field: 'name' };
@@ -63,13 +72,17 @@ function buildSuggestion(raw) {
   if (!s.country)                 return { error: 'Missing required field', field: 'country' };
   if (!s.type)                    return { error: 'Missing required field', field: 'type' };
 
-  const caps = { name: 120, description: 2000, notes: 2000, city: 120, country: 60, timezone: 60 };
+  const caps = { name: 120, description: 2000, notes: 2000, city: 120, country: 60, timezone: 60, priceRange: 60 };
   for (const [field, max] of Object.entries(caps)) {
     if (s[field].length > max) return { error: 'Too long', field };
   }
   if (!DATE_RE.test(s.startDate)) return { error: 'Invalid date', field: 'startDate' };
   if (!DATE_RE.test(s.endDate))   return { error: 'Invalid date', field: 'endDate' };
   if (!TYPES.includes(s.type))    return { error: 'Invalid value', field: 'type' };
+  if (s.edition && !EDITION_RE.test(s.edition))            return { error: 'Invalid value', field: 'edition' };
+  if (s.firstYear && !YEAR_RE.test(s.firstYear))           return { error: 'Invalid value', field: 'firstYear' };
+  if (s.attendance && !ATTENDANCE_OPTIONS.includes(s.attendance)) return { error: 'Invalid value', field: 'attendance' };
+  if (s.organizer && !ORGANIZER_OPTIONS.includes(s.organizer))    return { error: 'Invalid value', field: 'organizer' };
 
   for (const field of ['website', 'image']) {
     if (s[field] && (s[field].length > 300 || !isHttpUrl(s[field]))) {
