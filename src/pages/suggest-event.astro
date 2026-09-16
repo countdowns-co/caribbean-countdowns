@@ -19,6 +19,7 @@ import PageFooter from "../components/PageFooter.astro";
     }
     .page { max-width: 540px; margin: 0 auto; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
     .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
     .back-link:hover { color: #999; }
     .lang-group { display: flex; gap: 4px; flex-shrink: 0; }
@@ -68,7 +69,7 @@ import PageFooter from "../components/PageFooter.astro";
 </head>
 <body>
 <LiveBanner />
-<div class="page">
+<main class="page">
   <div class="page-header">
     <a class="back-link" href="/">
       <span class="t-en">← Back</span>
@@ -83,6 +84,7 @@ import PageFooter from "../components/PageFooter.astro";
       <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
     </div>
   </div>
+  <h1 class="page-title">🎉 <span class="t-en">Suggest an Event</span><span class="t-fr">Proposer un événement</span><span class="t-kr">Pwopoze yon evènman</span><span class="t-es">Proponer un evento</span></h1>
   <details class="criteria-box">
     <summary class="criteria-toggle">
       <span class="t-en">▸ Listing criteria</span>
@@ -123,7 +125,7 @@ import PageFooter from "../components/PageFooter.astro";
     <button id="btnBack" class="is-hidden"></button>
     <button id="btnNext"></button>
   </div>
-</div>
+</main>
 <script is:inline src="/scripts/suggest-event.js" defer></script>
 <PageFooter />
 </body>
