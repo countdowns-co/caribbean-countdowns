@@ -1,0 +1,397 @@
+---
+import LiveBanner from "../components/LiveBanner.astro";
+import PageFooter from "../components/PageFooter.astro";
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Accessibility Statement — countdowns.co</title>
+  <meta name="description" content="Accessibility statement for countdowns.co — WCAG 2.1 AA conformance status, what has been tested, known limitations, and how to report an issue." />
+  <style>.t-fr,.t-kr,.t-es{display:none}.lang-row{display:flex;align-items:center;gap:16px}</style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0f0f;
+      color: #e0e0e0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: underline; }
+    a:hover { color: #4ade80; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .site-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+    .site-title a { text-decoration: none; }
+
+    .lang-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      color: #aaa;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover { border-color: #888; color: #eee; }
+    .lang-btn.active { background: #1e3a5f; border-color: #2d6aa0; color: #7ec8e3; }
+
+    .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
+    .back-link:hover { color: #4ade80; }
+
+    .divider { border: none; border-top: 1px solid #2e2e2e; margin: 28px 0; }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    p { color: #999999; margin-bottom: 10px; font-size: 13px; }
+
+    li { color: #999999; font-size: 13px; margin-bottom: 6px; }
+
+    .section { margin-bottom: 8px; }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      margin-bottom: 16px;
+    }
+    .badge-info { background: #0a0f1a; color: #7ec8e3; border: 1px solid #1e3a5f; }
+  </style>
+</head>
+
+<body>
+<LiveBanner />
+  <main class="page">
+
+    <div class="header-row">
+      <h1 class="site-title">
+        <a href="/">Countdowns</a>
+      </h1>
+      <div class="lang-row">
+        <a class="back-link" href="/">
+          <span class="t-en">← Back</span>
+          <span class="t-fr">← Retour</span>
+          <span class="t-kr">← Retounen</span>
+          <span class="t-es">← Volver</span>
+        </a>
+        <div class="lang-group">
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="fr">FR</button>
+          <button class="lang-btn" data-lang="kr">KR</button>
+          <button class="lang-btn" data-lang="es">ES</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- FR -->
+    <div class="t-fr">
+
+      <div class="section">
+        <h2>Déclaration d'accessibilité</h2>
+        <p>countdowns.co s'engage à rendre son site accessible au plus grand nombre. Cette page décrit l'état actuel de conformité, ce qui a été testé, et comment signaler un problème.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Statut de conformité</h2>
+        <span class="badge badge-info">Partiellement conforme — WCAG 2.1 niveau AA</span>
+        <p>Ce statut signifie que certaines parties du contenu ne sont pas encore pleinement conformes, ou que la conformité n'a pas été vérifiée par une évaluation humaine complète (voir « Ce qui n'est pas encore fait » ci-dessous). Ce n'est pas une auto-certification définitive.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Ce qui a été fait</h2>
+        <ul>
+          <li>Audit automatisé <strong>axe-core</strong> (règles WCAG 2.1 A/AA et 2.2) sur les 16 pages publiques du site — 0 violation détectée, y compris sur des règles hors du périmètre WCAG strict (landmarks, structure de titres).</li>
+          <li>Structure sémantique : chaque page utilise des repères de navigation (<code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, bannière <code>role="banner"</code>) et un titre <code>&lt;h1&gt;</code> unique.</li>
+          <li>Contrastes de couleur vérifiés et corrigés (calcul du ratio de luminance réel, pas une estimation visuelle).</li>
+          <li>Scan indépendant complémentaire via <a href="https://app.getwcag.com" target="_blank" rel="noopener noreferrer">getwcag.com</a>, outil tiers gratuit et consultable par n'importe qui.</li>
+        </ul>
+        <p>Preuves publiques : <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/186" target="_blank" rel="noopener noreferrer">PR #186</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/187" target="_blank" rel="noopener noreferrer">#187</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/188" target="_blank" rel="noopener noreferrer">#188</a>.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Ce qui n'est pas encore fait</h2>
+        <p>Aucune évaluation humaine complète n'a encore été réalisée : pas de test au clavier de bout en bout, pas de test avec un lecteur d'écran réel (VoiceOver, NVDA). Les outils automatisés ne détectent qu'un sous-ensemble des critères WCAG — l'ordre de lecture logique, la pertinence des textes alternatifs, ou l'expérience réelle avec une technologie d'assistance ne peuvent être vérifiés que manuellement. Cette évaluation manuelle est prévue à court terme (voir la <a href="https://github.com/countdowns-co/caribbean-countdowns/blob/main/ROADMAP.md" target="_blank" rel="noopener noreferrer">feuille de route</a> du projet).</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Méthode d'évaluation</h2>
+        <p>Auto-évaluation par l'équipe du projet, à l'aide d'outils automatisés (axe-core, getwcag.com). Aucun audit externe rémunéré n'a été commandé.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Technologies utilisées</h2>
+        <p>HTML, CSS, JavaScript. Site statique, sans framework JavaScript côté client lourd.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Signaler un problème</h2>
+        <p>Si une partie du site ne vous est pas accessible, écrivez-nous : <a href="mailto:admin.hxqxk@silomails.com?subject=Accessibilit%C3%A9%20—%20probl%C3%A8me%20signal%C3%A9">admin.hxqxk@silomails.com</a>. Décrivez la page concernée et le problème rencontré — nous répondons personnellement.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Date de publication</h2>
+        <p>Cette déclaration a été publiée le 16 septembre 2026.</p>
+      </div>
+
+    </div>
+
+    <!-- EN -->
+    <div class="t-en">
+
+      <div class="section">
+        <h2>Accessibility statement</h2>
+        <p>countdowns.co is committed to making its site accessible to as many people as possible. This page describes the current conformance status, what has been tested, and how to report an issue.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Conformance status</h2>
+        <span class="badge badge-info">Partially conformant — WCAG 2.1 level AA</span>
+        <p>This status means some parts of the content are not yet fully conformant, or conformance has not been confirmed by a complete human evaluation (see "What hasn't been done" below). It is not a final self-certification.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>What has been done</h2>
+        <ul>
+          <li>Automated <strong>axe-core</strong> audit (WCAG 2.1 A/AA and 2.2 rules) across all 16 public pages — 0 violations found, including rules outside the strict WCAG tag scope (landmarks, heading structure).</li>
+          <li>Semantic structure: every page uses navigation landmarks (<code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, a <code>role="banner"</code> announcement bar) and a single <code>&lt;h1&gt;</code>.</li>
+          <li>Color contrast checked and fixed (real luminance-ratio calculation, not a visual estimate).</li>
+          <li>Complementary independent scan via <a href="https://app.getwcag.com" target="_blank" rel="noopener noreferrer">getwcag.com</a>, a free third-party tool anyone can run.</li>
+        </ul>
+        <p>Public evidence: <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/186" target="_blank" rel="noopener noreferrer">PR #186</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/187" target="_blank" rel="noopener noreferrer">#187</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/188" target="_blank" rel="noopener noreferrer">#188</a>.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>What hasn't been done yet</h2>
+        <p>No complete human evaluation has been carried out yet: no end-to-end keyboard-only testing, no testing with a real screen reader (VoiceOver, NVDA). Automated tools only catch a subset of WCAG criteria — logical reading order, alt-text quality, or real assistive-technology experience can only be verified manually. This manual pass is planned in the near term (see the project's <a href="https://github.com/countdowns-co/caribbean-countdowns/blob/main/ROADMAP.md" target="_blank" rel="noopener noreferrer">roadmap</a>).</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Assessment approach</h2>
+        <p>Self-evaluation by the project team, using automated tools (axe-core, getwcag.com). No paid external audit has been commissioned.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Technologies relied upon</h2>
+        <p>HTML, CSS, JavaScript. Static site, no heavy client-side JavaScript framework.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Report an issue</h2>
+        <p>If any part of the site isn't accessible to you, write to us: <a href="mailto:admin.hxqxk@silomails.com?subject=Accessibility%20—%20issue%20reported">admin.hxqxk@silomails.com</a>. Describe the page and the problem you encountered — we respond personally.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Publication date</h2>
+        <p>This statement was published on September 16, 2026.</p>
+      </div>
+
+    </div>
+
+    <!-- KR -->
+    <div class="t-kr">
+
+      <div class="section">
+        <h2>Deklarasyon aksesiblite</h2>
+        <p>countdowns.co angaje pou fè sit li aksesib pou plis moun posib. Paj sa a dekri estati konfòmite aktyèl la, sa ki te teste, ak kijan pou siyale yon pwoblèm.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Estati konfòmite</h2>
+        <span class="badge badge-info">Patyèlman konfòm — WCAG 2.1 nivo AA</span>
+        <p>Estati sa a vle di kèk pati nan kontni an poko totalman konfòm, oswa konfòmite a poko konfime pa yon evalyasyon imen konplè (gade "Sa ki poko fèt" anba a). Se pa yon oto-sètifikasyon final.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Sa ki te fèt</h2>
+        <ul>
+          <li>Odit otomatik <strong>axe-core</strong> (règ WCAG 2.1 A/AA ak 2.2) sou tout 16 paj piblik sit la — 0 vyolasyon jwenn, ki gen ladan règ ki depase seul WCAG strik la (landmark, estrikti tit).</li>
+          <li>Estrikti semantik: chak paj itilize pwen referans navigasyon (<code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, yon ba anonse <code>role="banner"</code>) ak yon sèl <code>&lt;h1&gt;</code>.</li>
+          <li>Kontras koulè verifye epi korije (kalkil vrè rapò limnyans, pa yon estimasyon vizyèl).</li>
+          <li>Scan endepandan konplemantè atravè <a href="https://app.getwcag.com" target="_blank" rel="noopener noreferrer">getwcag.com</a>, yon zouti tyès gratis nenpòt moun ka fè kouri.</li>
+        </ul>
+        <p>Prèv piblik: <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/186" target="_blank" rel="noopener noreferrer">PR #186</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/187" target="_blank" rel="noopener noreferrer">#187</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/188" target="_blank" rel="noopener noreferrer">#188</a>.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Sa ki poko fèt</h2>
+        <p>Poko gen okenn evalyasyon imen konplè: pa gen tès klavye total, pa gen tès ak yon vrè lekti ekran (VoiceOver, NVDA). Zouti otomatik yo sèlman detekte yon pati nan kritè WCAG yo — lòd lekti lojik, kalite tèks altènatif, oswa vrè eksperyans ak teknoloji asistans se sèlman verifyab manyèlman. Evalyasyon manyèl sa a planifye byento (gade <a href="https://github.com/countdowns-co/caribbean-countdowns/blob/main/ROADMAP.md" target="_blank" rel="noopener noreferrer">plan wout</a> pwojè a).</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Metòd evalyasyon</h2>
+        <p>Oto-evalyasyon pa ekip pwojè a, ak zouti otomatik (axe-core, getwcag.com). Pa gen okenn odit ekstèn peye ki te kòmande.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Teknoloji itilize</h2>
+        <p>HTML, CSS, JavaScript. Sit statik, san gwo framework JavaScript kote kliyan.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Siyale yon pwoblèm</h2>
+        <p>Si yon pati nan sit la pa aksesib pou ou, ekri nou: <a href="mailto:admin.hxqxk@silomails.com?subject=Aksesiblite%20—%20pwoblèm%20siyale">admin.hxqxk@silomails.com</a>. Dekri paj la ak pwoblèm ou rankontre a — nou reponn pèsonèlman.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Dat piblikasyon</h2>
+        <p>Deklarasyon sa a te pibliye 16 septanm 2026.</p>
+      </div>
+
+    </div>
+
+    <!-- ES -->
+    <div class="t-es">
+
+      <div class="section">
+        <h2>Declaración de accesibilidad</h2>
+        <p>countdowns.co se compromete a hacer su sitio accesible al mayor número de personas posible. Esta página describe el estado actual de conformidad, lo que se ha probado y cómo informar de un problema.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Estado de conformidad</h2>
+        <span class="badge badge-info">Parcialmente conforme — WCAG 2.1 nivel AA</span>
+        <p>Este estado significa que algunas partes del contenido aún no son totalmente conformes, o que la conformidad no ha sido confirmada mediante una evaluación humana completa (ver "Lo que aún no se ha hecho" más abajo). No es una autocertificación definitiva.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Lo que se ha hecho</h2>
+        <ul>
+          <li>Auditoría automatizada <strong>axe-core</strong> (reglas WCAG 2.1 A/AA y 2.2) en las 16 páginas públicas del sitio — 0 violaciones detectadas, incluidas reglas fuera del alcance estricto de WCAG (landmarks, estructura de encabezados).</li>
+          <li>Estructura semántica: cada página utiliza puntos de referencia de navegación (<code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, una barra de aviso <code>role="banner"</code>) y un único <code>&lt;h1&gt;</code>.</li>
+          <li>Contraste de color verificado y corregido (cálculo real del ratio de luminancia, no una estimación visual).</li>
+          <li>Escaneo independiente complementario mediante <a href="https://app.getwcag.com" target="_blank" rel="noopener noreferrer">getwcag.com</a>, una herramienta gratuita de terceros que cualquiera puede ejecutar.</li>
+        </ul>
+        <p>Evidencia pública: <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/186" target="_blank" rel="noopener noreferrer">PR #186</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/187" target="_blank" rel="noopener noreferrer">#187</a>, <a href="https://github.com/countdowns-co/caribbean-countdowns/pull/188" target="_blank" rel="noopener noreferrer">#188</a>.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Lo que aún no se ha hecho</h2>
+        <p>Todavía no se ha realizado una evaluación humana completa: sin pruebas de teclado de extremo a extremo, sin pruebas con un lector de pantalla real (VoiceOver, NVDA). Las herramientas automatizadas solo detectan un subconjunto de los criterios WCAG — el orden de lectura lógico, la calidad del texto alternativo o la experiencia real con tecnología de asistencia solo pueden verificarse manualmente. Esta evaluación manual está prevista a corto plazo (ver la <a href="https://github.com/countdowns-co/caribbean-countdowns/blob/main/ROADMAP.md" target="_blank" rel="noopener noreferrer">hoja de ruta</a> del proyecto).</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Método de evaluación</h2>
+        <p>Autoevaluación por el equipo del proyecto, usando herramientas automatizadas (axe-core, getwcag.com). No se ha encargado ninguna auditoría externa remunerada.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Tecnologías utilizadas</h2>
+        <p>HTML, CSS, JavaScript. Sitio estático, sin un framework de JavaScript pesado del lado del cliente.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Informar de un problema</h2>
+        <p>Si alguna parte del sitio no te resulta accesible, escríbenos: <a href="mailto:admin.hxqxk@silomails.com?subject=Accesibilidad%20—%20problema%20reportado">admin.hxqxk@silomails.com</a>. Describe la página y el problema encontrado — respondemos personalmente.</p>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="section">
+        <h2>Fecha de publicación</h2>
+        <p>Esta declaración se publicó el 16 de septiembre de 2026.</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script is:inline src="/scripts/lang.js" defer></script>
+<PageFooter />
+</body>
+</html>

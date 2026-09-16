@@ -7,6 +7,7 @@ Countdown timers to festival application deadlines across the Caribbean and Fren
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/countdowns-co/caribbean-countdowns/badge)](https://scorecard.dev/viewer/?uri=github.com/countdowns-co/caribbean-countdowns)
 [![CII Best Practices](https://www.bestpractices.dev/projects/12911/badge)](https://www.bestpractices.dev/projects/12911)
 [![Deploy CC](https://github.com/countdowns-co/caribbean-countdowns/actions/workflows/deploy.yml/badge.svg)](https://github.com/countdowns-co/caribbean-countdowns/actions/workflows/deploy.yml)
+[![WCAG 2.1 AA (automated)](https://a11ybadges.com/badge?text=WCAG_2.1_AA_(automated)&badgeColor=0d2a0d&textColor=4ade80)](https://caribbean.countdowns.co/accessibility-statement/)
 
 ---
 
@@ -18,6 +19,7 @@ Countdown timers to festival application deadlines across the Caribbean and Fren
 - 🤝 NGO spotlight — community progress tracker for the [NGO community](https://caribbean.countdowns.co/ngo/)
 - 📝 Suggest a festival — 12-step submission wizard
 - 🛡️ [Security posture](https://caribbean.countdowns.co/security/) — OpenSSF Scorecard, CII Best Practices, and privacy compliance tracked publicly, updated as the project evolves
+- ♿ [Accessibility statement](https://caribbean.countdowns.co/accessibility-statement/) — WCAG 2.1 AA conformance status, automated audit evidence, and known limitations tracked publicly
 - 🔒 Privacy-first visit counter — first-party only, no third-party analytics or tracking scripts
 
 ## 🔧 How it's built

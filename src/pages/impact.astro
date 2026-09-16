@@ -133,6 +133,12 @@ import PageFooter from "../components/PageFooter.astro";
       letter-spacing: 0.3px;
     }
 
+    .card-a11y-img {
+      width: 220px;
+      max-width: 100%;
+      height: auto;
+    }
+
   </style>
 </head>
 <body>
@@ -233,7 +239,7 @@ import PageFooter from "../components/PageFooter.astro";
 
     <div class="score-card">
       <div class="card-header">
-        <span class="service-name">WCAG 2.1 AA (axe-core)</span>
+        <span class="service-name">WCAG 2.1 AA</span>
         <span class="grade-badge grade-Aplus">
           <span class="t-en">0 violations</span>
           <span class="t-fr">0 violation</span>
@@ -241,17 +247,18 @@ import PageFooter from "../components/PageFooter.astro";
           <span class="t-es">0 violaciones</span>
         </span>
       </div>
+      <img class="card-a11y-img" src="https://a11ybadges.com/badge?text=WCAG_2.1_AA_(automated)&badgeColor=0d2a0d&textColor=4ade80" alt="WCAG 2.1 AA — automated" width="220" height="32" loading="lazy" />
       <p class="card-desc">
-        <span class="t-en">Automated WCAG 2.1 AA accessibility audit (axe-core) across all 16 live pages, September 2026. Covers structural, contrast, and ARIA issues — not a full manual or screen-reader audit.</span>
-        <span class="t-fr">Audit d'accessibilité WCAG 2.1 AA automatisé (axe-core) sur les 16 pages live, septembre 2026. Couvre les problèmes structurels, de contraste et ARIA — pas un audit manuel ou lecteur d'écran complet.</span>
-        <span class="t-kr">Odit aksesiblite WCAG 2.1 AA otomatik (axe-core) sou tout 16 paj live yo, septanm 2026. Kouvri pwoblèm estriktirèl, kontras ak ARIA — se pa yon odit manyèl oswa lekti ekran konplè.</span>
-        <span class="t-es">Auditoría de accesibilidad WCAG 2.1 AA automatizada (axe-core) en las 16 páginas activas, septiembre de 2026. Cubre problemas estructurales, de contraste y ARIA — no es una auditoría manual o de lector de pantalla completa.</span>
+        <span class="t-en">Automated testing (axe-core + getwcag.com) across all 16 live pages, September 2026 — 0 known violations. Status is <strong>partially conformant</strong>: a full manual and screen-reader review hasn't been done yet. See the full statement for scope and evidence.</span>
+        <span class="t-fr">Tests automatisés (axe-core + getwcag.com) sur les 16 pages live, septembre 2026 — 0 violation connue. Statut <strong>partiellement conforme</strong> : aucune revue manuelle ou lecteur d'écran complète n'a encore été faite. Voir la déclaration complète pour le périmètre et les preuves.</span>
+        <span class="t-kr">Tès otomatik (axe-core + getwcag.com) sou tout 16 paj live yo, septanm 2026 — 0 vyolasyon konnen. Estati <strong>patyèlman konfòm</strong> : poko gen okenn revizyon manyèl oswa lekti ekran konplè. Gade deklarasyon konplè a pou seul ak prèv yo.</span>
+        <span class="t-es">Pruebas automatizadas (axe-core + getwcag.com) en las 16 páginas activas, septiembre de 2026 — 0 violaciones conocidas. Estado <strong>parcialmente conforme</strong>: aún no se ha hecho una revisión manual o de lector de pantalla completa. Ver la declaración completa para el alcance y las pruebas.</span>
       </p>
-      <a class="card-link" href="https://github.com/countdowns-co/caribbean-countdowns/pull/186" target="_blank" rel="noopener noreferrer">
-        <span class="t-en">View audit PR ↗</span>
-        <span class="t-fr">Voir la PR d'audit ↗</span>
-        <span class="t-kr">Wè PR odit la ↗</span>
-        <span class="t-es">Ver la PR de la auditoría ↗</span>
+      <a class="card-link" href="/accessibility-statement/">
+        <span class="t-en">View accessibility statement →</span>
+        <span class="t-fr">Voir la déclaration d'accessibilité →</span>
+        <span class="t-kr">Wè deklarasyon aksesiblite a →</span>
+        <span class="t-es">Ver la declaración de accesibilidad →</span>
       </a>
     </div>
 
