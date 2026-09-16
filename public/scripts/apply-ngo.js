@@ -48,6 +48,17 @@ var LABELS = {
   fileBadType: { en: "Only PNG or JPG images are accepted.", fr: "Seules les images PNG ou JPG sont acceptées.", kr: "Sèlman imaj PNG oswa JPG aksepte.", es: "Solo se aceptan imágenes PNG o JPG." },
 };
 
+var FIELD_ERROR_LABELS = {
+  website: { en: "Please check your website URL — e.g. https://example.org", fr: "Vérifiez l'URL de votre site — ex. https://example.org", kr: "Tcheke URL sit ou a — egz. https://example.org", es: "Revisa la URL de tu sitio — ej. https://example.org" },
+  name:           { en: "Please check the NGO name.",         fr: "Vérifiez le nom de l'ONG.",              kr: "Tcheke non ONG a.",                  es: "Revisa el nombre de la ONG." },
+  location:       { en: "Please check the location.",         fr: "Vérifiez la localisation.",              kr: "Tcheke kote a.",                     es: "Revisa la ubicación." },
+  foundedYear:    { en: "Please check the founding year (4 digits).", fr: "Vérifiez l'année de fondation (4 chiffres).", kr: "Tcheke ane fondasyon an (4 chif).", es: "Revisa el año de fundación (4 dígitos)." },
+  volunteers:     { en: "Please check the number of volunteers.", fr: "Vérifiez le nombre de bénévoles.",   kr: "Tcheke kantite benevol yo.",         es: "Revisa el número de voluntarios." },
+  actions:        { en: "Please check your list of actions.", fr: "Vérifiez votre liste d'actions.",        kr: "Tcheke lis aksyon ou yo.",            es: "Revisa tu lista de acciones." },
+  donationStatus: { en: "Please answer the donation question.", fr: "Répondez à la question sur le don.",   kr: "Reponn kesyon sou don an.",          es: "Responde la pregunta sobre la donación." },
+  receiptImage:   { en: "There's a problem with the receipt image — try a different PNG or JPG under 4 MB.", fr: "Problème avec l'image du reçu — essayez un autre PNG ou JPG de moins de 4 Mo.", kr: "Gen yon pwoblèm ak imaj resi a — eseye yon lòt PNG oswa JPG anba 4 Mo.", es: "Hay un problema con la imagen del recibo — prueba otro PNG o JPG de menos de 4 MB." },
+};
+
 var MAX_RECEIPT_BYTES = 4 * 1024 * 1024;
 
 var STEPS = [
@@ -334,12 +345,18 @@ function saveStep(n) {
   var step = STEPS[n];
   if (step.type === "text" || step.type === "url" || step.type === "number" || step.type === "textarea") {
     var input = document.getElementById("stepInput");
-    if (input) state[step.id] = input.value.trim();
+    if (input) {
+      var val = input.value.trim();
+      if (step.type === "url" && val && !/^https?:\/\//i.test(val)) {
+        val = "https://" + val;
+      }
+      state[step.id] = val;
+    }
   } else if (step.type === "select") {
     var selInput = document.getElementById("stepInput");
     if (selInput) state[step.id] = selInput.value;
   }
-  // list and contact-pair update state in real-time via event listeners
+  // list and file update state in real-time via event listeners
 }
 
 function buildPayload() {
@@ -395,7 +412,10 @@ function renderFinal() {
         + '<span class="t-es">No es obligatorio para enviar, pero acelera la revisión.</span>'
         + '</p></div>';
   if (finalState === "error") {
-    html += '<p class="submit-error">' + escHtml(L(finalErrorKey)) + '</p>';
+    var errMsg = finalErrorField && FIELD_ERROR_LABELS[finalErrorField]
+      ? (FIELD_ERROR_LABELS[finalErrorField][lang] || FIELD_ERROR_LABELS[finalErrorField].en)
+      : L(finalErrorKey);
+    html += '<p class="submit-error">' + escHtml(errMsg) + '</p>';
   }
   html += '<button id="btnSubmit" class="btn-submit"' + (finalState === "sending" ? " disabled" : "") + '>'
         + escHtml(finalState === "sending" ? L("sending") : (finalState === "error" ? L("retry") : L("submit")))
@@ -412,20 +432,31 @@ function renderFinal() {
   if (btn) btn.addEventListener("click", submitApplication);
 }
 
+var finalErrorField = null;
+
 function submitApplication() {
   if (finalState === "sending") return;
   finalState = "sending";
+  finalErrorField = null;
   renderFinal();
   fetch("/api/ngo-apply", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(buildPayload())
   }).then(function(res) {
-    if (res.status === 201) { finalState = "sent"; }
-    else { finalState = "error"; finalErrorKey = res.status === 429 ? "rateLimited" : "errorHint"; }
-    renderFinal();
+    if (res.status === 201) {
+      finalState = "sent";
+      renderFinal();
+      return;
+    }
+    finalState = "error";
+    finalErrorKey = res.status === 429 ? "rateLimited" : "errorHint";
+    res.json().then(function(data) {
+      if (data && data.field) finalErrorField = data.field;
+      renderFinal();
+    }).catch(function() { renderFinal(); });
   }).catch(function() {
-    finalState = "error"; finalErrorKey = "errorHint";
+    finalState = "error"; finalErrorKey = "errorHint"; finalErrorField = null;
     renderFinal();
   });
 }
