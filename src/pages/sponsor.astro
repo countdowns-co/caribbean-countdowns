@@ -10,7 +10,7 @@ import PageFooter from "../components/PageFooter.astro";
   <meta name="referrer" content="no-referrer" />
   <title>Support a Cause — countdowns.co</title>
   <meta name="description" content="Sponsor Caribbean cultural events through countdowns.co — transparent partnership tiers supporting festivals, carnivals and marine conservation." />
-  <style>.t-fr,.t-kr,.t-es{display:none}.lang-row{display:flex;align-items:center;gap:16px}.note-excluded{font-size:12px;color:#555;margin-bottom:10px}.cta-block.cta-flush{margin-top:0}.cta-lead{color:#ddd}</style>
+  <style>.t-fr,.t-kr,.t-es{display:none}.lang-row{display:flex;align-items:center;gap:16px}.note-warning{font-size:12px;color:#999;margin-bottom:10px}.cta-block.cta-flush{margin-top:0}.cta-lead{color:#ddd}</style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -73,7 +73,52 @@ import PageFooter from "../components/PageFooter.astro";
 
     .divider { border: none; border-top: 1px solid #2e2e2e; margin: 32px 0; }
 
-    .exclusion-box {
+    .gain-box {
+      background: #0a0f1a;
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 20px 0 0;
+    }
+
+    .gain-box strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #5a8fad;
+      margin-bottom: 10px;
+    }
+
+    .gain-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .gain-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .gain-check {
+      color: #5eead4;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .tax-note {
+      font-size: 12px;
+      color: #5a8fad;
+      margin-top: 4px;
+    }
+
+    .warning-box {
       background: #111;
       border: 1px solid #2e2e2e;
       border-radius: 6px;
@@ -81,24 +126,24 @@ import PageFooter from "../components/PageFooter.astro";
       margin: 20px 0 0;
     }
 
-    .exclusion-box strong {
+    .warning-box strong {
       display: block;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      color: #555;
+      color: #b45309;
       margin-bottom: 10px;
     }
 
-    .exclusion-list {
+    .warning-list {
       list-style: none;
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
     }
 
-    .exclusion-list li {
+    .warning-list li {
       font-size: 11px;
       color: #666;
       background: #1a1a1a;
@@ -210,6 +255,139 @@ import PageFooter from "../components/PageFooter.astro";
       border-radius: 6px;
       padding: 18px;
     }
+
+    /* Simulator */
+    .simulator {
+      background: #111;
+      border: 1px solid #2e2e2e;
+      border-radius: 6px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .simulator-scope {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #5a8fad;
+      background: #0a0f1a;
+      border: 1px solid #1e3a5f;
+      border-radius: 4px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+
+    .simulator-label {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    .amount-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 220px;
+      margin-bottom: 24px;
+    }
+
+    .amount-input-row span {
+      font-size: 20px;
+      font-weight: 700;
+      color: #888;
+    }
+
+    #donationAmount {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 8px 12px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    #donationAmount:focus { border-color: #2d6aa0; }
+
+    .simulator-result {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-top: 1px solid #1e1e1e;
+      font-size: 13px;
+      color: #888;
+    }
+    .result-row:first-child { border-top: none; }
+
+    .result-row strong {
+      color: #ccc;
+      font-size: 15px;
+    }
+
+    .result-row-main {
+      background: #0d2a1a;
+      border: 1px solid #166534;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin: 4px 0;
+    }
+    .result-row-main strong {
+      color: #4ade80;
+      font-size: 18px;
+    }
+
+    .simulator-tier-panel {
+      display: none;
+      border-top: 1px solid #1e1e1e;
+      padding-top: 16px;
+      margin-top: 4px;
+    }
+    .simulator-tier-panel.active { display: block; }
+
+    .simulator-tier-panel ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    .simulator-tier-panel ul li {
+      font-size: 12px;
+      color: #888;
+      padding: 3px 0;
+      border-top: 1px solid #1e1e1e;
+    }
+    .simulator-tier-panel ul li:first-child { border-top: none; }
+
+    .compare-note {
+      font-size: 12px;
+      color: #5a8fad;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .simulator-disclaimer {
+      font-size: 11px;
+      color: #555;
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+    .simulator-disclaimer a { color: #5a8fad; text-decoration: underline; }
 
     .tier-name {
       font-size: 11px;
@@ -381,61 +559,40 @@ import PageFooter from "../components/PageFooter.astro";
       <span class="t-es">countdowns.co ofrece visibilidad a marcas y organizaciones que apoyan causas que protegen el Caribe. Ningún dinero va a este sitio — el 100% de las donaciones van directamente a la ONG destacada.</span>
     </p>
 
-    <div class="exclusion-box">
+    <div class="gain-box">
       <strong>
-        <span class="t-en">Not eligible</span>
-        <span class="t-fr">Non éligibles</span>
-        <span class="t-kr">Pa elijib</span>
-        <span class="t-es">No elegibles</span>
+        <span class="t-en">What you gain</span>
+        <span class="t-fr">Ce que vous gagnez</span>
+        <span class="t-kr">Sa ou genyen</span>
+        <span class="t-es">Qué ganas</span>
       </strong>
-      <p class="note-excluded">
-        <span class="t-en">Sponsorship is a form of visibility. We don't offer it to sectors that — however economically present in the region — are among the leading drivers of the environmental pressures the Caribbean faces: rising seas, coral bleaching, and coastal erosion.</span>
-        <span class="t-fr">Le sponsoring est une forme de visibilité. Nous ne l'offrons pas aux secteurs qui — aussi présents soient-ils économiquement dans la région — figurent parmi les principales causes des pressions environnementales que subit la Caraïbe : montée des eaux, blanchissement des coraux et érosion côtière.</span>
-        <span class="t-kr">Sponsoring se on fòm vizibilite. Nou pa ofri l bay sektè ki — kèlkeswa prezans ekonomik yo nan rejyon an — nan tèt sektè ki koze plis presyon anviwonnmantal Karayib la ap fè fas a : monte dlo lanmè, blan koray, epi ewozyon bò lanmè.</span>
-        <span class="t-es">El patrocinio es una forma de visibilidad. No la ofrecemos a sectores que — por muy presentes que estén económicamente en la región — se encuentran entre los principales impulsores de las presiones ambientales que enfrenta el Caribe: subida del mar, blanqueamiento de corales y erosión costera.</span>
-      </p>
-      <ul class="exclusion-list">
+      <ul class="gain-list">
         <li>
-          <span class="t-en">Fossil fuels (oil, gas, coal extractors &amp; distributors)</span>
-          <span class="t-fr">Énergies fossiles (extracteurs &amp; distributeurs de pétrole, gaz, charbon)</span>
-          <span class="t-kr">Konbistib fosil (pètwòl, gaz, chabon — ekstraktè &amp; distribitè)</span>
-          <span class="t-es">Combustibles fósiles (extractores &amp; distribuidores de petróleo, gas, carbón)</span>
+          <span class="gain-check">✓</span>
+          <span>
+            <span class="t-en">A genuine association, not an ad slot. We list a small, curated group of sponsors tied to a verified donation — not a numbers-driven ad network.</span>
+            <span class="t-fr">Une association authentique, pas un simple encart publicitaire. Nous référençons un petit groupe de sponsors sélectionnés, chacun lié à un don vérifié — pas un réseau publicitaire fondé sur l'audience.</span>
+            <span class="t-kr">Yon vré asosyasyon, pa yon senp espas piblisite. Nou lis yon ti gwoup sponsor chwazi, chak lye ak yon don verifye — pa yon rezo piblisite ki baze sou odyans.</span>
+            <span class="t-es">Una asociación genuina, no un simple espacio publicitario. Listamos un grupo pequeño y seleccionado de patrocinadores, cada uno vinculado a una donación verificada — no una red publicitaria basada en audiencia.</span>
+          </span>
         </li>
         <li>
-          <span class="t-en">Airlines &amp; aviation travel agencies</span>
-          <span class="t-fr">Compagnies aériennes &amp; agences de voyage</span>
-          <span class="t-kr">Konpayi avyon &amp; ajans vwayaj</span>
-          <span class="t-es">Aerolíneas &amp; agencias de viaje aéreo</span>
+          <span class="gain-check">✓</span>
+          <span>
+            <span class="t-en">A possible tax deduction. Corporate donations to eligible nonprofits like L'Asso-Mer may reduce your company's tax bill, depending on your country (e.g. France's <em>mécénat d'entreprise</em> regime). Ask L'Asso-Mer for your donation receipt.</span>
+            <span class="t-fr">Une possible déduction fiscale. Les dons d'entreprise à des associations éligibles comme L'Asso-Mer peuvent réduire l'impôt de votre société, selon votre pays (régime du mécénat d'entreprise en France). Demandez votre reçu de don à L'Asso-Mer.</span>
+            <span class="t-kr">Yon posib rediksyon taks. Don biznis bay asosyasyon elijib tankou L'Asso-Mer ka redwi taks konpayi ou a, selon peyi ou (rejim mesena antrepriz an Frans). Mande L'Asso-Mer resi don ou.</span>
+            <span class="t-es">Una posible deducción fiscal. Las donaciones corporativas a organizaciones elegibles como L'Asso-Mer pueden reducir los impuestos de tu empresa, según tu país (régimen de mecenazgo empresarial en Francia). Pide a L'Asso-Mer tu comprobante de donación.</span>
+          </span>
         </li>
         <li>
-          <span class="t-en">Cruise companies</span>
-          <span class="t-fr">Compagnies de croisière</span>
-          <span class="t-kr">Konpayi kwazye</span>
-          <span class="t-es">Compañías de cruceros</span>
-        </li>
-        <li>
-          <span class="t-en">Car manufacturers (combustion, hybrid, SUV)</span>
-          <span class="t-fr">Constructeurs auto (thermique, hybride, SUV)</span>
-          <span class="t-kr">Fabikan machin (tèmik, ibrid, SUV)</span>
-          <span class="t-es">Fabricantes de autos (térmico, híbrido, SUV)</span>
-        </li>
-        <li>
-          <span class="t-en">Fast fashion</span>
-          <span class="t-fr">Fast fashion</span>
-          <span class="t-kr">Fast fashion</span>
-          <span class="t-es">Moda rápida</span>
-        </li>
-        <li>
-          <span class="t-en">Fast food &amp; ultra-processed food</span>
-          <span class="t-fr">Fast food &amp; alimentation ultra-transformée</span>
-          <span class="t-kr">Fast food &amp; manje pwosede</span>
-          <span class="t-es">Comida rápida &amp; alimentos ultraprocesados</span>
-        </li>
-        <li>
-          <span class="t-en">Industrial meat industry</span>
-          <span class="t-fr">Industrie de la viande industrielle</span>
-          <span class="t-kr">Endistri vyann endistriyèl</span>
-          <span class="t-es">Industria cárnica industrial</span>
+          <span class="gain-check">✓</span>
+          <span>
+            <span class="t-en">A dated, public record of commitment. Your support stays listed on this page for the full duration of your tier — not a one-off social post that disappears from feeds.</span>
+            <span class="t-fr">Une trace publique et datée de votre engagement. Votre soutien reste affiché sur cette page pendant toute la durée de votre palier — pas une simple publication qui disparaît des fils d'actualité.</span>
+            <span class="t-kr">Yon prèv piblik ak dat sou angajman ou. Sipò ou rete afiche sou paj sa a pandan tout dire nivo ou a — pa yon senp pòs ki disparèt nan fil aktyalite.</span>
+            <span class="t-es">Un registro público y con fecha de tu compromiso. Tu apoyo permanece listado en esta página durante toda la duración de tu nivel — no una simple publicación que desaparece del feed.</span>
+          </span>
         </li>
       </ul>
     </div>
@@ -466,6 +623,12 @@ import PageFooter from "../components/PageFooter.astro";
             <span class="t-kr">Fè don ou dirèktèman bay NGO a. Gade prèv don ou.</span>
             <span class="t-es">Haz tu donación directamente a la ONG destacada. Guarda tu comprobante.</span>
           </span>
+          <div class="tax-note">
+            <span class="t-en">💡 This donation may be tax-deductible for your company, depending on your country.</span>
+            <span class="t-fr">💡 Ce don peut être déductible des impôts de votre entreprise, selon votre pays.</span>
+            <span class="t-kr">💡 Don sa a ka dediktib nan taks konpayi ou, selon peyi ou.</span>
+            <span class="t-es">💡 Esta donación puede ser deducible de impuestos para tu empresa, según tu país.</span>
+          </div>
         </div>
       </div>
       <div class="step">
@@ -545,104 +708,193 @@ import PageFooter from "../components/PageFooter.astro";
 
     <hr class="divider" />
 
-    <!-- Tiers -->
+    <!-- Simulator -->
     <h2>
-      <span class="t-en">Sponsorship tiers</span>
-      <span class="t-fr">Paliers de sponsoring</span>
-      <span class="t-kr">Nivo parenaj</span>
-      <span class="t-es">Niveles de patrocinio</span>
+      <span class="t-en">Estimate your cost after tax</span>
+      <span class="t-fr">Estimez votre coût après impôt</span>
+      <span class="t-kr">Estimen kout ou apre taks</span>
+      <span class="t-es">Estima tu costo después de impuestos</span>
     </h2>
 
-    <div class="tiers">
-      <div class="tier">
-        <div class="tier-name">
-          <span class="t-en">Friend</span>
-          <span class="t-fr">Ami</span>
-          <span class="t-kr">Zanmi</span>
-          <span class="t-es">Amigo</span>
-        </div>
-        <div class="tier-amount">€50 <span>/ <span class="t-en">1 month of visibility</span><span class="t-fr">1 mois de visibilité</span><span class="t-kr">1 mwa vizibilite</span><span class="t-es">1 mes de visibilidad</span></span></div>
-        <ul>
-          <li>
-            <span class="t-en">Name + link on main page</span>
-            <span class="t-fr">Nom + lien sur la page principale</span>
-            <span class="t-kr">Non + lyen sou paj prensipal</span>
-            <span class="t-es">Nombre + enlace en página principal</span>
-          </li>
-          <li>
-            <span class="t-en">Listed on this page</span>
-            <span class="t-fr">Listé sur cette page</span>
-            <span class="t-kr">Liste sou paj sa a</span>
-            <span class="t-es">Listado en esta página</span>
-          </li>
-        </ul>
+    <div class="simulator">
+      <div class="simulator-scope">
+        🇫🇷
+        <span class="t-en">For companies subject to French corporate tax (mécénat d'entreprise)</span>
+        <span class="t-fr">Pour les entreprises soumises à l'impôt français (mécénat d'entreprise)</span>
+        <span class="t-kr">Pou konpayi ki soumèt a taks fransè (mesena antrepriz)</span>
+        <span class="t-es">Para empresas sujetas al impuesto francés (mecenazgo empresarial)</span>
       </div>
 
-      <div class="tier">
-        <div class="tier-name">
-          <span class="t-en">Supporter</span>
-          <span class="t-fr">Soutien</span>
-          <span class="t-kr">Sipòtè</span>
-          <span class="t-es">Colaborador</span>
-        </div>
-        <div class="tier-amount">€150 <span>/ <span class="t-en">3 months of visibility</span><span class="t-fr">3 mois de visibilité</span><span class="t-kr">3 mwa vizibilite</span><span class="t-es">3 meses de visibilidad</span></span></div>
-        <ul>
-          <li>
-            <span class="t-en">Name + link on main page</span>
-            <span class="t-fr">Nom + lien sur la page principale</span>
-            <span class="t-kr">Non + lyen sou paj prensipal</span>
-            <span class="t-es">Nombre + enlace en página principal</span>
-          </li>
-          <li>
-            <span class="t-en">Logo displayed</span>
-            <span class="t-fr">Logo affiché</span>
-            <span class="t-kr">Logo afichè</span>
-            <span class="t-es">Logo visible</span>
-          </li>
-          <li>
-            <span class="t-en">Listed on this page</span>
-            <span class="t-fr">Listé sur cette page</span>
-            <span class="t-kr">Liste sou paj sa a</span>
-            <span class="t-es">Listado en esta página</span>
-          </li>
-        </ul>
+      <label class="simulator-label" for="donationAmount">
+        <span class="t-en">Donation amount</span>
+        <span class="t-fr">Montant du don</span>
+        <span class="t-kr">Kantite don</span>
+        <span class="t-es">Monto de la donación</span>
+      </label>
+      <div class="amount-input-row">
+        <span>€</span>
+        <input type="number" id="donationAmount" min="0" step="100" value="5000" inputmode="numeric" />
       </div>
 
-      <div class="tier">
-        <div class="tier-name">
-          <span class="t-en">Partner</span>
-          <span class="t-fr">Partenaire</span>
-          <span class="t-kr">Patnè</span>
-          <span class="t-es">Socio</span>
+      <div class="simulator-result">
+        <div class="result-row">
+          <span>
+            <span class="t-en">Tax reduction (60%)</span>
+            <span class="t-fr">Réduction d'impôt (60 %)</span>
+            <span class="t-kr">Rediksyon taks (60%)</span>
+            <span class="t-es">Reducción de impuestos (60%)</span>
+          </span>
+          <strong id="resultReduction">€3,000</strong>
         </div>
-        <div class="tier-amount">€400 <span>/ <span class="t-en">6 months of visibility</span><span class="t-fr">6 mois de visibilité</span><span class="t-kr">6 mwa vizibilite</span><span class="t-es">6 meses de visibilidad</span></span></div>
+        <div class="result-row result-row-main">
+          <span>
+            <span class="t-en">Net cost to your company</span>
+            <span class="t-fr">Coût net pour votre entreprise</span>
+            <span class="t-kr">Kout nèt pou konpayi ou</span>
+            <span class="t-es">Costo neto para tu empresa</span>
+          </span>
+          <strong id="resultNetCost">€2,000</strong>
+        </div>
+        <div class="result-row">
+          <span>
+            <span class="t-en">L'Asso-Mer receives</span>
+            <span class="t-fr">L'Asso-Mer reçoit</span>
+            <span class="t-kr">L'Asso-Mer resevwa</span>
+            <span class="t-es">L'Asso-Mer recibe</span>
+          </span>
+          <strong id="resultNgoReceives">€5,000</strong>
+        </div>
+      </div>
+
+      <div class="simulator-tier-panel" data-tier="friend">
+        <div class="tier-name">
+          <span class="t-en">This unlocks: Friend</span>
+          <span class="t-fr">Cela débloque : Ami</span>
+          <span class="t-kr">Sa debloke : Zanmi</span>
+          <span class="t-es">Esto desbloquea: Amigo</span>
+        </div>
+        <div class="tier-amount">
+          <span class="t-en">1 month of visibility</span>
+          <span class="t-fr">1 mois de visibilité</span>
+          <span class="t-kr">1 mwa vizibilite</span>
+          <span class="t-es">1 mes de visibilidad</span>
+        </div>
         <ul>
           <li>
-            <span class="t-en">Name + link on main page</span>
-            <span class="t-fr">Nom + lien sur la page principale</span>
-            <span class="t-kr">Non + lyen sou paj prensipal</span>
-            <span class="t-es">Nombre + enlace en página principal</span>
+            <span class="t-en">Your name links to your site from the homepage</span>
+            <span class="t-fr">Votre nom renvoie vers votre site depuis la page principale</span>
+            <span class="t-kr">Non ou lye ak sit ou depi paj prensipal la</span>
+            <span class="t-es">Tu nombre enlaza a tu sitio desde la página principal</span>
           </li>
           <li>
-            <span class="t-en">Logo displayed (prominent)</span>
-            <span class="t-fr">Logo affiché (en évidence)</span>
-            <span class="t-kr">Logo afichè (an evid)</span>
-            <span class="t-es">Logo visible (destacado)</span>
-          </li>
-          <li>
-            <span class="t-en">Listed on this page</span>
-            <span class="t-fr">Listé sur cette page</span>
-            <span class="t-kr">Liste sou paj sa a</span>
-            <span class="t-es">Listado en esta página</span>
-          </li>
-          <li>
-            <span class="t-en">Short description included</span>
-            <span class="t-fr">Courte description incluse</span>
-            <span class="t-kr">Ti deskripsyon enkli</span>
-            <span class="t-es">Breve descripción incluida</span>
+            <span class="t-en">Publicly listed here as a verified supporter</span>
+            <span class="t-fr">Listé publiquement ici comme soutien vérifié</span>
+            <span class="t-kr">Liste piblikman isit la kòm sipòtè verifye</span>
+            <span class="t-es">Listado públicamente aquí como colaborador verificado</span>
           </li>
         </ul>
+        <p class="compare-note">
+          <span class="t-en">For comparison: a single roadside billboard panel for 1 month costs ~€1,000 in Guadeloupe/Martinique (estimated from a 3-month rate) — and isn't tax-deductible.</span>
+          <span class="t-fr">À titre de comparaison : un seul panneau d'affichage routier pour 1 mois coûte ~1 000 € en Guadeloupe/Martinique (estimation à partir d'un tarif 3 mois) — et n'est pas déductible des impôts.</span>
+          <span class="t-kr">Konparezon : yon sèl panno afichaj bò wout pou 1 mwa koute ~1 000 € nan Gwadloup/Matinik (estimasyon apati yon tarif 3 mwa) — epi li pa dediktib nan taks.</span>
+          <span class="t-es">Para comparar: un solo panel publicitario en carretera durante 1 mes cuesta ~1.000 € en Guadalupe/Martinica (estimado a partir de una tarifa de 3 meses) — y no es deducible de impuestos.</span>
+        </p>
       </div>
+
+      <div class="simulator-tier-panel" data-tier="supporter">
+        <div class="tier-name">
+          <span class="t-en">This unlocks: Supporter</span>
+          <span class="t-fr">Cela débloque : Soutien</span>
+          <span class="t-kr">Sa debloke : Sipòtè</span>
+          <span class="t-es">Esto desbloquea: Colaborador</span>
+        </div>
+        <div class="tier-amount">
+          <span class="t-en">3 months of visibility</span>
+          <span class="t-fr">3 mois de visibilité</span>
+          <span class="t-kr">3 mwa vizibilite</span>
+          <span class="t-es">3 meses de visibilidad</span>
+        </div>
+        <ul>
+          <li>
+            <span class="t-en">Your name links to your site from the homepage</span>
+            <span class="t-fr">Votre nom renvoie vers votre site depuis la page principale</span>
+            <span class="t-kr">Non ou lye ak sit ou depi paj prensipal la</span>
+            <span class="t-es">Tu nombre enlaza a tu sitio desde la página principal</span>
+          </li>
+          <li>
+            <span class="t-en">Your logo shown as a verified supporter</span>
+            <span class="t-fr">Votre logo affiché comme soutien vérifié</span>
+            <span class="t-kr">Logo ou afiche kòm sipòtè verifye</span>
+            <span class="t-es">Tu logo mostrado como colaborador verificado</span>
+          </li>
+          <li>
+            <span class="t-en">Publicly listed here as a verified supporter</span>
+            <span class="t-fr">Listé publiquement ici comme soutien vérifié</span>
+            <span class="t-kr">Liste piblikman isit la kòm sipòtè verifye</span>
+            <span class="t-es">Listado públicamente aquí como colaborador verificado</span>
+          </li>
+        </ul>
+        <p class="compare-note">
+          <span class="t-en">For comparison: a single roadside billboard panel for 3 months costs €2,999 in Guadeloupe/Martinique — and isn't tax-deductible.</span>
+          <span class="t-fr">À titre de comparaison : un seul panneau d'affichage routier pour 3 mois coûte 2 999 € en Guadeloupe/Martinique — et n'est pas déductible des impôts.</span>
+          <span class="t-kr">Konparezon : yon sèl panno afichaj bò wout pou 3 mwa koute 2 999 € nan Gwadloup/Matinik — epi li pa dediktib nan taks.</span>
+          <span class="t-es">Para comparar: un solo panel publicitario en carretera durante 3 meses cuesta 2.999 € en Guadalupe/Martinica — y no es deducible de impuestos.</span>
+        </p>
+      </div>
+
+      <div class="simulator-tier-panel" data-tier="partner">
+        <div class="tier-name">
+          <span class="t-en">This unlocks: Partner</span>
+          <span class="t-fr">Cela débloque : Partenaire</span>
+          <span class="t-kr">Sa debloke : Patnè</span>
+          <span class="t-es">Esto desbloquea: Socio</span>
+        </div>
+        <div class="tier-amount">
+          <span class="t-en">6 months of visibility</span>
+          <span class="t-fr">6 mois de visibilité</span>
+          <span class="t-kr">6 mwa vizibilite</span>
+          <span class="t-es">6 meses de visibilidad</span>
+        </div>
+        <ul>
+          <li>
+            <span class="t-en">Your name links to your site from the homepage</span>
+            <span class="t-fr">Votre nom renvoie vers votre site depuis la page principale</span>
+            <span class="t-kr">Non ou lye ak sit ou depi paj prensipal la</span>
+            <span class="t-es">Tu nombre enlaza a tu sitio desde la página principal</span>
+          </li>
+          <li>
+            <span class="t-en">Your logo shown prominently as a verified partner</span>
+            <span class="t-fr">Votre logo affiché en évidence comme partenaire vérifié</span>
+            <span class="t-kr">Logo ou afiche an evidans kòm patnè verifye</span>
+            <span class="t-es">Tu logo destacado como socio verificado</span>
+          </li>
+          <li>
+            <span class="t-en">Publicly listed here as a verified partner</span>
+            <span class="t-fr">Listé publiquement ici comme partenaire vérifié</span>
+            <span class="t-kr">Liste piblikman isit la kòm patnè verifye</span>
+            <span class="t-es">Listado públicamente aquí como socio verificado</span>
+          </li>
+          <li>
+            <span class="t-en">A short description of your brand, in your own words</span>
+            <span class="t-fr">Une courte description de votre marque, dans vos propres mots</span>
+            <span class="t-kr">Yon ti deskripsyon mak ou, nan pwòp mo ou</span>
+            <span class="t-es">Una breve descripción de tu marca, en tus propias palabras</span>
+          </li>
+        </ul>
+        <p class="compare-note">
+          <span class="t-en">For comparison: a single roadside billboard panel for 6 months costs €4,299 in Guadeloupe/Martinique — and isn't tax-deductible.</span>
+          <span class="t-fr">À titre de comparaison : un seul panneau d'affichage routier pour 6 mois coûte 4 299 € en Guadeloupe/Martinique — et n'est pas déductible des impôts.</span>
+          <span class="t-kr">Konparezon : yon sèl panno afichaj bò wout pou 6 mwa koute 4 299 € nan Gwadloup/Matinik — epi li pa dediktib nan taks.</span>
+          <span class="t-es">Para comparar: un solo panel publicitario en carretera durante 6 meses cuesta 4.299 € en Guadalupe/Martinica — y no es deducible de impuestos.</span>
+        </p>
+      </div>
+
+      <p class="simulator-disclaimer">
+        <span class="t-en">Estimate only, not tax advice. Reduction capped at €20,000/year or 0.5% of revenue if higher (excess carries forward 5 years). Confirm with your accountant. Source: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Billboard prices: single 4×3m panel rates, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — the 1-month figure is estimated from their 3-month rate, not a quoted price; other providers negotiate rates privately.</span>
+        <span class="t-fr">Estimation uniquement, pas un conseil fiscal. Réduction plafonnée à 20 000 €/an ou 0,5 % du chiffre d'affaires si plus élevé (excédent reportable 5 ans). Confirmez avec votre expert-comptable. Source : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarifs d'affichage : panneau 4x3 unique, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — le tarif à 1 mois est estimé à partir de leur tarif 3 mois, ce n'est pas un prix affiché ; d'autres prestataires négocient au cas par cas.</span>
+        <span class="t-kr">Se sèlman yon estimasyon, pa yon konsèy fiskal. Rediksyon limite a 20 000 €/an oswa 0,5% chif dafè si pi wo (èksede repòte 5 an). Konfime ak ekspè-kontab ou. Sous : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarif afichaj : yon sèl panno 4x3, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — tarif 1 mwa a se yon estimasyon apati tarif 3 mwa yo, se pa yon pri ofisyèl ; lòt founisè negosye pri o ka pa ka.</span>
+        <span class="t-es">Solo una estimación, no es asesoría fiscal. Reducción limitada a 20.000 €/año o el 0,5% de la facturación si es mayor (el exceso se traslada 5 años). Confirma con tu contador. Fuente: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Precios de vallas: panel 4x3 único, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — la cifra de 1 mes es una estimación a partir de su tarifa de 3 meses, no un precio publicado; otros proveedores negocian caso por caso.</span>
+      </p>
     </div>
 
     <!-- CTA -->
@@ -686,9 +938,71 @@ import PageFooter from "../components/PageFooter.astro";
       </a>
     </div>
 
+    <hr class="divider" />
+
+    <div class="warning-box">
+      <strong>
+        <span class="t-en">⚠ High-impact sectors — a note for NGOs and companies</span>
+        <span class="t-fr">⚠ Secteurs à fort impact — une note pour les ONG et les entreprises</span>
+        <span class="t-kr">⚠ Sektè gwo enpak — yon nòt pou ONG ak konpayi</span>
+        <span class="t-es">⚠ Sectores de alto impacto — una nota para ONG y empresas</span>
+      </strong>
+      <p class="note-warning">
+        <span class="t-en">These sectors are, despite their economic presence in the region, among the leading drivers of the environmental pressures the Caribbean faces: rising seas, coral bleaching, and coastal erosion. This isn't a ban — accepting a donation from a company in one of these sectors remains the featured NGO's decision, not ours. We flag it so both the NGO and the company can weigh it with full information. countdowns.co still reserves the right to decline promoting a sponsor on solid grounds, even where the NGO has accepted the donation.</span>
+        <span class="t-fr">Ces secteurs figurent, malgré leur présence économique dans la région, parmi les principales causes des pressions environnementales que subit la Caraïbe : montée des eaux, blanchissement des coraux et érosion côtière. Ce n'est pas une interdiction — accepter un don d'une entreprise de l'un de ces secteurs reste la décision de l'ONG partenaire, pas la nôtre. Nous le signalons pour que l'ONG comme l'entreprise puissent trancher en connaissance de cause. countdowns.co conserve néanmoins le droit de refuser de promouvoir un sponsor pour des motifs solides, même si l'ONG a accepté le don.</span>
+        <span class="t-kr">Malgre prezans ekonomik yo nan rejyon an, sektè sa yo pami tèt sektè ki koze plis presyon anviwonnmantal Karayib la ap fè fas a : monte dlo lanmè, blan koray, epi ewozyon bò lanmè. Sa a se pa yon entèdiksyon — aksepte yon don ki soti nan yon konpayi nan youn nan sektè sa yo rete desizyon ONG patnè a, se pa desizyon nou. Nou siyale sa pou ni ONG a ni konpayi a ka deside ak tout enfòmasyon. countdowns.co toujou gen dwa refize pwomouvwa yon sponsor pou bon rezon solid, menm si ONG a aksepte don an.</span>
+        <span class="t-es">Estos sectores están, a pesar de su presencia económica en la región, entre los principales impulsores de las presiones ambientales que enfrenta el Caribe: subida del mar, blanqueamiento de corales y erosión costera. Esto no es una prohibición — aceptar una donación de una empresa de uno de estos sectores sigue siendo decisión de la ONG destacada, no nuestra. Lo señalamos para que tanto la ONG como la empresa puedan decidir con toda la información. countdowns.co conserva el derecho de negarse a promocionar a un patrocinador por motivos sólidos, incluso si la ONG ha aceptado la donación.</span>
+      </p>
+      <ul class="warning-list">
+        <li>
+          <span class="t-en">Fossil fuels (oil, gas, coal extractors &amp; distributors)</span>
+          <span class="t-fr">Énergies fossiles (extracteurs &amp; distributeurs de pétrole, gaz, charbon)</span>
+          <span class="t-kr">Konbistib fosil (pètwòl, gaz, chabon — ekstraktè &amp; distribitè)</span>
+          <span class="t-es">Combustibles fósiles (extractores &amp; distribuidores de petróleo, gas, carbón)</span>
+        </li>
+        <li>
+          <span class="t-en">Airlines &amp; aviation travel agencies</span>
+          <span class="t-fr">Compagnies aériennes &amp; agences de voyage</span>
+          <span class="t-kr">Konpayi avyon &amp; ajans vwayaj</span>
+          <span class="t-es">Aerolíneas &amp; agencias de viaje aéreo</span>
+        </li>
+        <li>
+          <span class="t-en">Cruise companies</span>
+          <span class="t-fr">Compagnies de croisière</span>
+          <span class="t-kr">Konpayi kwazye</span>
+          <span class="t-es">Compañías de cruceros</span>
+        </li>
+        <li>
+          <span class="t-en">Car manufacturers (combustion, hybrid, SUV)</span>
+          <span class="t-fr">Constructeurs auto (thermique, hybride, SUV)</span>
+          <span class="t-kr">Fabikan machin (tèmik, ibrid, SUV)</span>
+          <span class="t-es">Fabricantes de autos (térmico, híbrido, SUV)</span>
+        </li>
+        <li>
+          <span class="t-en">Fast fashion</span>
+          <span class="t-fr">Fast fashion</span>
+          <span class="t-kr">Fast fashion</span>
+          <span class="t-es">Moda rápida</span>
+        </li>
+        <li>
+          <span class="t-en">Fast food &amp; ultra-processed food</span>
+          <span class="t-fr">Fast food &amp; alimentation ultra-transformée</span>
+          <span class="t-kr">Fast food &amp; manje pwosede</span>
+          <span class="t-es">Comida rápida &amp; alimentos ultraprocesados</span>
+        </li>
+        <li>
+          <span class="t-en">Industrial meat industry</span>
+          <span class="t-fr">Industrie de la viande industrielle</span>
+          <span class="t-kr">Endistri vyann endistriyèl</span>
+          <span class="t-es">Industria cárnica industrial</span>
+        </li>
+      </ul>
+    </div>
+
   </div>
 
   <script is:inline src="/scripts/lang.js" defer></script>
+  <script is:inline src="/scripts/sponsor-simulator.js" defer></script>
 <PageFooter />
 </body>
 </html>
