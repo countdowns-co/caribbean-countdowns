@@ -12,6 +12,7 @@ This document outlines the planned technical direction for Caribbean Countdowns.
 - Fully static site: no server, no database, edge-served
 - CI/CD pipeline with type checking, linting, dependency audit, and automated deploy
 - OpenSSF Scorecard 8.9/10, OpenSSF Best Practices Silver badge
+- Automated WCAG 2.1 AA audit (axe-core) passing with 0 violations across all 16 live pages
 
 ## Near term (next 3 months)
 
@@ -19,13 +20,13 @@ This document outlines the planned technical direction for Caribbean Countdowns.
 - **Missing event images** — Sandy Ground Village Festival, Éko Festival Péyi, Festival Lannuit, KRÉYÒL PRIDE
 - **OpenSSF Best Practices gold level** — assess feasibility of the remaining criteria
 - **Automated deploy trigger** — data update in private storage triggers build automatically, removing the manual step
+- **Manual accessibility pass** — keyboard-only navigation and screen reader testing to complement the automated axe-core audit, which only catches a subset of WCAG issues
 
 ## Medium term (3–9 months)
 
 - **Search and filter** — filter festivals by island, type, or month without a server
 - **iCal export** — generate `.ics` files client-side for add-to-calendar functionality
 - **Expanded NGO section** — additional partner organisations, additional data fields
-- **Accessibility audit** — systematic review against WCAG 2.1 AA
 
 ## Long term
 
