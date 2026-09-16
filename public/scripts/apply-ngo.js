@@ -42,15 +42,21 @@ var LABELS = {
   retry:       { en: "Retry",             fr: "Réessayer",                    kr: "Eseye ankò",        es: "Reintentar" },
   addAction:   { en: "+ Add another",     fr: "+ Ajouter",                    kr: "+ Ajoute",          es: "+ Añadir" },
   removeAction:{ en: "Remove",            fr: "Retirer",                      kr: "Retire",            es: "Quitar" },
+  chooseFile:  { en: "Choose image",      fr: "Choisir une image",            kr: "Chwazi yon imaj",   es: "Elegir imagen" },
+  removeFile:  { en: "Remove",            fr: "Retirer",                      kr: "Retire",            es: "Quitar" },
+  fileTooBig:  { en: "Image too large — 4 MB max.", fr: "Image trop volumineuse — 4 Mo max.", kr: "Imaj twò gwo — 4 Mo maksimòm.", es: "Imagen demasiado grande — 4 MB máx." },
+  fileBadType: { en: "Only PNG or JPG images are accepted.", fr: "Seules les images PNG ou JPG sont acceptées.", kr: "Sèlman imaj PNG oswa JPG aksepte.", es: "Solo se aceptan imágenes PNG o JPG." },
 };
+
+var MAX_RECEIPT_BYTES = 4 * 1024 * 1024;
 
 var STEPS = [
   { id:"name",        required:true,  type:"text",
     question:{ en:"What's the name of your NGO?",         fr:"Quel est le nom de votre ONG ?",          kr:"Ki jan yo rele ONG ou a ?",            es:"¿Cuál es el nombre de tu ONG?" },
     hint:    { en:"e.g. L'Asso-Mer",                       fr:"ex. L'Asso-Mer",                          kr:"egz. L'Asso-Mer",                      es:"ej. L'Asso-Mer" } },
-  { id:"website",     required:false, type:"url",
+  { id:"website",     required:true,  type:"url",
     question:{ en:"What's your website?",                 fr:"Quel est votre site web ?",               kr:"Ki sit web ou a ?",                    es:"¿Cuál es tu sitio web?" },
-    hint:    { en:"Leave blank if none",                  fr:"Laissez vide si aucun",                   kr:"Kite vid si pa gen youn",              es:"Dejar en blanco si no hay" } },
+    hint:    { en:"This is how we verify and reach you — we don't collect email or phone here.", fr:"C'est ce qui nous sert à vous vérifier et vous contacter — nous ne collectons ni email ni téléphone ici.", kr:"Se konsa nou verifye epi kontakte ou — nou pa kolekte email oswa telefòn isit la.", es:"Así te verificamos y contactamos — no recogemos email ni teléfono aquí." } },
   { id:"location",    required:true,  type:"select",      options:COUNTRIES,
     question:{ en:"Where is your NGO based?",             fr:"Où votre ONG est-elle basée ?",           kr:"Kote ONG ou a baze ?",                 es:"¿Dónde tiene sede tu ONG?" },
     hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
@@ -63,9 +69,18 @@ var STEPS = [
   { id:"actions",     required:true,  type:"list",        maxItems:5,
     question:{ en:"List up to 5 of your key actions",     fr:"Listez jusqu'à 5 de vos actions clés",    kr:"Lis jiska 5 nan aksyon kle ou yo",     es:"Enumera hasta 5 de tus acciones clave" },
     hint:    { en:"e.g. Sea turtle nesting surveys",      fr:"ex. Suivis des nids de tortues marines",  kr:"egz. Sondaj nich tòti maren",          es:"ej. Seguimiento de nidos de tortugas" } },
-  { id:"contact",     required:true,  type:"contact-pair",
-    question:{ en:"How can we reach you?",                fr:"Comment pouvons-nous vous contacter ?",   kr:"Kijan nou ka kontakte ou ?",           es:"¿Cómo podemos contactarte?" },
-    hint:    { en:"Email is required, phone is optional", fr:"L'email est obligatoire, le téléphone optionnel", kr:"Email obligatwa, telefòn opsyonèl", es:"El email es obligatorio, el teléfono opcional" } },
+  { id:"donationStatus", required:true, type:"select",
+    options:["yes","no"],
+    optionLabels:{
+      "yes": { en:"Yes, a company has already donated", fr:"Oui, une entreprise a déjà fait un don", kr:"Wi, yon konpayi deja fè yon don", es:"Sí, una empresa ya ha donado" },
+      "no":  { en:"Not yet",                             fr:"Pas encore",                              kr:"Poko",                             es:"Todavía no" },
+    },
+    question:{ en:"Has a company already made a donation to support your listing?", fr:"Une entreprise a-t-elle déjà fait un don pour soutenir votre référencement ?", kr:"Èske yon konpayi deja fè yon don pou sipòte enskripsyon ou an ?", es:"¿Ya ha hecho una empresa una donación para apoyar tu listado?" },
+    hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
+  { id:"receipt",     required:false, type:"file",
+    skipIf:  function(s) { return s.donationStatus !== "yes"; },
+    question:{ en:"Upload the donation receipt (optional)", fr:"Téléversez le reçu de don (optionnel)",  kr:"Telechaje resi don an (opsyonèl)",     es:"Sube el comprobante de donación (opcional)" },
+    hint:    { en:"PNG or JPG, 4 MB max. Helps us verify faster — not required to submit.", fr:"PNG ou JPG, 4 Mo max. Accélère la vérification — non obligatoire pour soumettre.", kr:"PNG oswa JPG, 4 Mo maksimòm. Ede nou verifye pi vit — pa obligatwa pou soumèt.", es:"PNG o JPG, 4 MB máx. Ayuda a verificar más rápido — no es obligatorio para enviar." } },
   { id:"notes",       required:false, type:"textarea",
     question:{ en:"Anything else to tell us?",            fr:"Autre chose à nous dire ?",               kr:"Eske gen lòt bagay ou vle di nou ?",   es:"¿Algo más que quieras decirnos?" },
     hint:    { en:"Social media links, press coverage, partner organizations...", fr:"Réseaux sociaux, presse, organisations partenaires...", kr:"Rezo sosyal, laprès, òganizasyon patnè...", es:"Redes sociales, prensa, organizaciones asociadas..." } },
@@ -118,16 +133,27 @@ function isStepValid(n) {
   if (!step.required) return true;
   if (step.type === "select") return !!(state[step.id]);
   if (step.type === "list")   return nonEmptyActions().length > 0;
-  if (step.type === "contact-pair") return !!(state.email && state.email.trim());
   var input = document.getElementById("stepInput");
   return !!(input && input.value.trim());
 }
 
 function hasValue(n) {
   var step = STEPS[n];
-  if (step.type === "list")         return nonEmptyActions().length > 0;
-  if (step.type === "contact-pair") return !!(state.email || state.phone);
+  if (step.type === "list") return nonEmptyActions().length > 0;
+  if (step.type === "file") return !!state.receiptImage;
   return !!(state[step.id]);
+}
+
+function nextVisibleStep(n) {
+  var i = n;
+  while (i < STEPS.length && STEPS[i].skipIf && STEPS[i].skipIf(state)) i++;
+  return i;
+}
+
+function prevVisibleStep(n) {
+  var i = n;
+  while (i > 0 && STEPS[i] && STEPS[i].skipIf && STEPS[i].skipIf(state)) i--;
+  return i;
 }
 
 function updateNav(n) {
@@ -211,24 +237,20 @@ function renderStep(n) {
     var current = state[step.id] || "";
     html += '<select id="stepInput" class="step-input" aria-label="' + escHtml(q) + '"><option value="">—</option>';
     step.options.forEach(function(opt) {
-      html += '<option value="' + escHtml(opt) + '"' + (current === opt ? " selected" : "") + '>' + escHtml(opt) + '</option>';
+      var label = step.optionLabels ? (step.optionLabels[opt][lang] || step.optionLabels[opt].en) : opt;
+      html += '<option value="' + escHtml(opt) + '"' + (current === opt ? " selected" : "") + '>' + escHtml(label) + '</option>';
     });
     html += '</select>';
-  } else if (step.type === "contact-pair") {
-    var emailLabel = { en: "Email", fr: "Email", kr: "Email", es: "Email" };
-    var phoneLabel = { en: "Phone (optional)", fr: "Téléphone (optionnel)", kr: "Telefòn (opsyonèl)", es: "Teléfono (opcional)" };
-    html += '<div class="date-row">'
-          + '<div><div class="date-label">' + escHtml(emailLabel[lang] || emailLabel.en) + '</div>'
-          + '<input type="email" id="contactEmail" class="step-input" value="' + escHtml(state.email || "") + '" /></div>'
-          + '<div><div class="date-label">' + escHtml(phoneLabel[lang] || phoneLabel.en) + '</div>'
-          + '<input type="tel" id="contactPhone" class="step-input" value="' + escHtml(state.phone || "") + '" /></div>'
-          + '</div>';
+  } else if (step.type === "file") {
+    html += '<div id="fileWrap"></div>';
   }
 
   container.innerHTML = html;
 
   if (step.type === "list") {
     renderActionsList(container, n);
+  } else if (step.type === "file") {
+    renderFileStep(container, n);
   }
 
   applyLang();
@@ -236,12 +258,7 @@ function renderStep(n) {
   if (step.type === "select") {
     var selEl = container.querySelector("#stepInput");
     if (selEl) selEl.addEventListener("change", function() { state[step.id] = selEl.value; updateNav(n); });
-  } else if (step.type === "contact-pair") {
-    var emailEl = container.querySelector("#contactEmail");
-    var phoneEl = container.querySelector("#contactPhone");
-    if (emailEl) emailEl.addEventListener("input", function() { state.email = emailEl.value; updateNav(n); });
-    if (phoneEl) phoneEl.addEventListener("input", function() { state.phone = phoneEl.value; updateNav(n); });
-  } else if (step.type !== "list") {
+  } else if (step.type !== "list" && step.type !== "file") {
     var input = container.querySelector("#stepInput");
     if (input) {
       input.addEventListener("input", function() { updateNav(n); });
@@ -249,6 +266,68 @@ function renderStep(n) {
     }
   }
   updateNav(n);
+}
+
+function renderFileStep(container, n) {
+  var wrap = container.querySelector("#fileWrap");
+  var errorMsg = "";
+
+  function draw() {
+    wrap.innerHTML = "";
+    if (state.receiptImage) {
+      var preview = document.createElement("img");
+      preview.className = "receipt-preview";
+      preview.src = "data:" + state.receiptImage.contentType + ";base64," + state.receiptImage.data;
+      wrap.appendChild(preview);
+
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "btn-remove-file";
+      rm.textContent = LABELS.removeFile[lang] || LABELS.removeFile.en;
+      rm.addEventListener("click", function() {
+        state.receiptImage = null;
+        draw();
+        updateNav(n);
+      });
+      wrap.appendChild(rm);
+    } else {
+      var fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/png,image/jpeg";
+      fileInput.id = "receiptFileInput";
+      fileInput.addEventListener("change", function() {
+        var file = fileInput.files[0];
+        if (!file) return;
+        if (file.type !== "image/png" && file.type !== "image/jpeg") {
+          errorMsg = LABELS.fileBadType[lang] || LABELS.fileBadType.en;
+          draw();
+          return;
+        }
+        if (file.size > MAX_RECEIPT_BYTES) {
+          errorMsg = LABELS.fileTooBig[lang] || LABELS.fileTooBig.en;
+          draw();
+          return;
+        }
+        errorMsg = "";
+        var reader = new FileReader();
+        reader.onload = function() {
+          var base64 = reader.result.split(",")[1];
+          state.receiptImage = { data: base64, contentType: file.type };
+          draw();
+          updateNav(n);
+        };
+        reader.readAsDataURL(file);
+      });
+      wrap.appendChild(fileInput);
+      if (errorMsg) {
+        var err = document.createElement("div");
+        err.className = "submit-error";
+        err.textContent = errorMsg;
+        wrap.appendChild(err);
+      }
+    }
+  }
+  draw();
 }
 
 function saveStep(n) {
@@ -264,17 +343,20 @@ function saveStep(n) {
 }
 
 function buildPayload() {
-  return {
-    name:        state.name        || "",
-    website:     state.website     || "",
-    location:    state.location    || "",
-    foundedYear: state.foundedYear || "",
-    volunteers:  state.volunteers  || "",
-    actions:     nonEmptyActions(),
-    email:       state.email       || "",
-    phone:       state.phone       || "",
-    notes:       state.notes       || "",
+  var payload = {
+    name:           state.name           || "",
+    website:        state.website        || "",
+    location:       state.location       || "",
+    foundedYear:    state.foundedYear    || "",
+    volunteers:     state.volunteers     || "",
+    actions:        nonEmptyActions(),
+    donationStatus: state.donationStatus || "",
+    notes:          state.notes          || "",
   };
+  if (state.donationStatus === "yes" && state.receiptImage) {
+    payload.receiptImage = state.receiptImage;
+  }
+  return payload;
 }
 
 var finalState    = "idle"; // idle | sending | sent | error
@@ -360,7 +442,7 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("btnNext").addEventListener("click", function() {
     if (currentStep < STEPS.length) {
       saveStep(currentStep);
-      currentStep++;
+      currentStep = nextVisibleStep(currentStep + 1);
       updateProgress();
       if (currentStep === STEPS.length) { renderFinal(); } else { renderStep(currentStep); }
     }
@@ -368,7 +450,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.getElementById("btnBack").addEventListener("click", function() {
     if (currentStep > 0) {
-      currentStep--;
+      currentStep = prevVisibleStep(currentStep - 1);
       updateProgress();
       document.getElementById("btnNext").style.display = "";
       renderStep(currentStep);
