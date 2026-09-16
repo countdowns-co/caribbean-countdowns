@@ -84,15 +84,21 @@
       return e;
     }
 
-    function buildContent(container) {
+    function buildContent(container, interactive) {
       live.forEach(function (f, i) {
         if (i > 0) container.appendChild(el("span", "live-tsep-big", "✦"));
 
-        var a = document.createElement("a");
+        // interactive=false builds the aria-hidden duplicate used for the
+        // seamless scroll loop: a <span>, never an <a>, so there is no
+        // moment — however brief — where a real focusable link exists
+        // inside an aria-hidden container (axe's aria-hidden-focus rule).
+        var a = document.createElement(interactive ? "a" : "span");
         a.className = "live-tname";
-        a.href = f.website || "#";
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
+        if (interactive) {
+          a.href = f.website || "#";
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+        }
         a.textContent = f.name;
         container.appendChild(a);
 
@@ -121,19 +127,15 @@
 
     if (!tickerA || !tickerB || !ticker || !banner || !closeEl) return;
 
-    buildContent(tickerA);
+    buildContent(tickerA, true);
 
     // tickerB is the aria-hidden duplicate for the seamless scroll loop —
-    // clone A instead of rebuilding. tabIndex=-1 alone isn't enough: axe's
-    // aria-hidden-focus rule (correctly) still flags an <a href> inside an
-    // aria-hidden container as focusable via assistive tech / programmatic
-    // focus. These clones are purely visual, so strip href entirely —
-    // removes the element from the tab order for real, no residual link
-    // semantics.
-    Array.prototype.slice.call(tickerA.childNodes).forEach(function (n) {
-      tickerB.appendChild(n.cloneNode(true));
-    });
-    tickerB.querySelectorAll("a").forEach(function (a) { a.removeAttribute("href"); });
+    // built directly with spans (interactive=false), not cloned from A and
+    // stripped. Cloning then removing href left a window, however brief,
+    // where a real <a href> existed inside an aria-hidden container —
+    // axe's aria-hidden-focus rule (correctly) can catch that mid-build
+    // state. Building it with no <a> at all removes the race entirely.
+    buildContent(tickerB, false);
 
     banner.classList.add("is-visible");
 
