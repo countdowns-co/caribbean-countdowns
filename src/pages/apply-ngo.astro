@@ -19,10 +19,10 @@ import PageFooter from "../components/PageFooter.astro";
     }
     .page { max-width: 540px; margin: 0 auto; }
     .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
-    .back-link { font-size: 12px; color: #555; text-decoration: underline; }
+    .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
     .back-link:hover { color: #999; }
     .lang-group { display: flex; gap: 4px; flex-shrink: 0; }
-    .lang-btn { background: transparent; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 16px; padding: 2px 6px; color: #aaa; font-family: inherit; transition: all 0.15s; opacity: 0.5; }
+    .lang-btn { background: transparent; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 16px; padding: 2px 6px; color: #aaa; font-family: inherit; transition: all 0.15s; opacity: 0.75; }
     .lang-btn:hover { border-color: #888; opacity: 0.8; }
     .lang-btn.active { background: #1a1a1a; border-color: #555; opacity: 1; }
     details.criteria-box { background: #0a0f1a; border: 1px solid #1e3a5f; border-radius: 4px; padding: 10px 16px; margin-bottom: 32px; }
@@ -36,23 +36,23 @@ import PageFooter from "../components/PageFooter.astro";
     .progress-seg { height: 3px; flex: 1; background: #333; border-radius: 2px; transition: background 0.2s; }
     .progress-seg.filled { background: #2d6aa0; }
     #wizardStep { min-height: 200px; }
-    .step-num { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; }
+    .step-num { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #999999; margin-bottom: 10px; }
     .step-question { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .step-hint { font-size: 12px; color: #555; margin-bottom: 20px; }
+    .step-hint { font-size: 12px; color: #999999; margin-bottom: 20px; }
     .step-input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #e0e0e0; font-family: inherit; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
     .step-input:focus { border-color: #2d6aa0; }
     .step-textarea { resize: vertical; min-height: 80px; }
     .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #444; margin-bottom: 6px; }
+    .date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #999999; margin-bottom: 6px; }
     .done-title { font-size: 16px; font-weight: 700; color: #4ade80; margin-bottom: 6px; }
-    .done-hint { font-size: 12px; color: #555; margin-bottom: 20px; }
+    .done-hint { font-size: 12px; color: #999999; margin-bottom: 20px; }
     .btn-submit { width: 100%; background: #0d2a1a; border: 1px solid #166534; color: #4ade80; border-radius: 4px; padding: 12px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 600; transition: background 0.15s; margin-bottom: 16px; }
     .btn-submit:hover:not(:disabled) { background: #113520; }
     .btn-submit:disabled { opacity: 0.5; cursor: wait; }
     .submit-error { font-size: 12px; color: #f87171; margin-bottom: 12px; }
     #wizardNav { display: flex; gap: 10px; margin-top: 28px; }
     .is-hidden { display: none; }
-    #btnBack { background: transparent; border: 1px solid #333; border-radius: 4px; color: #555; font-size: 13px; font-family: inherit; padding: 10px 22px; cursor: pointer; transition: all 0.15s; }
+    #btnBack { background: transparent; border: 1px solid #333; border-radius: 4px; color: #999999; font-size: 13px; font-family: inherit; padding: 10px 22px; cursor: pointer; transition: all 0.15s; }
     #btnBack:hover { border-color: #555; color: #aaa; }
     #btnNext { background: #1e3a5f; border: 1px solid #2d6aa0; border-radius: 4px; color: #7ec8e3; font-size: 13px; font-family: inherit; font-weight: 600; padding: 10px 28px; cursor: pointer; transition: background 0.15s; }
     #btnNext:hover:not(:disabled) { background: #24497a; }
@@ -61,7 +61,7 @@ import PageFooter from "../components/PageFooter.astro";
     /* Actions list */
     .action-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
     .action-input { flex: 1; }
-    .btn-remove-action { background: transparent; border: 1px solid #333; border-radius: 4px; color: #666; font-size: 16px; line-height: 1; padding: 8px 12px; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+    .btn-remove-action { background: transparent; border: 1px solid #333; border-radius: 4px; color: #999999; font-size: 16px; line-height: 1; padding: 8px 12px; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
     .btn-remove-action:hover { border-color: #f87171; color: #f87171; }
     .btn-add-action { background: transparent; border: 1px dashed #333; border-radius: 4px; color: #7ec8e3; font-size: 12px; font-family: inherit; padding: 8px 14px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
     .btn-add-action:hover { border-color: #2d6aa0; }

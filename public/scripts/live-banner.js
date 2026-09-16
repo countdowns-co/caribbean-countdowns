@@ -124,11 +124,16 @@
     buildContent(tickerA);
 
     // tickerB is the aria-hidden duplicate for the seamless scroll loop —
-    // clone A instead of rebuilding, and keep its links out of the tab order
+    // clone A instead of rebuilding. tabIndex=-1 alone isn't enough: axe's
+    // aria-hidden-focus rule (correctly) still flags an <a href> inside an
+    // aria-hidden container as focusable via assistive tech / programmatic
+    // focus. These clones are purely visual, so strip href entirely —
+    // removes the element from the tab order for real, no residual link
+    // semantics.
     Array.prototype.slice.call(tickerA.childNodes).forEach(function (n) {
       tickerB.appendChild(n.cloneNode(true));
     });
-    tickerB.querySelectorAll("a").forEach(function (a) { a.tabIndex = -1; });
+    tickerB.querySelectorAll("a").forEach(function (a) { a.removeAttribute("href"); });
 
     banner.classList.add("is-visible");
 
