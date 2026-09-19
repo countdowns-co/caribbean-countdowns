@@ -38,8 +38,8 @@ test("GET /status lazily creates season 1 with correct defaults", async () => {
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.equal(body.extensionsUsed, 0);
-  assert.equal(body.goalCompany, 5000);
-  assert.equal(body.goalCommunity, 5000);
+  assert.equal(body.goalCompany, 1000);
+  assert.equal(body.goalCommunity, 500);
   assert.equal(body.companyTotal, 0);
   assert.equal(body.communityTotal, 0);
   assert.equal(body.end - body.start, 30 * 86400000);
