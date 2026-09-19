@@ -159,7 +159,8 @@ const { ngo } = ngos;
     #fight-form { display:none; flex-direction:column; gap:10px; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
     #fight-form.visible { display:flex; }
     #fight-form label { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.5px; }
-    #fight-form input, #fight-form textarea { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #fff; font-family: inherit; font-size: 13px; padding: 8px 10px; }
+    #fight-form > div:not(.fight-side-choice) { display:flex; flex-direction:column; gap: 6px; }
+    #fight-form input, #fight-form textarea { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #fff; font-family: inherit; font-size: 13px; padding: 8px 10px; width: 100%; }
     #fight-form .fight-side-choice { display:flex; gap: 14px; font-size: 13px; color: #e0e0e0; }
     #fight-form button[type=submit] { background: #0d9488; color: #06201c; font-weight: 700; border: none; border-radius: 5px; padding: 10px; cursor: pointer; }
     .fight-form-msg { font-size: 12px; }
@@ -365,35 +366,6 @@ const { ngo } = ngos;
     .mission-icon { font-size: 40px; margin-bottom: 12px; }
     .mission-title { font-size: 20px; font-weight: 700; color: #34d399; margin-bottom: 8px; }
     .mission-text { font-size: 13px; color: #5eead4; }
-
-    /* Tier info */
-    .tier-info {
-      background: #0a1414;
-      border: 1px solid #1a3a3a;
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin-bottom: 32px;
-    }
-
-    .tier-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #5a9a90; margin-bottom: 8px; }
-
-    .tier-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .tier-item {
-      font-size: 12px;
-      color: #5eead4;
-      border: 1px solid #1a3a3a;
-      border-radius: 3px;
-      padding: 3px 10px;
-    }
-
-    .tier-item.current { border-color: #0d9488; background: #0a1a1a; }
-    .tier-item span { color: #5a9a90; }
 
     @media (max-width: 600px) {
       .ngo-hero { flex-direction: column; align-items: flex-start; }
@@ -875,21 +847,6 @@ const { ngo } = ngos;
   <div id="fight-history-list"></div>
 
   <hr class="divider" />
-
-  <!-- Tier info -->
-  <div class="tier-info">
-    <div class="tier-label">
-      <span class="t-en">Game duration = sponsor tier — more donations = more time for the community</span>
-      <span class="t-fr">Durée du jeu = palier sponsor — plus de dons = plus de temps pour la communauté</span>
-      <span class="t-kr">Dire jwèt = nivo sponsor — plis don = plis tan pou kominote a</span>
-      <span class="t-es">Duración del juego = nivel de patrocinio — más donaciones = más tiempo para la comunidad</span>
-    </div>
-    <div class="tier-row">
-      <div class="tier-item">Friend — <span>30 <span class="t-en">days</span><span class="t-fr">jours</span><span class="t-kr">jou</span><span class="t-es">días</span></span></div>
-      <div class="tier-item">Supporter — <span>90 <span class="t-en">days</span><span class="t-fr">jours</span><span class="t-kr">jou</span><span class="t-es">días</span></span></div>
-      <div class="tier-item current">Partner — <span>180 <span class="t-en">days</span><span class="t-fr">jours</span><span class="t-kr">jou</span><span class="t-es">días</span></span></div>
-    </div>
-  </div>
 
   <!-- Sponsor CTA -->
   <div class="ngo-cta">
