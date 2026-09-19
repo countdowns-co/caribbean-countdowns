@@ -25,6 +25,7 @@
 User-agent: *
 Content-Signal: search=yes, ai-input=yes, ai-train=no
 Disallow: /api/
+Disallow: /ngo-fight-review/
 Allow: /
 
 # ── AI training crawlers — disallowed entirely ──

@@ -42,6 +42,10 @@ jobs:
           //   - *.astro files whose entire body is a redirect (frontmatter-only, no
           //     template) - e.g. legacy-URL redirect stubs. A redirect isn't canonical
           //     content; the destination it points to is already in the sitemap.
+          //   - Pages with a <meta name="robots" content="noindex..."> tag - internal/
+          //     gated pages (e.g. moderation panels) that explicitly opt out of search
+          //     indexing. Listing a noindex page in the sitemap would contradict its own
+          //     meta tag and needlessly advertise the URL.
 
           import { readFileSync, readdirSync, statSync } from 'node:fs';
           import { join, relative, sep } from 'node:path';
@@ -67,6 +71,10 @@ jobs:
             return body === '';
           }
 
+          function isNoindex(content) {
+            return /<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(content);
+          }
+
           function toRouteUrl(filePath) {
             const rel = relative(PAGES_DIR, filePath).split(sep).join('/');
             const withoutExt = rel.replace(/\.astro$/, '');
@@ -83,6 +91,7 @@ jobs:
             if (/\[.+\]/.test(file)) continue;
             const content = readFileSync(file, 'utf8');
             if (isPureRedirectStub(content)) continue;
+            if (isNoindex(content)) continue;
             pageUrls.push(toRouteUrl(file));
           }
 
