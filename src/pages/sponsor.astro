@@ -287,6 +287,12 @@ import PageFooter from "../components/PageFooter.astro";
       margin-bottom: 8px;
     }
 
+    .simulator-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
     .amount-input-row {
       display: flex;
       align-items: center;
@@ -301,7 +307,7 @@ import PageFooter from "../components/PageFooter.astro";
       color: #888;
     }
 
-    #donationAmount {
+    .simulator-input {
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 4px;
@@ -314,7 +320,7 @@ import PageFooter from "../components/PageFooter.astro";
       width: 100%;
       transition: border-color 0.15s;
     }
-    #donationAmount:focus { border-color: #2d6aa0; }
+    .simulator-input:focus { border-color: #2d6aa0; }
 
     .simulator-result {
       display: flex;
@@ -683,30 +689,47 @@ import PageFooter from "../components/PageFooter.astro";
     <div class="simulator">
       <div class="simulator-scope">
         🇫🇷
-        <span class="t-en">For companies subject to French corporate tax (mécénat d'entreprise)</span>
-        <span class="t-fr">Pour les entreprises soumises à l'impôt français (mécénat d'entreprise)</span>
-        <span class="t-kr">Pou konpayi ki soumèt a taks fransè (mesena antrepriz)</span>
-        <span class="t-es">Para empresas sujetas al impuesto francés (mecenazgo empresarial)</span>
+        <span class="t-en">For companies subject to French corporate tax (mécénat d'entreprise) — adjust the rate for your own country's scheme.</span>
+        <span class="t-fr">Pour les entreprises soumises à l'impôt français (mécénat d'entreprise) — ajustez le taux selon le régime de votre pays.</span>
+        <span class="t-kr">Pou konpayi ki soumèt a taks fransè (mesena antrepriz) — ajiste to a selon rejim peyi ou.</span>
+        <span class="t-es">Para empresas sujetas al impuesto francés (mecenazgo empresarial) — ajusta la tasa según el régimen de tu país.</span>
       </div>
 
-      <label class="simulator-label" for="donationAmount">
-        <span class="t-en">Donation amount</span>
-        <span class="t-fr">Montant du don</span>
-        <span class="t-kr">Kantite don</span>
-        <span class="t-es">Monto de la donación</span>
-      </label>
-      <div class="amount-input-row">
-        <span>€</span>
-        <input type="number" id="donationAmount" min="0" step="100" value="5000" inputmode="numeric" />
+      <div class="simulator-inputs">
+        <div>
+          <label class="simulator-label" for="donationAmount">
+            <span class="t-en">Donation amount</span>
+            <span class="t-fr">Montant du don</span>
+            <span class="t-kr">Kantite don</span>
+            <span class="t-es">Monto de la donación</span>
+          </label>
+          <div class="amount-input-row">
+            <span>€</span>
+            <input type="number" id="donationAmount" class="simulator-input" min="0" step="100" value="5000" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div>
+          <label class="simulator-label" for="reductionRate">
+            <span class="t-en">Tax reduction rate</span>
+            <span class="t-fr">Taux de réduction</span>
+            <span class="t-kr">To rediksyon</span>
+            <span class="t-es">Tasa de reducción</span>
+          </label>
+          <div class="amount-input-row">
+            <input type="number" id="reductionRate" class="simulator-input" min="0" max="100" step="1" value="60" inputmode="numeric" />
+            <span>%</span>
+          </div>
+        </div>
       </div>
 
       <div class="simulator-result">
         <div class="result-row">
           <span>
-            <span class="t-en">Tax reduction (60%)</span>
-            <span class="t-fr">Réduction d'impôt (60 %)</span>
-            <span class="t-kr">Rediksyon taks (60%)</span>
-            <span class="t-es">Reducción de impuestos (60%)</span>
+            <span class="t-en">Tax reduction (<span class="rate-display">60</span>%)</span>
+            <span class="t-fr">Réduction d'impôt (<span class="rate-display">60</span> %)</span>
+            <span class="t-kr">Rediksyon taks (<span class="rate-display">60</span>%)</span>
+            <span class="t-es">Reducción de impuestos (<span class="rate-display">60</span>%)</span>
           </span>
           <strong id="resultReduction">€3,000</strong>
         </div>
@@ -722,7 +745,7 @@ import PageFooter from "../components/PageFooter.astro";
         <div class="result-row">
           <span>
             <span class="t-en">L'Asso-Mer receives</span>
-            <span class="t-fr">L'Asso-Mer reçoit</span>
+            <span class="t-fr">L'ONG reçoit</span>
             <span class="t-kr">L'Asso-Mer resevwa</span>
             <span class="t-es">L'Asso-Mer recibe</span>
           </span>
@@ -854,10 +877,10 @@ import PageFooter from "../components/PageFooter.astro";
       </div>
 
       <p class="simulator-disclaimer">
-        <span class="t-en">Estimate only, not tax advice. Reduction capped at €20,000/year or 0.5% of revenue if higher (excess carries forward 5 years). Confirm with your accountant. Source: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Billboard prices: single 4×3m panel rates, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — the 1-month figure is estimated from their 3-month rate, not a quoted price; other providers negotiate rates privately.</span>
-        <span class="t-fr">Estimation uniquement, pas un conseil fiscal. Réduction plafonnée à 20 000 €/an ou 0,5 % du chiffre d'affaires si plus élevé (excédent reportable 5 ans). Confirmez avec votre expert-comptable. Source : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarifs d'affichage : panneau 4x3 unique, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — le tarif à 1 mois est estimé à partir de leur tarif 3 mois, ce n'est pas un prix affiché ; d'autres prestataires négocient au cas par cas.</span>
-        <span class="t-kr">Se sèlman yon estimasyon, pa yon konsèy fiskal. Rediksyon limite a 20 000 €/an oswa 0,5% chif dafè si pi wo (èksede repòte 5 an). Konfime ak ekspè-kontab ou. Sous : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarif afichaj : yon sèl panno 4x3, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — tarif 1 mwa a se yon estimasyon apati tarif 3 mwa yo, se pa yon pri ofisyèl ; lòt founisè negosye pri o ka pa ka.</span>
-        <span class="t-es">Solo una estimación, no es asesoría fiscal. Reducción limitada a 20.000 €/año o el 0,5% de la facturación si es mayor (el exceso se traslada 5 años). Confirma con tu contador. Fuente: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Precios de vallas: panel 4x3 único, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — la cifra de 1 mes es una estimación a partir de su tarifa de 3 meses, no un precio publicado; otros proveedores negocian caso por caso.</span>
+        <span class="t-en">Estimate only, not tax advice. Reduction capped at €20,000/year or 0.5% of revenue if higher (excess carries forward 5 years). Confirm with your accountant. The default rate (60%) is French mécénat d'entreprise; tax regimes vary widely elsewhere in the Caribbean — Dominican Republic (donations deductible up to 5% of taxable income), Jamaica (up to 5%), Trinidad & Tobago (up to 15% for a covenanted donation), Barbados (deductible with no fixed cap if the organization is registered), Haiti (no dedicated scheme identified), and no corporate income tax at all in the Bahamas, Cayman Islands or BVI (a deduction doesn't apply there). Adjust the rate above and check with a local tax advisor before committing. Source: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Billboard prices: single 4×3m panel rates, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — the 1-month figure is estimated from their 3-month rate, not a quoted price; other providers negotiate rates privately.</span>
+        <span class="t-fr">Estimation uniquement, pas un conseil fiscal. Réduction plafonnée à 20 000 €/an ou 0,5 % du chiffre d'affaires si plus élevé (excédent reportable 5 ans). Confirmez avec votre expert-comptable. Le taux par défaut (60 %) correspond au mécénat d'entreprise français ; les régimes fiscaux diffèrent fortement ailleurs dans la Caraïbe — République dominicaine (dons déductibles jusqu'à 5 % du revenu imposable), Jamaïque (jusqu'à 5 %), Trinité-et-Tobago (jusqu'à 15 % pour un don conventionné), Barbade (déductible sans plafond fixe si l'organisme est enregistré), Haïti (aucun régime dédié identifié), et aucun impôt sur les sociétés aux Bahamas, Îles Caïmans ou BVI (la réduction ne s'y applique pas). Ajustez le taux ci-dessus et vérifiez auprès d'un fiscaliste local avant de vous engager. Source : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarifs d'affichage : panneau 4x3 unique, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — le tarif à 1 mois est estimé à partir de leur tarif 3 mois, ce n'est pas un prix affiché ; d'autres prestataires négocient au cas par cas.</span>
+        <span class="t-kr">Se sèlman yon estimasyon, pa yon konsèy fiskal. Rediksyon limite a 20 000 €/an oswa 0,5% chif dafè si pi wo (èksede repòte 5 an). Konfime ak ekspè-kontab ou. To pa defo a (60%) se mesena antrepriz fransè ; rejim fiskal yo diferan anpil lòt kote nan Karayib la — Repiblik Dominiken (don dediktib jiska 5% revni taksab), Jamayik (jiska 5%), Trinidad ak Tobago (jiska 15% pou yon don kovenante), Barbad (dediktib san limit fiks si òganizasyon an anrejistre), Ayiti (pa gen rejim dedye idantifye), epi pa gen taks sosyete ditou nan Bahamas, Zile Kayiman oswa BVI (rediksyon an pa aplikab la). Ajiste to a anwo a epi verifye ak yon fiskalis lokal anvan ou angaje. Sous : <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Tarif afichaj : yon sèl panno 4x3, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — tarif 1 mwa a se yon estimasyon apati tarif 3 mwa yo, se pa yon pri ofisyèl ; lòt founisè negosye pri o ka pa ka.</span>
+        <span class="t-es">Solo una estimación, no es asesoría fiscal. Reducción limitada a 20.000 €/año o el 0,5% de la facturación si es mayor (el exceso se traslada 5 años). Confirma con tu contador. La tasa por defecto (60%) corresponde al mecenazgo empresarial francés; los regímenes fiscales varían mucho en el resto del Caribe — República Dominicana (donaciones deducibles hasta el 5% de la renta imponible), Jamaica (hasta el 5%), Trinidad y Tobago (hasta el 15% para una donación convenida), Barbados (deducible sin límite fijo si la organización está registrada), Haití (sin régimen específico identificado), y sin impuesto de sociedades en Bahamas, Islas Caimán o BVI (la deducción no aplica ahí). Ajusta la tasa arriba y consulta a un asesor fiscal local antes de comprometerte. Fuente: <a href="https://www.economie.gouv.fr/entreprises/gerer-sa-fiscalite-et-ses-impots/limpot-sur-les-benefices-ir-et/mecenat-donnez-des-oeuvres-dinteret-general-et-obtenez-une-reduction" target="_blank" rel="noopener noreferrer">economie.gouv.fr</a>. Precios de vallas: panel 4x3 único, <a href="https://www.s2media-caraibes.com/tarifs-s2" target="_blank" rel="noopener noreferrer">S2Média Caraïbes</a> (2025) — la cifra de 1 mes es una estimación a partir de su tarifa de 3 meses, no un precio publicado; otros proveedores negocian caso por caso.</span>
       </p>
     </div>
 
@@ -885,7 +908,23 @@ import PageFooter from "../components/PageFooter.astro";
       </div>
     </div>
 
+    <!-- CTA -->
     <div class="cta-block cta-flush">
+      <p>
+        <span class="t-en">Help defend the Caribbean's marine heritage while lowering your taxes.</span>
+        <span class="t-fr">Aidez à défendre le patrimoine marin caribéen tout en allégeant vos impôts.</span>
+        <span class="t-kr">Ede pwoteje patrimwàn maren Karayib la epi diminye taks ou.</span>
+        <span class="t-es">Ayude a proteger el patrimonio marino caribeño mientras reduce sus impuestos.</span>
+      </p>
+      <a class="cta-btn" href="https://www.lassomer.fr/contact/" target="_blank" rel="noopener noreferrer">
+        <span class="t-en">Contact L'Asso-Mer</span>
+        <span class="t-fr">Contacter L'Asso-Mer</span>
+        <span class="t-kr">Kontakte L'Asso-Mer</span>
+        <span class="t-es">Contactar a L'Asso-Mer</span>
+      </a>
+    </div>
+
+    <div class="cta-block">
       <p class="cta-lead">
         <span class="t-en">Are you an NGO or nonprofit protecting the Caribbean? Apply for a free listing.</span>
         <span class="t-fr">Vous êtes une ONG ou association protégeant la Caraïbe ? Demandez un référencement gratuit.</span>
@@ -897,22 +936,6 @@ import PageFooter from "../components/PageFooter.astro";
         <span class="t-fr">Postuler</span>
         <span class="t-kr">Aplike</span>
         <span class="t-es">Postular</span>
-      </a>
-    </div>
-
-    <!-- CTA -->
-    <div class="cta-block">
-      <p>
-        <span class="t-en">Interested? Contact L'Asso-Mer directly to arrange your sponsorship and receive your donation receipt.</span>
-        <span class="t-fr">Intéressé·e ? Contactez directement L'Asso-Mer pour organiser votre sponsoring et recevoir votre reçu de don.</span>
-        <span class="t-kr">Enterese ? Kontakte L'Asso-Mer dirèkteman pou òganize sponsoring ou epi resevwa resi don ou.</span>
-        <span class="t-es">¿Interesado? Contacta directamente a L'Asso-Mer para organizar tu patrocinio y recibir tu comprobante de donación.</span>
-      </p>
-      <a class="cta-btn" href="https://www.lassomer.fr/contact/" target="_blank" rel="noopener noreferrer">
-        <span class="t-en">Contact L'Asso-Mer</span>
-        <span class="t-fr">Contacter L'Asso-Mer</span>
-        <span class="t-kr">Kontakte L'Asso-Mer</span>
-        <span class="t-es">Contactar a L'Asso-Mer</span>
       </a>
     </div>
 
