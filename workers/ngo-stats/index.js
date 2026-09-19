@@ -48,7 +48,7 @@ export default {
       stats.contributors += 1;
       stats.communityProgress = Math.min(
         parseFloat((stats.communityProgress + contribution).toFixed(2)),
-        94
+        100
       );
 
       await putStats(env, stats);

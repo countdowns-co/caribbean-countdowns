@@ -1,0 +1,26 @@
+name = "ngo-fight"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[[kv_namespaces]]
+binding = "FIGHT_KV"
+id = "REPLACE_WITH_REAL_ID"  # npx wrangler kv namespace create FIGHT_KV
+
+# Read-only cross-Worker binding — same NGO_KV namespace ngo-stats already writes to.
+# Copy the id from workers/ngo-stats/wrangler.toml's own NGO_KV binding.
+[[kv_namespaces]]
+binding = "NGO_KV"
+id = "d1cf1196097b44b7be80ed578c521317"
+
+[[routes]]
+pattern = "caribbean.countdowns.co/api/ngo-fight/*"
+zone_name = "countdowns.co"
+
+# namespace_id 1004: 1001 (events-data/ngo-stats), 1002 (visits), 1003 (suggest) are
+# already taken — confirmed via `grep -rn namespace_id workers/*/wrangler.toml` at
+# implementation time (the plan's own draft had guessed 1003, which was wrong).
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1004"
+simple = { limit = 5, period = 60 }

@@ -137,119 +137,39 @@ const { ngo } = ngos;
     /* Divider */
     .divider { border: none; border-top: 1px solid #1a2e2e; margin: 32px 0; }
 
-    /* Gamification block */
-    .game-header {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #0d9488;
-      margin-bottom: 24px;
-    }
-
-    /* Countdown */
-    .countdown-wrap {
-      background: #0a1a1a;
-      border: 1px solid #0d3d35;
-      border-radius: 6px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .countdown-label { font-size: 12px; color: #5eead4; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
-    .countdown-label-sub { font-size: 11px; color: #5a9a90; margin-top: 2px; }
-
-    .countdown-timer { display: flex; gap: 12px; }
-
-    .time-block { text-align: center; }
-    .time-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #fff;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-    .time-label { font-size: 9px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
-
-    .time-sep { font-size: 24px; color: #1a4a40; align-self: flex-start; margin-top: 2px; }
-
-    /* Gauge */
-    .gauge-wrap {
-      background: #0a1a1a;
-      border: 1px solid #0d3d35;
-      border-radius: 6px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
-    }
-
-    .gauge-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-    }
-
-    .gauge-title { font-size: 13px; font-weight: 700; color: #fff; }
-    .gauge-pct { font-size: 22px; font-weight: 700; color: #34d399; }
-
-    .gauge-track {
-      height: 18px;
-      background: #0f2a2a;
-      border-radius: 9px;
-      overflow: hidden;
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .gauge-fill {
-      width: 0;
-      height: 100%;
-      border-radius: 9px;
-      background: linear-gradient(90deg, #0d9488, #34d399);
-      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      position: relative;
-    }
-
-    .gauge-fill::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: rgba(255,255,255,0.4);
-      border-radius: 0 9px 9px 0;
-    }
-
-    .gauge-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: #5a9a90;
-    }
-
-    .gauge-meta .contributors { color: #5eead4; }
-
-    /* Renewal note */
-    .renewal-note {
-      background: #050f0d;
-      border: 1px solid #065f46;
-      border-radius: 4px;
-      padding: 10px 14px;
-      font-size: 12px;
-      color: #34d399;
-      margin-bottom: 20px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-    }
-
-    .renewal-icon { flex-shrink: 0; }
+    /* The Fight */
+    .fight-header { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 6px; }
+    .fight-sub { font-size: 12px; color: #5a9a90; margin-bottom: 18px; }
+    .fight-countdown-wrap { display:flex; align-items:center; justify-content:center; gap:10px; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 6px; padding: 12px; margin-bottom: 20px; }
+    .fight-countdown-label { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fight-countdown-time { font-size: 18px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .fight-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 480px) { .fight-grid { grid-template-columns: 1fr; } }
+    .fight-card { background: #0a1a1a; border: 1px solid #1a3a3a; border-radius: 8px; padding: 16px; }
+    .fight-card.leading { border-color: #34d399; box-shadow: 0 0 0 1px #34d399 inset; }
+    .fight-side-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #e0e0e0; margin-bottom: 10px; }
+    .fight-amount { font-size: 22px; font-weight: 700; color: #34d399; font-variant-numeric: tabular-nums; }
+    .fight-goal { font-size: 12px; color: #7a9a9a; font-weight: 400; }
+    .fight-gauge-track { background: #0f2a2a; border-radius: 9px; height: 10px; overflow: hidden; margin: 10px 0 8px; }
+    .fight-gauge-fill { height: 100%; border-radius: 9px; background: linear-gradient(90deg, #0d9488, #34d399); width: 0%; transition: width 0.4s ease; }
+    .fight-meta { font-size: 11px; color: #5a9a90; }
+    .fight-report-cta { display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap: wrap; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .fight-report-cta p { margin:0; font-size:13px; color: #7a9a9a; flex:1; min-width:180px; }
+    .btn-report { background: #0d9488; color: #06201c; font-weight: 700; font-size: 13px; border: none; border-radius: 5px; padding: 10px 18px; cursor: pointer; white-space: nowrap; }
+    #fight-form { display:none; flex-direction:column; gap:10px; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    #fight-form.visible { display:flex; }
+    #fight-form label { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.5px; }
+    #fight-form input, #fight-form textarea { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #fff; font-family: inherit; font-size: 13px; padding: 8px 10px; }
+    #fight-form .fight-side-choice { display:flex; gap: 14px; font-size: 13px; color: #e0e0e0; }
+    #fight-form button[type=submit] { background: #0d9488; color: #06201c; font-weight: 700; border: none; border-radius: 5px; padding: 10px; cursor: pointer; }
+    .fight-form-msg { font-size: 12px; }
+    .fight-form-msg.visible { color: #34d399; }
+    .fight-form-msg.visible.error { color: #f0a0a0; }
+    .fight-history-title { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .fight-history-row { display:flex; align-items:center; justify-content:space-between; gap:10px; background: #0a1a1a; border: 1px solid #1a3a3a; border-radius: 6px; padding: 10px 14px; font-size: 12px; margin-bottom: 8px; }
+    .quiz-accordion { background: #0a1a1a; border: 1px solid #1a3a3a; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+    .quiz-accordion summary { padding: 14px 16px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; list-style: none; }
+    .quiz-accordion summary::-webkit-details-marker { display:none; }
 
     /* Quiz CTA */
     .quiz-cta {
@@ -477,7 +397,6 @@ const { ngo } = ngos;
 
     @media (max-width: 600px) {
       .ngo-hero { flex-direction: column; align-items: flex-start; }
-      .countdown-wrap { flex-direction: column; }
     }
   </style>
   <style is:global>
@@ -719,183 +638,241 @@ const { ngo } = ngos;
 
   <hr class="divider" />
 
-  <!-- Gamification -->
-  <div class="game-header">
-    <span class="t-en">🎮 Community Mission — Help renew L'Asso-Mer's visibility</span>
-    <span class="t-fr">🎮 Mission collective — Aidez à renouveler la visibilité de L'Asso-Mer</span>
-    <span class="t-kr">🎮 Misyon kominotè — Ede renouvle vizibilite L'Asso-Mer</span>
-    <span class="t-es">🎮 Misión colectiva — Ayuda a renovar la visibilidad de L'Asso-Mer</span>
-  </div>
-
-  <!-- Countdown -->
-  <div class="countdown-wrap">
-    <div>
-      <div class="countdown-label">
-        <span class="t-en">Sponsorship period ends in</span>
-        <span class="t-fr">Période de sponsoring se termine dans</span>
-        <span class="t-kr">Peryòd parenaj fini nan</span>
-        <span class="t-es">El período de patrocinio termina en</span>
-      </div>
-      <div class="countdown-label-sub">
-        <span class="t-en">If the gauge reaches 100% before then → visibility auto-renewed</span>
-        <span class="t-fr">Si la jauge atteint 100 % avant → visibilité renouvelée automatiquement</span>
-        <span class="t-kr">Si jwaj la rive 100% avan → vizibilite otomatikman renouvle</span>
-        <span class="t-es">Si el marcador llega al 100% antes → visibilidad renovada automáticamente</span>
-      </div>
-    </div>
-    <div class="countdown-timer">
-      <div class="time-block">
-        <div class="time-value" id="cd-days">--</div>
-        <div class="time-label t-en">days</div>
-        <div class="time-label t-fr">jours</div>
-        <div class="time-label t-kr">jou</div>
-        <div class="time-label t-es">días</div>
-      </div>
-      <div class="time-sep">:</div>
-      <div class="time-block">
-        <div class="time-value" id="cd-hours">--</div>
-        <div class="time-label t-en">hours</div>
-        <div class="time-label t-fr">heures</div>
-        <div class="time-label t-kr">è</div>
-        <div class="time-label t-es">horas</div>
-      </div>
-      <div class="time-sep">:</div>
-      <div class="time-block">
-        <div class="time-value" id="cd-mins">--</div>
-        <div class="time-label t-en">min</div>
-        <div class="time-label t-fr">min</div>
-        <div class="time-label t-kr">min</div>
-        <div class="time-label t-es">min</div>
-      </div>
-      <div class="time-sep">:</div>
-      <div class="time-block">
-        <div class="time-value" id="cd-secs">--</div>
-        <div class="time-label t-en">sec</div>
-        <div class="time-label t-fr">sec</div>
-        <div class="time-label t-kr">sèk</div>
-        <div class="time-label t-es">seg</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gauge -->
-  <div class="gauge-wrap">
-    <div class="gauge-header">
-      <div class="gauge-title">
-        <span class="t-en">Community progress</span>
-        <span class="t-fr">Progression collective</span>
-        <span class="t-kr">Progrè kominotè</span>
-        <span class="t-es">Progreso colectivo</span>
-      </div>
-      <div class="gauge-pct" id="gauge-pct">0%</div>
-    </div>
-    <div class="gauge-track">
-      <div class="gauge-fill" id="gauge-fill"></div>
-    </div>
-    <div class="gauge-meta">
-      <span class="contributors" id="contributors-count">— </span>
-      <span id="gauge-remaining">
-        <span class="t-en">Fill it before the deadline!</span>
-        <span class="t-fr">Remplissez-la avant la deadline !</span>
-        <span class="t-kr">Ranpli'y avan delè a !</span>
-        <span class="t-es">¡Complétalo antes del plazo!</span>
-      </span>
-    </div>
-  </div>
-
-  <!-- Renewal note -->
-  <div class="renewal-note">
-    <span class="renewal-icon">♻️</span>
-    <span>
-      <span class="t-en">If the gauge reaches 100% before the countdown ends, L'Asso-Mer's sponsorship is renewed once for 30 days at no extra cost — ensuring no single NGO blocks visibility for others. This one-time renewal cannot be extended further.</span>
-      <span class="t-fr">Si la jauge atteint 100 % avant la fin du compte à rebours, le parrainage de L'Asso-Mer est renouvelé une seule fois pour 30 jours sans frais supplémentaires — pour qu'aucune ONG ne monopolise la visibilité au détriment des autres. Ce renouvellement unique ne peut pas être prolongé.</span>
-      <span class="t-kr">Si jwaj la rive 100% avan kont-a-rebò a fini, parenaj L'Asso-Mer renouvle yon sèl fwa pou 30 jou san lajan anplis — pou okenn ONG pa bloke vizibilite lòt yo. Renouvèlman inik sa a pa ka pwolonge.</span>
-      <span class="t-es">Si el marcador alcanza el 100% antes de que termine la cuenta regresiva, el patrocinio de L'Asso-Mer se renueva una sola vez por 30 días sin costo adicional — para que ninguna ONG bloquee la visibilidad de otras causas. Esta renovación única no puede extenderse.</span>
+  <!-- The Fight -->
+  <div class="fight-header">
+    <span class="fight-title">
+      <span class="t-en">⚔️ The Fight — Season <span id="fight-season-num">1</span></span>
+      <span class="t-fr">⚔️ Le Fight — Saison <span id="fight-season-num-fr">1</span></span>
+      <span class="t-kr">⚔️ Konba a — Sezon <span id="fight-season-num-kr">1</span></span>
+      <span class="t-es">⚔️ La Pelea — Temporada <span id="fight-season-num-es">1</span></span>
     </span>
   </div>
+  <div class="fight-sub">
+    <span class="t-en">Companies vs. Community: who will support L'Asso-Mer the most before the season ends?</span>
+    <span class="t-fr">Entreprises contre Communauté : qui soutiendra le plus L'Asso-Mer avant la fin de la saison ?</span>
+    <span class="t-kr">Konpayi kont Kominote : ki moun ki pral sipòte L'Asso-Mer plis avan sezon an fini?</span>
+    <span class="t-es">Empresas contra Comunidad: ¿quién apoyará más a L'Asso-Mer antes de que termine la temporada?</span>
+  </div>
 
-  <!-- Quiz CTA -->
-  <div class="quiz-cta">
-    <button class="btn-quiz" id="btn-start-quiz">
-      <span class="t-en">🧠 Take the quiz — contribute to the gauge</span>
-      <span class="t-fr">🧠 Faire le quiz — contribuer à la jauge</span>
-      <span class="t-kr">🧠 Fè kwiz la — kontribye nan jwaj la</span>
-      <span class="t-es">🧠 Hacer el quiz — contribuir al marcador</span>
+  <div class="fight-countdown-wrap">
+    <span class="fight-countdown-label">
+      <span class="t-en">Season ends in</span>
+      <span class="t-fr">Fin de saison dans</span>
+      <span class="t-kr">Sezon fini nan</span>
+      <span class="t-es">La temporada termina en</span>
+    </span>
+    <span class="fight-countdown-time" id="fight-countdown">—</span>
+  </div>
+
+  <div class="fight-grid">
+    <div class="fight-card" id="fight-community-card">
+      <div class="fight-side-label">
+        <span class="t-en">Community</span>
+        <span class="t-fr">Communauté</span>
+        <span class="t-kr">Kominote</span>
+        <span class="t-es">Comunidad</span>
+      </div>
+      <div class="fight-amount"><span id="fight-community-amount">€0</span> <span class="fight-goal">/ <span id="fight-community-goal">€5,000</span></span></div>
+      <div class="fight-gauge-track"><div class="fight-gauge-fill" id="fight-community-fill"></div></div>
+      <div class="fight-meta"><span id="fight-community-contributors">0</span>
+        <span class="t-en"> contributors</span>
+        <span class="t-fr"> contributeurs</span>
+        <span class="t-kr"> kontribistè</span>
+        <span class="t-es"> contribuyentes</span>
+      </div>
+    </div>
+
+    <div class="fight-card" id="fight-company-card">
+      <div class="fight-side-label">
+        <span class="t-en">Companies</span>
+        <span class="t-fr">Entreprises</span>
+        <span class="t-kr">Konpayi</span>
+        <span class="t-es">Empresas</span>
+      </div>
+      <div class="fight-amount"><span id="fight-company-amount">€0</span> <span class="fight-goal">/ <span id="fight-company-goal">€5,000</span></span></div>
+      <div class="fight-gauge-track"><div class="fight-gauge-fill" id="fight-company-fill"></div></div>
+      <div class="fight-meta"><span id="fight-company-contributors">0</span>
+        <span class="t-en"> companies</span>
+        <span class="t-fr"> entreprises</span>
+        <span class="t-kr"> konpayi</span>
+        <span class="t-es"> empresas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fight-report-cta">
+    <p>
+      <span class="t-en">Did you give to L'Asso-Mer? Report your contribution to push your side forward.</span>
+      <span class="t-fr">Vous avez donné à L'Asso-Mer ? Signalez votre contribution pour faire avancer votre camp.</span>
+      <span class="t-kr">Ou te bay L'Asso-Mer? Rapòte kontribisyon ou pou fè kan ou avanse.</span>
+      <span class="t-es">¿Le diste a L'Asso-Mer? Reporta tu contribución para hacer avanzar a tu equipo.</span>
+    </p>
+    <button class="btn-report" id="btn-report-contribution" type="button">
+      <span class="t-en">Report a contribution</span>
+      <span class="t-fr">Signaler une contribution</span>
+      <span class="t-kr">Rapòte yon kontribisyon</span>
+      <span class="t-es">Reportar una contribución</span>
     </button>
-    <a class="btn-donate" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">
-      <span class="t-en">Donate directly →</span>
-      <span class="t-fr">Faire un don →</span>
-      <span class="t-kr">Fè on don →</span>
-      <span class="t-es">Donar directamente →</span>
-    </a>
   </div>
 
-  <!-- Quiz section -->
-  <div id="quiz-section">
-    <div class="quiz-box">
-      <div class="quiz-progress">
-        <div class="quiz-step" id="quiz-step-label">
-          <span class="t-en">Question 1 of 8</span>
-          <span class="t-fr">Question 1 sur 8</span>
-          <span class="t-kr">Kèstyon 1 sou 8</span>
-          <span class="t-es">Pregunta 1 de 8</span>
-        </div>
-        <div class="quiz-dots" id="quiz-dots"></div>
-      </div>
-      <div class="quiz-question" id="quiz-question"></div>
-      <div class="quiz-options" id="quiz-options"></div>
-      <div class="quiz-feedback" id="quiz-feedback"></div>
-      <button class="quiz-next" id="quiz-next">
-        <span class="t-en">Next →</span>
-        <span class="t-fr">Suivant →</span>
-        <span class="t-kr">Swivan →</span>
-        <span class="t-es">Siguiente →</span>
-      </button>
+  <form id="fight-form">
+    <div class="fight-side-choice">
+      <label><input type="radio" name="side" value="community" checked />
+        <span class="t-en">Community</span><span class="t-fr">Communauté</span><span class="t-kr">Kominote</span><span class="t-es">Comunidad</span>
+      </label>
+      <label><input type="radio" name="side" value="company" />
+        <span class="t-en">Company</span><span class="t-fr">Entreprise</span><span class="t-kr">Konpayi</span><span class="t-es">Empresa</span>
+      </label>
     </div>
-  </div>
+    <div>
+      <label for="fight-amount">
+        <span class="t-en">Amount given (€)</span><span class="t-fr">Montant donné (€)</span><span class="t-kr">Kantite bay (€)</span><span class="t-es">Monto dado (€)</span>
+      </label>
+      <input type="number" id="fight-amount" min="1" step="1" required />
+    </div>
+    <div>
+      <label for="fight-name">
+        <span class="t-en">Name (optional — company or, if you want to be listed, your name)</span>
+        <span class="t-fr">Nom (optionnel — nom d'entreprise, ou le vôtre si vous voulez être listé)</span>
+        <span class="t-kr">Non (opsyonèl)</span>
+        <span class="t-es">Nombre (opcional)</span>
+      </label>
+      <input type="text" id="fight-name" maxlength="120" />
+    </div>
+    <div>
+      <label for="fight-siret">
+        <span class="t-en">SIRET (companies only)</span><span class="t-fr">SIRET (entreprises uniquement)</span><span class="t-kr">SIRET (konpayi sèlman)</span><span class="t-es">SIRET (solo empresas)</span>
+      </label>
+      <input type="text" id="fight-siret" maxlength="14" pattern="[0-9]{14}" />
+    </div>
+    <div>
+      <label for="fight-note">
+        <span class="t-en">Note (optional, for our review only — never shown publicly)</span>
+        <span class="t-fr">Note (optionnelle, pour notre vérification uniquement — jamais publique)</span>
+        <span class="t-kr">Nòt (opsyonèl)</span>
+        <span class="t-es">Nota (opcional)</span>
+      </label>
+      <textarea id="fight-note" maxlength="500" rows="2"></textarea>
+    </div>
+    <button type="submit">
+      <span class="t-en">Submit</span><span class="t-fr">Envoyer</span><span class="t-kr">Voye</span><span class="t-es">Enviar</span>
+    </button>
+    <div class="fight-form-msg" id="fight-form-msg"></div>
+  </form>
 
-  <!-- Quiz result -->
-  <div id="quiz-result">
-    <div class="result-box">
-      <div class="result-score" id="result-score">0/5</div>
-      <div class="result-label" id="result-label"></div>
-      <div class="result-contribution" id="result-contribution"></div>
-      <div class="result-round-label" id="result-round-label"></div>
-      <div class="result-actions">
-        <button class="btn-replay" id="btn-replay">
-          <span class="t-en">Play again</span>
-          <span class="t-fr">Rejouer</span>
-          <span class="t-kr">Jwe ankò</span>
-          <span class="t-es">Jugar de nuevo</span>
+  <details class="quiz-accordion">
+    <summary>
+      <span class="t-en">🧠 Learn about the cause</span>
+      <span class="t-fr">🧠 En savoir plus sur la cause</span>
+      <span class="t-kr">🧠 Aprann sou koz la</span>
+      <span class="t-es">🧠 Aprende sobre la causa</span>
+    </summary>
+    <div style="padding: 0 16px 16px;">
+      <div class="quiz-cta">
+        <button class="btn-quiz" id="btn-start-quiz">
+          <span class="t-en">🧠 Take the quiz</span>
+          <span class="t-fr">🧠 Faire le quiz</span>
+          <span class="t-kr">🧠 Fè kwiz la</span>
+          <span class="t-es">🧠 Hacer el quiz</span>
         </button>
-        <a class="btn-donate" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">
-          <span class="t-en">Donate to go further →</span>
-          <span class="t-fr">Faire un don pour aller plus loin →</span>
-          <span class="t-kr">Fè on don pou avanse plis →</span>
-          <span class="t-es">Donar para ir más lejos →</span>
-        </a>
       </div>
-    </div>
-  </div>
+      <p style="font-size:12px; color:#7a9a9a; margin-top:10px;">
+        <span class="t-en">Marine ecology quiz — no financial contribution needed. Every time the quiz gauge fills before the fight ends, the season is extended 7 days (up to twice) — more time for both sides.</span>
+        <span class="t-fr">Quiz sur l'écologie marine — aucune contribution financière requise. Chaque fois que la jauge du quiz se remplit avant la fin du fight, la saison est prolongée de 7 jours (2 fois maximum) — plus de temps pour les deux camps.</span>
+        <span class="t-kr">Quiz sou ekoloji maren — pa gen kontribisyon finansye ki nesesè. Chak fwa jwaj kwiz la ranpli avan konba a fini, sezon an pwolonje 7 jou (2 fwa maksimòm).</span>
+        <span class="t-es">Quiz de ecología marina — no se necesita contribución financiera. Cada vez que el medidor del quiz se llena antes de que termine la pelea, la temporada se extiende 7 días (hasta dos veces).</span>
+      </p>
 
-  <!-- Mission accomplished -->
-  <div id="mission-accomplished">
-    <div class="mission-box">
-      <div class="mission-icon">🎉</div>
-      <div class="mission-title">
-        <span class="t-en">Mission accomplished!</span>
-        <span class="t-fr">Mission accomplie !</span>
-        <span class="t-kr">Misyon akonpli !</span>
-        <span class="t-es">¡Misión cumplida!</span>
+      <!-- Quiz question flow — DOM structure, IDs and classes unchanged from the
+           original page; only this comment and its new position (inside the
+           collapsed accordion) are new. public/scripts/ngo.js's existing quiz logic
+           (startQuiz, renderQuizQuestion, selectAnswer, etc.) targets these same IDs
+           and needs no changes to keep working here. -->
+      <div id="quiz-section">
+        <div class="quiz-box">
+          <div class="quiz-progress">
+            <div class="quiz-step" id="quiz-step-label">
+              <span class="t-en">Question 1 of 8</span>
+              <span class="t-fr">Question 1 sur 8</span>
+              <span class="t-kr">Kèstyon 1 sou 8</span>
+              <span class="t-es">Pregunta 1 de 8</span>
+            </div>
+            <div class="quiz-dots" id="quiz-dots"></div>
+          </div>
+          <div class="quiz-question" id="quiz-question"></div>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+          <button class="quiz-next" id="quiz-next">
+            <span class="t-en">Next →</span>
+            <span class="t-fr">Suivant →</span>
+            <span class="t-kr">Swivan →</span>
+            <span class="t-es">Siguiente →</span>
+          </button>
+        </div>
       </div>
-      <div class="mission-text">
-        <span class="t-en">The community reached 100%. L'Asso-Mer's visibility has been renewed for another period. Thank you!</span>
-        <span class="t-fr">La communauté a atteint 100 %. La visibilité de L'Asso-Mer est renouvelée pour une nouvelle période. Merci !</span>
-        <span class="t-kr">Kominote a rive 100%. Vizibilite L'Asso-Mer renouvle pou on peryòd ankò. Mèsi !</span>
-        <span class="t-es">¡La comunidad alcanzó el 100%! La visibilidad de L'Asso-Mer se ha renovado por otro período. ¡Gracias!</span>
+
+      <!-- Quiz result — unchanged -->
+      <div id="quiz-result">
+        <div class="result-box">
+          <div class="result-score" id="result-score">0/5</div>
+          <div class="result-label" id="result-label"></div>
+          <div class="result-contribution" id="result-contribution"></div>
+          <div class="result-round-label" id="result-round-label"></div>
+          <div class="result-actions">
+            <button class="btn-replay" id="btn-replay">
+              <span class="t-en">Play again</span>
+              <span class="t-fr">Rejouer</span>
+              <span class="t-kr">Jwe ankò</span>
+              <span class="t-es">Jugar de nuevo</span>
+            </button>
+            <a class="btn-donate" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">
+              <span class="t-en">Donate to go further →</span>
+              <span class="t-fr">Faire un don pour aller plus loin →</span>
+              <span class="t-kr">Fè on don pou avanse plis →</span>
+              <span class="t-es">Donar para ir más lejos →</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mission accomplished — copy REWRITTEN below, everything else unchanged.
+           Old copy claimed "L'Asso-Mer's visibility has been renewed," which is no
+           longer true now that the quiz's payoff is a fight extension, not a
+           visibility renewal. New copy is deliberately outcome-agnostic (doesn't say
+           "extended by 7 days" specifically) because which of the two outcomes
+           actually happened — extension vs. forced season close — is decided
+           server-side in workers/ngo-fight and this static markup can't know which
+           one fired; it points the user at the countdown/gauges above instead of
+           asserting a specific result. -->
+      <div id="mission-accomplished">
+        <div class="mission-box">
+          <div class="mission-icon">🎉</div>
+          <div class="mission-title">
+            <span class="t-en">Mission accomplished!</span>
+            <span class="t-fr">Mission accomplie !</span>
+            <span class="t-kr">Misyon akonpli !</span>
+            <span class="t-es">¡Misión cumplida!</span>
+          </div>
+          <div class="mission-text">
+            <span class="t-en">The quiz gauge reached 100%! This pushes the fight forward — check the countdown above, it may have just changed.</span>
+            <span class="t-fr">La jauge du quiz a atteint 100 % ! Cela fait avancer le fight — regardez le compte à rebours ci-dessus, il vient peut-être de changer.</span>
+            <span class="t-kr">Jwaj kwiz la rive 100% ! Sa a ede konba a avanse — gade kont-a-rebò anwo a, li ka fenk chanje.</span>
+            <span class="t-es">¡El medidor del quiz alcanzó el 100%! Esto impulsa la pelea — mira la cuenta regresiva arriba, puede que acabe de cambiar.</span>
+          </div>
+        </div>
       </div>
     </div>
+  </details>
+
+  <hr class="divider" />
+
+  <div class="fight-history-title">
+    <span class="t-en">Previous seasons</span>
+    <span class="t-fr">Saisons précédentes</span>
+    <span class="t-kr">Sezon anvan yo</span>
+    <span class="t-es">Temporadas anteriores</span>
   </div>
+  <div id="fight-history-list"></div>
 
   <hr class="divider" />
 

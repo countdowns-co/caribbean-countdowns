@@ -34,9 +34,6 @@ applyLang();
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-var _cfg = document.getElementById("ngo-config");
-var PERIOD_END   = new Date(_cfg.dataset.periodEnd).getTime();
-
 var STATS_URL = "/api/ngo-stats";
 
 // Fallback values used while the Worker responds or if it fails
@@ -46,7 +43,13 @@ var communityContributors = 0;
 var MAX_USER_TOTAL   = 25;   // max % a single user can contribute in total
 var MAX_PER_SESSION  = 5;    // max % per quiz session (perfect score)
 
-// ─── Gauge ───────────────────────────────────────────────────────────────────
+// ─── Quiz → ngo-stats bridge ───────────────────────────────────────────────
+// The quiz score still feeds ngo-stats' communityProgress (0-100%) — that's
+// what workers/ngo-fight's checkQuizTrigger reads to decide whether to extend
+// or force-close the current fight season (see the Fight module below). There
+// is no visible gauge for it anymore (the old .gauge-wrap markup is gone,
+// replaced by the Fight block) — this is purely the data pipeline plus the
+// 100%-threshold trigger, decoupled from any rendering.
 
 function getUserContribution() {
   return Math.min(parseFloat(localStorage.getItem("ngo_contribution") || "0"), MAX_USER_TOTAL);
@@ -63,52 +66,10 @@ function getTotalProgress() {
   return Math.min(communityProgress + getUserContribution(), 100);
 }
 
-function renderGauge(pct, contributors) {
-  var fill = document.getElementById("gauge-fill");
-  var label = document.getElementById("gauge-pct");
-  var contribEl = document.getElementById("contributors-count");
-  if (!fill || !label) return;
-
-  var rounded = Math.min(Math.round(pct * 10) / 10, 100);
-  fill.style.width = rounded + "%";
-  label.textContent = rounded + "%";
-
-  if (contributors !== undefined) {
-    var c = contributors;
-    var contribTexts = c > 0
-      ? {
-          en: c.toLocaleString() + " contributors",
-          fr: c.toLocaleString() + " contributeurs",
-          kr: c.toLocaleString() + " kontribistè",
-          es: c.toLocaleString() + " contribuyentes"
-        }
-      : {
-          en: "Be the first to contribute!",
-          fr: "Soyez le premier à contribuer !",
-          kr: "Se premye pou kontribyé !",
-          es: "¡Sé el primero en contribuir!"
-        };
-    contribEl.textContent = contribTexts[lang] || contribTexts.en;
-  }
-
+function checkMissionThreshold(pct) {
   if (pct >= 100) {
     showMissionAccomplished();
   }
-}
-
-function animateGaugeTo(targetPct, contributors) {
-  var startPct = parseFloat(document.getElementById("gauge-fill").style.width) || 0;
-  var current = startPct;
-  var step = function() {
-    current = Math.min(current + (targetPct - current) * 0.08 + 0.2, targetPct);
-    renderGauge(current, contributors);
-    if (current < targetPct - 0.1) {
-      requestAnimationFrame(step);
-    } else {
-      renderGauge(targetPct, contributors);
-    }
-  };
-  requestAnimationFrame(step);
 }
 
 // ─── Worker API ──────────────────────────────────────────────────────────────
@@ -119,7 +80,7 @@ function fetchStats() {
     .then(function(data) {
       communityProgress = data.communityProgress !== null ? data.communityProgress : communityProgress;
       communityContributors = data.contributors !== null ? data.contributors : communityContributors;
-      animateGaugeTo(getTotalProgress(), communityContributors);
+      checkMissionThreshold(getTotalProgress());
     })
     .catch(function() {
       // Worker unreachable — keep fallback values already displayed
@@ -142,43 +103,139 @@ function postContribution(pct) {
     });
 }
 
+// ─── Fight ───────────────────────────────────────────────────────────────────
 
-// ─── Countdown ───────────────────────────────────────────────────────────────
+var FIGHT_STATUS_URL = "/api/ngo-fight/status";
+var FIGHT_SUBMIT_URL = "/api/ngo-fight/submit";
+var fightSeasonEnd = null;
 
-function pad(n) { return n < 10 ? "0" + n : "" + n; }
+function formatFightEuro(n) {
+  var rounded = Math.round(n);
+  return "€" + rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
-function updateCountdown() {
-  var diff = PERIOD_END - Date.now();
-  var el = {
-    d: document.getElementById("cd-days"),
-    h: document.getElementById("cd-hours"),
-    m: document.getElementById("cd-mins"),
-    s: document.getElementById("cd-secs")
-  };
-  if (!el.d) return;
+function renderFight(season) {
+  fightSeasonEnd = season.end;
 
-  if (diff <= 0) {
-    el.d.textContent = "00";
-    el.h.textContent = "00";
-    el.m.textContent = "00";
-    el.s.textContent = "00";
-    return;
-  }
+  // Worker only tracks seasonId (an epoch timestamp, unique but not sequential) —
+  // history.length + 1 gives the human-readable "Season N" display number.
+  var seasonNum = (season.history || []).length + 1;
+  ["fight-season-num", "fight-season-num-fr", "fight-season-num-kr", "fight-season-num-es"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = seasonNum;
+  });
 
+  var companyPct = season.goalCompany > 0 ? Math.min((season.companyTotal / season.goalCompany) * 100, 100) : 0;
+  var communityPct = season.goalCommunity > 0 ? Math.min((season.communityTotal / season.goalCommunity) * 100, 100) : 0;
+
+  document.getElementById("fight-company-amount").textContent = formatFightEuro(season.companyTotal);
+  document.getElementById("fight-company-goal").textContent = formatFightEuro(season.goalCompany);
+  document.getElementById("fight-company-fill").style.width = companyPct + "%";
+  document.getElementById("fight-company-contributors").textContent = season.companyContributors;
+
+  document.getElementById("fight-community-amount").textContent = formatFightEuro(season.communityTotal);
+  document.getElementById("fight-community-goal").textContent = formatFightEuro(season.goalCommunity);
+  document.getElementById("fight-community-fill").style.width = communityPct + "%";
+  document.getElementById("fight-community-contributors").textContent = season.communityContributors;
+
+  document.getElementById("fight-company-card").classList.toggle("leading", season.companyTotal > season.communityTotal);
+  document.getElementById("fight-community-card").classList.toggle("leading", season.communityTotal > season.companyTotal);
+
+  renderFightHistory(season.history || []);
+}
+
+function renderFightHistory(history) {
+  var el = document.getElementById("fight-history-list");
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+
+  // history entries come straight from workers/ngo-fight's closeSeasonEntry() — only
+  // numbers and a fixed 3-value enum (winner), never user-submitted text (name/note/
+  // siret aren't part of this shape) — but built via textContent/DOM methods anyway,
+  // not innerHTML, since no HTML formatting is actually needed here.
+  history.slice().reverse().forEach(function(h, i) {
+    var winnerLabel = h.winner === "tie" ? "Égalité" : (h.winner === "company" ? "Entreprises" : "Communauté");
+    var row = document.createElement("div");
+    row.className = "fight-history-row";
+
+    var seasonSpan = document.createElement("span");
+    seasonSpan.textContent = "Saison " + (history.length - i);
+
+    var resultSpan = document.createElement("span");
+    resultSpan.textContent = winnerLabel + " — " + formatFightEuro(h.companyFinal) + " vs " + formatFightEuro(h.communityFinal);
+
+    row.appendChild(seasonSpan);
+    row.appendChild(resultSpan);
+    el.appendChild(row);
+  });
+}
+
+function updateFightCountdown() {
+  var el = document.getElementById("fight-countdown");
+  if (!el || !fightSeasonEnd) return;
+  var diff = fightSeasonEnd - Date.now();
+  if (diff <= 0) { el.textContent = "00j 00h 00m"; return; }
   var total = Math.floor(diff / 1000);
   var d = Math.floor(total / 86400);
   var h = Math.floor((total % 86400) / 3600);
   var m = Math.floor((total % 3600) / 60);
-  var s = total % 60;
-
-  el.d.textContent = d;
-  el.h.textContent = pad(h);
-  el.m.textContent = pad(m);
-  el.s.textContent = pad(s);
+  el.textContent = d + "j " + (h < 10 ? "0" + h : h) + "h " + (m < 10 ? "0" + m : m) + "m";
 }
 
-updateCountdown();
-setInterval(updateCountdown, 1000);
+function fetchFightStatus() {
+  fetch(FIGHT_STATUS_URL)
+    .then(function(r) { return r.json(); })
+    .then(renderFight)
+    .catch(function() { /* Worker unreachable — keep last-known rendered values */ });
+}
+
+function submitFightEntry(payload) {
+  var msg = document.getElementById("fight-form-msg");
+  return fetch(FIGHT_SUBMIT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+    .then(function(r) { if (!r.ok) throw new Error("submit failed"); return r.json(); })
+    .then(function() {
+      if (msg) {
+        msg.textContent = "Merci — votre contribution est en cours de vérification.";
+        msg.className = "fight-form-msg visible";
+      }
+      document.getElementById("fight-form").reset();
+    })
+    .catch(function() {
+      if (msg) {
+        msg.textContent = "Erreur d'envoi — réessayez.";
+        msg.className = "fight-form-msg visible error";
+      }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  fetchFightStatus();
+  setInterval(updateFightCountdown, 60000);
+  setInterval(fetchFightStatus, 120000); // picks up admin approvals / quiz extensions without a page reload
+
+  var btnToggle = document.getElementById("btn-report-contribution");
+  var form = document.getElementById("fight-form");
+  if (btnToggle && form) {
+    btnToggle.addEventListener("click", function() { form.classList.toggle("visible"); });
+  }
+  if (form) {
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var side = form.querySelector('input[name="side"]:checked');
+      submitFightEntry({
+        side: side ? side.value : "community",
+        amount: parseFloat(document.getElementById("fight-amount").value),
+        name: document.getElementById("fight-name").value,
+        siret: document.getElementById("fight-siret").value,
+        note: document.getElementById("fight-note").value
+      });
+    });
+  }
+});
 
 // ─── Quiz data ───────────────────────────────────────────────────────────────
 // Edit questions in src/data/quiz-questions.json — no JS changes needed.
@@ -463,7 +520,7 @@ function showResult() {
       es: "+" + pct.toFixed(1) + "% añadidos al marcador colectivo → ahora en " + newTotal.toFixed(1) + "%"
     };
     document.getElementById("result-contribution").textContent = contributionTexts[lang] || contributionTexts.en;
-    animateGaugeTo(newTotal, communityContributors);
+    checkMissionThreshold(newTotal);
   });
 
   applyLang();
@@ -504,7 +561,7 @@ document.getElementById("btn-replay").addEventListener("click", function() {
 
 // Show local estimate immediately, then update with real Worker data
 setTimeout(function() {
-  animateGaugeTo(getTotalProgress(), communityContributors);
+  checkMissionThreshold(getTotalProgress());
   fetchStats();
 }, 400);
 
