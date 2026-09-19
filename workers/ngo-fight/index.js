@@ -17,8 +17,8 @@
  */
 
 const NGO_ID = "lassomer";
-const GOAL_COMPANY = 5000;
-const GOAL_COMMUNITY = 5000;
+const GOAL_COMPANY = 1000;
+const GOAL_COMMUNITY = 500;
 const SEASON_DAYS = 30;
 const EXTENSION_DAYS = 7;
 const MAX_EXTENSIONS = 2;
