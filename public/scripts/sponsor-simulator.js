@@ -1,12 +1,16 @@
 /* sponsor-simulator.js — caribbean.countdowns.co/sponsor
- * French mécénat d'entreprise: 60% tax reduction, capped at €20,000/year
- * or 0.5% of revenue if higher (not modeled here — see disclaimer).
- * Source: economie.gouv.fr (see page disclaimer for the link). */
-var RATE = 0.6;
+ * Rate is adjustable (defaults to 60%, French mécénat d'entreprise).
+ * Reduction cap (€20,000/year or 0.5% of revenue) not modeled here —
+ * see page disclaimer. Source: economie.gouv.fr (see disclaimer for link). */
+var DEFAULT_RATE = 60;
 
 function formatEuro(n) {
   var rounded = Math.round(n);
   return "€" + rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatRate(r) {
+  return (Math.round(r * 10) / 10).toString();
 }
 
 function tierForAmount(amount) {
@@ -16,13 +20,18 @@ function tierForAmount(amount) {
 }
 
 function updateSimulator() {
-  var input = document.getElementById("donationAmount");
-  if (!input) return;
+  var amountInput = document.getElementById("donationAmount");
+  var rateInput = document.getElementById("reductionRate");
+  if (!amountInput || !rateInput) return;
 
-  var amount = parseFloat(input.value);
+  var amount = parseFloat(amountInput.value);
   if (!isFinite(amount) || amount < 0) amount = 0;
 
-  var reduction = amount * RATE;
+  var rate = parseFloat(rateInput.value);
+  if (!isFinite(rate) || rate < 0) rate = DEFAULT_RATE;
+  if (rate > 100) rate = 100;
+
+  var reduction = amount * (rate / 100);
   var netCost = amount - reduction;
 
   var elReduction = document.getElementById("resultReduction");
@@ -32,6 +41,10 @@ function updateSimulator() {
   if (elNetCost) elNetCost.textContent = formatEuro(netCost);
   if (elNgoReceives) elNgoReceives.textContent = formatEuro(amount);
 
+  document.querySelectorAll(".rate-display").forEach(function (el) {
+    el.textContent = formatRate(rate);
+  });
+
   var tier = tierForAmount(amount);
   document.querySelectorAll(".simulator-tier-panel").forEach(function (panel) {
     panel.classList.toggle("active", panel.getAttribute("data-tier") === tier);
@@ -39,7 +52,9 @@ function updateSimulator() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  var input = document.getElementById("donationAmount");
-  if (input) input.addEventListener("input", updateSimulator);
+  var amountInput = document.getElementById("donationAmount");
+  var rateInput = document.getElementById("reductionRate");
+  if (amountInput) amountInput.addEventListener("input", updateSimulator);
+  if (rateInput) rateInput.addEventListener("input", updateSimulator);
   updateSimulator();
 });
