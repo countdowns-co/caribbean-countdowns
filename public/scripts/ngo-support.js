@@ -83,7 +83,7 @@ function renderFightHistory(history) {
     row.className = "fight-history-row";
 
     var seasonSpan = document.createElement("span");
-    seasonSpan.textContent = "Saison " + (history.length - i);
+    seasonSpan.textContent = "Projet " + (history.length - i);
 
     var resultSpan = document.createElement("span");
     resultSpan.textContent = winnerLabel + " — " + formatFightEuro(h.companyFinal) + " vs " + formatFightEuro(h.communityFinal);
