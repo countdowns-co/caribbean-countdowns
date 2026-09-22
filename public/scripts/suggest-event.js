@@ -108,29 +108,6 @@ var STEPS = [
   { id:"city",        required:false, type:"text",
     question:{ en:"Which city or area?",                  fr:"Quelle ville ou zone ?",                  kr:"Ki vil oswa zòn ?",                   es:"¿Qué ciudad o zona?" },
     hint:    { en:"e.g. Le Moule (blank if island-wide)", fr:"ex. Le Moule (vide si à l'échelle de l'île)", kr:"egz. Le Moule (kite vid si nan tout zile a)", es:"ej. Le Moule (en blanco si es en toda la isla)" } },
-  { id:"edition",     required:false, type:"edition-range",
-    question:{ en:"Is this a recurring event?",           fr:"Est-ce un événement récurrent ?",         kr:"Èske se yon évènman rekiran ?",       es:"¿Es un evento recurrente?" },
-    hint:    { en:"Leave blank if this is the first edition", fr:"Laissez vide si c'est la première édition", kr:"Kite vid si se premye edisyon an", es:"Deja en blanco si es la primera edición" } },
-  { id:"attendance",  required:false, type:"select",
-    options:["under_200","200_1000","1000_plus"],
-    optionLabels:{
-      "under_200":  { en:"Under 200",   fr:"Moins de 200", kr:"Mwens pase 200", es:"Menos de 200" },
-      "200_1000":   { en:"200 – 1,000", fr:"200 – 1 000",  kr:"200 – 1 000",    es:"200 – 1.000" },
-      "1000_plus":  { en:"1,000+",      fr:"1 000+",       kr:"1 000+",         es:"1.000+" },
-    },
-    question:{ en:"Estimated public attendance?",         fr:"Fréquentation publique estimée ?",        kr:"Estimasyon kantite piblik ?",         es:"¿Asistencia de público estimada?" },
-    hint:    { en:"Visitors/spectators, not participants. Leave blank if unsure.", fr:"Visiteurs/spectateurs, pas les participants. Laissez vide si incertain.", kr:"Vizitè/spektatè, pa patisipan yo. Kite vid si ou pa sèten.", es:"Visitantes/espectadores, no participantes. Deja en blanco si no estás seguro." } },
-  { id:"organizer",   required:false, type:"select",
-    options:["association","company","municipality","media","individual"],
-    optionLabels:{
-      "association":  { en:"Association / NGO",           fr:"Association / ONG",            kr:"Asosyasyon / ONG",        es:"Asociación / ONG" },
-      "company":       { en:"Company",                     fr:"Entreprise",                    kr:"Konpayi",                 es:"Empresa" },
-      "municipality":  { en:"Municipality / government",   fr:"Municipalité / collectivité",   kr:"Minisipalite / gouvènman", es:"Municipio / gobierno" },
-      "media":         { en:"Media outlet",                fr:"Média",                          kr:"Medya",                   es:"Medio de comunicación" },
-      "individual":    { en:"Informal / individual",       fr:"Informel / particulier",        kr:"Enfòmèl / patikilye",     es:"Informal / particular" },
-    },
-    question:{ en:"Who organizes this event?",             fr:"Qui organise cet événement ?",            kr:"Ki moun ki òganize évènman sa a ?",   es:"¿Quién organiza este evento?" },
-    hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
   { id:"type",        required:true,  type:"select",
     options:["music festival","carnival","sailing race","art","sport","other"],
     optionLabels:{
@@ -152,15 +129,12 @@ var STEPS = [
   { id:"tickets",     required:false, type:"tickets",
     question:{ en:"Where can people buy tickets?",        fr:"Où peut-on acheter des billets ?",        kr:"Ki kote moun ka achte tikè ?",         es:"¿Dónde puede la gente comprar entradas?" },
     hint:    { en:"Select platforms and paste the URL. Leave all blank if free.", fr:"Sélectionnez les plateformes et collez l'URL. Tout vide = gratuit.", kr:"Chwazi platfòm yo epi kole URL. Tout vide = gratis.", es:"Selecciona plataformas y pega la URL. Todo vacío = gratuito." } },
-  { id:"priceRange",  required:false, type:"text",
-    question:{ en:"What's the ticket price range?",       fr:"Quelle est la fourchette de prix des billets ?", kr:"Ki fouchèt pri tikè yo ?",       es:"¿Cuál es el rango de precios de las entradas?" },
-    hint:    { en:"e.g. €25-60, or \"Free\"",             fr:"ex. 25-60 €, ou « Gratuit »",             kr:"egz. €25-60, oswa \"Gratis\"",       es:"ej. €25-60, o \"Gratis\"" } },
   { id:"eco",         required:false, type:"eco",
     question:{ en:"Does this festival have any of these practices?",          fr:"Ce festival applique-t-il certaines de ces pratiques ?",       kr:"Èske fèstival sa a gen okenn nan pratik sa yo ?",          es:"¿Este festival tiene alguna de estas prácticas?" },
     hint:    { en:"Select only what you know for certain — skip if unsure",   fr:"Cochez uniquement ce que vous savez avec certitude",           kr:"Chwazi sèlman sa ou konnen avèk sèten — pase si pa sèten", es:"Selecciona solo lo que sepas con certeza — omite si no estás seguro" } },
   { id:"notes",       required:false, type:"textarea",
     question:{ en:"Anything else to tell us?",            fr:"Autre chose à nous dire ?",               kr:"Eske gen lòt bagay ou vle di nou ?",   es:"¿Algo más que quieras decirnos?" },
-    hint:    { en:"Contact, sustainability page URL... (not included in the listing)", fr:"Contact, URL page durabilité... (non inclus dans la fiche)", kr:"Contact, URL paj dirab... (pa enkli nan lis la)", es:"Contacto, URL página sostenibilidad... (no se incluye en el listado)" } },
+    hint:    { en:"Edition number, contact, sustainability page URL... (not included in the listing)", fr:"Numéro d'édition, contact, URL page durabilité... (non inclus dans la fiche)", kr:"Nimewo edisyon, contact, URL paj dirab... (pa enkli nan lis la)", es:"Número de edición, contacto, URL página sostenibilidad... (no se incluye en el listado)" } },
 ];
 
 var currentStep = 0;
@@ -169,7 +143,7 @@ var state = { details: [], tickets: [], ecoSignals: [] };
 function applyLang() {
   LANGS.forEach(function(l) {
     document.querySelectorAll(".t-" + l).forEach(function(el) {
-      el.style.display = l === lang ? "" : "none";
+      el.style.display = l === lang ? (el.tagName === "DIV" || el.tagName === "P" ? "block" : "inline") : "none";
     });
   });
   document.documentElement.lang = lang;
@@ -212,8 +186,7 @@ function isStepValid(n) {
 
 function hasValue(n) {
   var step = STEPS[n];
-  if (step.type === "date-range")   return !!(state.startDate || state.endDate);
-  if (step.type === "edition-range") return !!(state.edition || state.firstYear);
+  if (step.type === "date-range")  return !!(state.startDate || state.endDate);
   if (step.type === "multiselect") return state.details.length > 0;
   if (step.type === "tickets")     return state.tickets.length > 0;
   if (step.type === "eco")         return state.ecoSignals.length > 0;
@@ -259,16 +232,6 @@ function renderStep(n) {
           + '<input type="date" id="startDate" class="step-input" aria-label="' + escHtml(sdLabel[lang] || sdLabel.en) + '" value="' + escHtml(sd) + '" /></div>'
           + '<div><div class="date-label t-en">End date</div><div class="date-label t-fr">Date de fin</div><div class="date-label t-kr">Dat lafen</div><div class="date-label t-es">Fecha de fin</div>'
           + '<input type="date" id="endDate" class="step-input" aria-label="' + escHtml(edLabel[lang] || edLabel.en) + '" value="' + escHtml(ed) + '" /></div>'
-          + '</div>';
-  } else if (step.type === "edition-range") {
-    var edNum = state.edition || "", fyNum = state.firstYear || "";
-    var editionLabel  = { en: "Edition number", fr: "Numéro d'édition", kr: "Nimewo edisyon", es: "Número de edición" };
-    var firstYearLabel = { en: "Year of first edition", fr: "Année de la première édition", kr: "Ane premye edisyon an", es: "Año de la primera edición" };
-    html += '<div class="date-row">'
-          + '<div><div class="date-label t-en">Edition number</div><div class="date-label t-fr">Numéro d\'édition</div><div class="date-label t-kr">Nimewo edisyon</div><div class="date-label t-es">Número de edición</div>'
-          + '<input type="number" min="1" max="999" id="editionNum" class="step-input" aria-label="' + escHtml(editionLabel[lang] || editionLabel.en) + '" value="' + escHtml(edNum) + '" /></div>'
-          + '<div><div class="date-label t-en">Year of first edition</div><div class="date-label t-fr">Année de la première édition</div><div class="date-label t-kr">Ane premye edisyon an</div><div class="date-label t-es">Año de la primera edición</div>'
-          + '<input type="number" min="1900" max="2100" id="firstYearNum" class="step-input" aria-label="' + escHtml(firstYearLabel[lang] || firstYearLabel.en) + '" value="' + escHtml(fyNum) + '" /></div>'
           + '</div>';
   } else if (step.type === "select") {
     var current = state[step.id] || "";
@@ -316,11 +279,6 @@ function renderStep(n) {
     var edEl = container.querySelector("#endDate");
     if (sdEl) sdEl.addEventListener("change", function() { state.startDate = sdEl.value; updateNav(n); });
     if (edEl) edEl.addEventListener("change", function() { state.endDate   = edEl.value; updateNav(n); });
-  } else if (step.type === "edition-range") {
-    var edNumEl = container.querySelector("#editionNum");
-    var fyNumEl = container.querySelector("#firstYearNum");
-    if (edNumEl) edNumEl.addEventListener("input", function() { state.edition   = edNumEl.value; updateNav(n); });
-    if (fyNumEl) fyNumEl.addEventListener("input", function() { state.firstYear = fyNumEl.value; updateNav(n); });
   } else if (step.type === "select") {
     var selEl = container.querySelector("#stepInput");
     if (selEl) {
@@ -399,10 +357,6 @@ function saveStep(n) {
     var sd = document.getElementById("startDate"), ed = document.getElementById("endDate");
     if (sd) state.startDate = sd.value;
     if (ed) state.endDate   = ed.value || (sd ? sd.value : "");
-  } else if (step.type === "edition-range") {
-    var edNum = document.getElementById("editionNum"), fyNum = document.getElementById("firstYearNum");
-    if (edNum) state.edition   = edNum.value.trim();
-    if (fyNum) state.firstYear = fyNum.value.trim();
   }
   // multiselect, tickets, eco update state in real-time via event listeners
 }
@@ -422,12 +376,7 @@ function buildPayload() {
     image:       state.image       || "",
     tickets:     state.tickets.filter(function(t) { return t.url; }),
     eco:         state.ecoSignals.slice(),
-    notes:       state.notes       || "",
-    edition:     state.edition     || "",
-    firstYear:   state.firstYear   || "",
-    attendance:  state.attendance  || "",
-    organizer:   state.organizer   || "",
-    priceRange:  state.priceRange  || ""
+    notes:       state.notes       || ""
   };
 }
 

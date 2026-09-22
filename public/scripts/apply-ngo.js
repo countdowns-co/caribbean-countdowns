@@ -103,7 +103,7 @@ var state = { actions: [""] };
 function applyLang() {
   LANGS.forEach(function(l) {
     document.querySelectorAll(".t-" + l).forEach(function(el) {
-      el.style.display = l === lang ? "" : "none";
+      el.style.display = l === lang ? (el.tagName === "DIV" || el.tagName === "P" ? "block" : "inline") : "none";
     });
   });
   document.documentElement.lang = lang;
