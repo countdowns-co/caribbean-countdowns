@@ -1,6 +1,7 @@
 name = "visits"
 main = "index.js"
 compatibility_date = "2025-01-01"
+workers_dev = false
 
 [[kv_namespaces]]
 binding = "VISITS_KV"

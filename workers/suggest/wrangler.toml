@@ -1,6 +1,7 @@
 name = "suggest"
 main = "index.js"
 compatibility_date = "2025-01-01"
+workers_dev = false
 
 [[r2_buckets]]
 binding = "CARIBBEAN_DATA"
