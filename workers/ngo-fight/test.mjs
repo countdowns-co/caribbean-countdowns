@@ -53,42 +53,42 @@ test("GET /status returns the same season on a second call (no re-init)", async 
   assert.equal(first.seasonId, second.seasonId);
 });
 
-test("quiz trigger: <100% progress does nothing", async () => {
-  const env = makeEnv({ ngoStats: { communityProgress: 80, contributors: 3 } });
+test("quiz trigger: <25 passing rounds does nothing", async () => {
+  const env = makeEnv({ ngoStats: { passingRounds: 18 } });
   const before = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json();
   const after = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json();
   assert.equal(after.end, before.end);
   assert.equal(after.extensionsUsed, 0);
 });
 
-// checkQuizTrigger runs on every /status call and resets communityProgress to 0 once
-// consumed (spec: each extension has to be earned fresh) — so simulating "the quiz
-// gauge filled again" between calls means re-seeding env.NGO_KV, not reusing one
-// static mock across multiple fetches.
+// checkQuizTrigger runs on every /status call and resets passingRounds to 0 once
+// consumed (spec: each extension has to be earned fresh) — so simulating "the
+// community hit 25 passing rounds again" between calls means re-seeding env.NGO_KV,
+// not reusing one static mock across multiple fetches.
 function fillQuizGauge(env) {
-  env.NGO_KV = makeKV({ stats: JSON.stringify({ communityProgress: 100, contributors: 20 }) });
+  env.NGO_KV = makeKV({ stats: JSON.stringify({ passingRounds: 25 }) });
 }
 
-test("quiz trigger: 100% progress extends season by 7 days, extensionsUsed 0→1", async () => {
+test("quiz trigger: 25 passing rounds extends season by 7 days, extensionsUsed 0→1", async () => {
   const env = makeEnv(); // no NGO_KV bound yet — clean baseline, no trigger possible
   const before = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json();
-  fillQuizGauge(env); // simulate the quiz just reaching 100%
+  fillQuizGauge(env); // simulate the community just hitting 25 passing rounds
   const after = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json();
   assert.equal(after.end - before.end, 7 * 86400000);
   assert.equal(after.extensionsUsed, 1);
 });
 
-test("quiz trigger: after 2 extensions, a 3rd 100% closes season to history and starts a new one", async () => {
+test("quiz trigger: after 2 extensions, a 3rd 25-round hit closes season to history and starts a new one", async () => {
   const env = makeEnv();
   fillQuizGauge(env);
   await worker.fetch(get("/api/ngo-fight/status"), env); // extension 1 (0→1)
 
-  fillQuizGauge(env); // community redoes the quiz
+  fillQuizGauge(env); // community hits 25 again
   const beforeThird = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json(); // extension 2 (1→2)
   assert.equal(beforeThird.extensionsUsed, 2);
   const originalSeasonId = beforeThird.seasonId;
 
-  fillQuizGauge(env); // community redoes the quiz a 3rd time
+  fillQuizGauge(env); // community hits 25 a 3rd time
   const after = await (await worker.fetch(get("/api/ngo-fight/status"), env)).json(); // forced close
   assert.notEqual(after.seasonId, originalSeasonId);
   assert.equal(after.extensionsUsed, 0);

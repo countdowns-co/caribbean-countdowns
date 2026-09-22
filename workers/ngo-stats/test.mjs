@@ -29,19 +29,32 @@ test("GET returns defaults when no stats stored", async () => {
     new Request("https://caribbean.countdowns.co/api/ngo-stats"),
     makeEnv()
   );
-  assert.deepEqual(await res.json(), { communityProgress: 0, contributors: 0 });
+  assert.deepEqual(await res.json(), { passingRounds: 0 });
 });
 
-test("communityProgress can reach 100, not capped at 94", async () => {
-  const env = makeEnv({ communityProgress: 97, contributors: 5 });
-  const res = await worker.fetch(post({ contribution: 5 }), env);
-  const body = await res.json();
-  assert.equal(body.communityProgress, 100);
+test("POST a passing round (3/5) increments passingRounds by 1", async () => {
+  const env = makeEnv({ passingRounds: 10 });
+  const res = await worker.fetch(post({ score: 3, total: 5 }), env);
+  assert.equal((await res.json()).passingRounds, 11);
 });
 
-test("communityProgress still caps at 100 (upper bound preserved)", async () => {
-  const env = makeEnv({ communityProgress: 99, contributors: 5 });
-  const res = await worker.fetch(post({ contribution: 5 }), env);
-  const body = await res.json();
-  assert.equal(body.communityProgress, 100);
+test("POST a failing round (2/5) does not increment passingRounds", async () => {
+  const env = makeEnv({ passingRounds: 10 });
+  const res = await worker.fetch(post({ score: 2, total: 5 }), env);
+  assert.equal((await res.json()).passingRounds, 10);
+});
+
+test("passingRounds caps at 25, does not overflow", async () => {
+  const env = makeEnv({ passingRounds: 25 });
+  const res = await worker.fetch(post({ score: 5, total: 5 }), env);
+  assert.equal((await res.json()).passingRounds, 25);
+});
+
+test("GET normalizes a legacy-shaped stored value instead of echoing it", async () => {
+  const env = makeEnv({ communityProgress: 87.5, contributors: 42 });
+  const res = await worker.fetch(
+    new Request("https://caribbean.countdowns.co/api/ngo-stats"),
+    env
+  );
+  assert.deepEqual(await res.json(), { passingRounds: 0 });
 });
