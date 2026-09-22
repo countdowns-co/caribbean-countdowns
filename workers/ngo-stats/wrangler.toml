@@ -1,6 +1,7 @@
 name = "ngo-stats"
 main = "index.js"
 compatibility_date = "2025-01-01"
+workers_dev = false
 
 [[kv_namespaces]]
 binding = "NGO_KV"

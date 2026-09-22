@@ -4,7 +4,7 @@ compatibility_date = "2025-01-01"
 
 [[kv_namespaces]]
 binding = "FIGHT_KV"
-id = "REPLACE_WITH_REAL_ID"  # npx wrangler kv namespace create FIGHT_KV
+id = "178e304358ec4bf8ab03c69b38ec6f3a"  # npx wrangler kv namespace create FIGHT_KV
 
 # Read-only cross-Worker binding — same NGO_KV namespace ngo-stats already writes to.
 # Copy the id from workers/ngo-stats/wrangler.toml's own NGO_KV binding.
