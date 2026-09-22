@@ -84,12 +84,15 @@ function closeSeasonEntry(season) {
 }
 
 // Lazily checked from both GET /status and POST /approve (see plan Global Constraints
-// for why not approve-only). No-ops if NGO_KV isn't bound or progress hasn't hit 100.
+// for why not approve-only). No-ops if NGO_KV isn't bound or the community hasn't
+// reached QUIZ_TRIGGER_THRESHOLD passing rounds yet.
+const QUIZ_TRIGGER_THRESHOLD = 25; // must match workers/ngo-stats' own copy of this number
+
 async function checkQuizTrigger(env, season) {
   if (!env.NGO_KV) return season;
   const raw = await env.NGO_KV.get("stats");
-  const stats = raw ? JSON.parse(raw) : { communityProgress: 0 };
-  if (stats.communityProgress < 100) return season;
+  const stats = raw ? JSON.parse(raw) : { passingRounds: 0 };
+  if (stats.passingRounds < QUIZ_TRIGGER_THRESHOLD) return season;
 
   if (season.extensionsUsed < MAX_EXTENSIONS) {
     season.end += EXTENSION_DAYS * 86400000;
@@ -98,7 +101,7 @@ async function checkQuizTrigger(env, season) {
     await appendHistory(env, closeSeasonEntry(season));
     season = newSeason();
   }
-  await env.NGO_KV.put("stats", JSON.stringify({ ...stats, communityProgress: 0 }));
+  await env.NGO_KV.put("stats", JSON.stringify({ ...stats, passingRounds: 0 }));
   await putSeason(env, season);
   return season;
 }

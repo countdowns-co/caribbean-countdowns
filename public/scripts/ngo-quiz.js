@@ -35,36 +35,20 @@ applyLang();
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 var STATS_URL = "/api/ngo-stats";
+var QUIZ_TRIGGER_THRESHOLD = 25; // must match workers/ngo-stats' TRIGGER_THRESHOLD
 
-// Fallback values used while the Worker responds or if it fails
-var communityProgress = 0;
-var communityContributors = 0;
-
-var MAX_USER_TOTAL   = 25;   // max % a single user can contribute in total
-var MAX_PER_SESSION  = 5;    // max % per quiz session (perfect score)
+// Fallback value used while the Worker responds or if it fails
+var passingRounds = 0;
 
 // ─── Quiz → ngo-stats bridge ───────────────────────────────────────────────
-// The quiz score feeds ngo-stats' communityProgress (0-100%) — that's what
-// workers/ngo-fight's checkQuizTrigger reads to decide whether to extend or
-// force-close the current fight season (see /ngo-support/'s ngo-support.js).
+// Every passing round (score/total >= 3/5) increments a shared, community-wide
+// counter in ngo-stats — that's what workers/ngo-fight's checkQuizTrigger reads
+// to decide whether to extend or force-close the current fight season (see
+// /ngo-support/'s ngo-support.js). No per-user local tracking anymore: passing is
+// a plain per-round server-side yes/no, nothing to blend with a personal total.
 
-function getUserContribution() {
-  return Math.min(parseFloat(localStorage.getItem("ngo_contribution") || "0"), MAX_USER_TOTAL);
-}
-
-function addUserContribution(pct) {
-  var current = getUserContribution();
-  var next = Math.min(current + pct, MAX_USER_TOTAL);
-  localStorage.setItem("ngo_contribution", next.toFixed(2));
-  return next - current;
-}
-
-function getTotalProgress() {
-  return Math.min(communityProgress + getUserContribution(), 100);
-}
-
-function checkMissionThreshold(pct) {
-  if (pct >= 100) {
+function checkMissionThreshold(rounds) {
+  if (rounds >= QUIZ_TRIGGER_THRESHOLD) {
     showMissionAccomplished();
   }
 }
@@ -75,28 +59,28 @@ function fetchStats() {
   fetch(STATS_URL)
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      communityProgress = data.communityProgress !== null ? data.communityProgress : communityProgress;
-      communityContributors = data.contributors !== null ? data.contributors : communityContributors;
-      checkMissionThreshold(getTotalProgress());
+      passingRounds = typeof data.passingRounds === "number" ? data.passingRounds : passingRounds;
+      checkMissionThreshold(passingRounds);
     })
     .catch(function() {
-      // Worker unreachable — keep fallback values already displayed
+      // Worker unreachable — keep fallback value already displayed
     });
 }
 
-function postContribution(pct) {
+function postRoundResult(score, total) {
   return fetch(STATS_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contribution: pct })
+    body: JSON.stringify({ score: score, total: total })
   })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      communityProgress = data.communityProgress !== null ? data.communityProgress : communityProgress;
-      communityContributors = data.contributors !== null ? data.contributors : communityContributors;
+      passingRounds = typeof data.passingRounds === "number" ? data.passingRounds : passingRounds;
+      return passingRounds;
     })
     .catch(function() {
       // Worker unreachable — local state still updated
+      return passingRounds;
     });
 }
 
@@ -159,6 +143,13 @@ var quizState = {
 
 function startQuiz() {
   if (getSessionCount() >= MAX_SESSIONS) return;
+
+  // Quiz auto-starts on page load (see Init below) — the "Take the quiz" button
+  // is now redundant once a session actually begins. Hidden here rather than in
+  // the early-return above so a maxed-out visitor still sees the disabled button
+  // + "Quiz completed" message from updateQuizButton().
+  var quizCta = document.querySelector(".quiz-cta");
+  if (quizCta) quizCta.style.display = "none";
 
   var shown = getShownIndices();
   var unseen = shuffle(
@@ -322,9 +313,8 @@ function showResult() {
 
   var score = quizState.score;
   var total = sessionQuestions.length;
-  var pct = Math.round((score / total) * MAX_PER_SESSION * 10) / 10;
+  var passed = score / total >= 0.6; // 3/5 — must match workers/ngo-stats' PASS_RATIO
 
-  addUserContribution(pct);
   saveSessionComplete(sessionCurrentIndices);
 
   var sessionsNow = getSessionCount();
@@ -371,16 +361,22 @@ function showResult() {
 
   updateQuizButton();
 
-  postContribution(pct).then(function() {
-    var newTotal = getTotalProgress();
-    var contributionTexts = {
-      en: "+" + pct.toFixed(1) + "% added to the community gauge → now at " + newTotal.toFixed(1) + "%",
-      fr: "+" + pct.toFixed(1) + "% ajoutés à la jauge collective → maintenant à " + newTotal.toFixed(1) + "%",
-      kr: "+" + pct.toFixed(1) + "% ajoute nan jwaj kominotè a → kounye a " + newTotal.toFixed(1) + "%",
-      es: "+" + pct.toFixed(1) + "% añadidos al marcador colectivo → ahora en " + newTotal.toFixed(1) + "%"
-    };
+  postRoundResult(score, total).then(function(newPassingRounds) {
+    var contributionTexts = passed
+      ? {
+          en: "This round counts! " + newPassingRounds + "/" + QUIZ_TRIGGER_THRESHOLD + " rounds toward the next countdown extension.",
+          fr: "Cette manche compte ! " + newPassingRounds + "/" + QUIZ_TRIGGER_THRESHOLD + " manches avant la prochaine extension du décompte.",
+          kr: "Manche sa a konte ! " + newPassingRounds + "/" + QUIZ_TRIGGER_THRESHOLD + " manche anvan pwochen ekstansyon dekont la.",
+          es: "¡Esta ronda cuenta! " + newPassingRounds + "/" + QUIZ_TRIGGER_THRESHOLD + " rondas para la próxima extensión de la cuenta regresiva."
+        }
+      : {
+          en: "Score 3/5 or higher to help extend the countdown.",
+          fr: "Obtenez 3/5 ou plus pour aider à prolonger le décompte.",
+          kr: "Fè 3/5 oswa plis pou ede pwolonje dekont la.",
+          es: "Obtén 3/5 o más para ayudar a extender la cuenta regresiva."
+        };
     document.getElementById("result-contribution").textContent = contributionTexts[lang] || contributionTexts.en;
-    checkMissionThreshold(newTotal);
+    checkMissionThreshold(newPassingRounds);
   });
 
   applyLang();
@@ -420,8 +416,13 @@ document.getElementById("btn-replay").addEventListener("click", function() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 setTimeout(function() {
-  checkMissionThreshold(getTotalProgress());
+  checkMissionThreshold(passingRounds);
   fetchStats();
 }, 400);
 
 updateQuizButton();
+
+// Auto-start: question 1 is ready the moment the page loads, no click needed.
+// No-ops via the existing session-limit check if this visitor already used all
+// MAX_SESSIONS rounds — updateQuizButton() above already covers that state.
+startQuiz();

@@ -1,14 +1,18 @@
 /* ngo-stats Worker — caribbean.countdowns.co/api/ngo-stats
  * KV binding: NGO_KV
- * GET  → { communityProgress, contributors }
- * POST { contribution: number } → increments stats, returns updated values
+ * GET  → { passingRounds }
+ * POST { score: number, total: number } → increments passingRounds if score/total is a
+ *   passing ratio, returns updated value. Pass/fail is decided here, not trusted from
+ *   the client as a bare boolean.
  */
 
-const DEFAULTS = { communityProgress: 0, contributors: 0 };
+const TRIGGER_THRESHOLD = 25; // must match workers/ngo-fight's own copy of this number
+const PASS_RATIO = 0.6; // 3/5
 
 async function getStats(env) {
   const raw = await env.NGO_KV.get("stats");
-  return raw ? JSON.parse(raw) : { ...DEFAULTS };
+  const parsed = raw ? JSON.parse(raw) : {};
+  return { passingRounds: Number(parsed.passingRounds) || 0 };
 }
 
 async function putStats(env, stats) {
@@ -42,14 +46,14 @@ export default {
         return new Response("Bad request", { status: 400 });
       }
 
-      const contribution = Math.max(0, Math.min(parseFloat(body.contribution) || 0, 5));
-      const stats = await getStats(env);
+      const score = Number(body.score) || 0;
+      const total = Number(body.total) || 1; // avoid div-by-zero; a real total is always 5 today
+      const passed = score / total >= PASS_RATIO;
 
-      stats.contributors += 1;
-      stats.communityProgress = Math.min(
-        parseFloat((stats.communityProgress + contribution).toFixed(2)),
-        100
-      );
+      const stats = await getStats(env);
+      if (passed) {
+        stats.passingRounds = Math.min(stats.passingRounds + 1, TRIGGER_THRESHOLD);
+      }
 
       await putStats(env, stats);
       return Response.json(stats);
