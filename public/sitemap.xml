@@ -24,6 +24,20 @@
   </url>
 
   <url>
+    <loc>https://caribbean.countdowns.co/ngo-quiz/</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://caribbean.countdowns.co/ngo-support/</loc>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
     <loc>https://caribbean.countdowns.co/eco-evaluator/</loc>
     <lastmod>2026-06-27</lastmod>
     <changefreq>monthly</changefreq>
@@ -59,7 +73,7 @@
   </url>
 
   <url>
-    <loc>https://caribbean.countdowns.co/apply-ngo/</loc>
+    <loc>https://caribbean.countdowns.co/ngo-apply/</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

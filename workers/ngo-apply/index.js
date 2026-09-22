@@ -1,5 +1,5 @@
 /* ngo-apply Worker — caribbean.countdowns.co/api/ngo-apply
- * Receives NGO applications from the /apply-ngo wizard, stores them in R2 for review.
+ * Receives NGO applications from the /ngo-apply wizard, stores them in R2 for review.
  * NGO-only: companies never submit data here — they deal directly with the
  * featured NGO. This is how an NGO applies to become that featured NGO.
  * R2 binding: CARIBBEAN_DATA (bucket caribbean-data)
