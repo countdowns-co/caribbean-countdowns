@@ -1,0 +1,419 @@
+---
+import PageFooter from "../components/PageFooter.astro";
+import quizQuestions from "../data/quiz-questions.json";
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Marine Ecology Quiz — L'Asso-Mer — countdowns.co</title>
+  <meta name="description" content="Test your knowledge of Caribbean marine ecosystems with L'Asso-Mer's quiz — no financial contribution needed." />
+  <style>.t-fr,.t-kr,.t-es{display:none}</style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0f0f;
+      color: #e0e0e0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
+    .back-link:hover { color: #999; }
+
+    .lang-group { display: flex; gap: 4px; }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      color: #aaa;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover { border-color: #888; color: #eee; }
+    .lang-btn.active { background: #0d2a2a; border-color: #0d9488; color: #5eead4; }
+
+    .quiz-page-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .quiz-page-sub { font-size: 12px; color: #7a9a9a; margin-bottom: 24px; max-width: 640px; }
+
+    .quiz-cta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; align-items: center; }
+
+    .btn-quiz {
+      background: #0c6f66;
+      border: none;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-quiz:hover { background: #0f766e; }
+    .btn-quiz:disabled { background: #1a3a3a; color: #5a9a90; cursor: default; }
+
+    .btn-donate {
+      background: transparent;
+      border: 1px solid #0d9488;
+      color: #5eead4;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-donate:hover { background: #0a1a1a; text-decoration: none; }
+
+    #quiz-section { display: none; }
+    #quiz-section.visible { display: block; }
+
+    .quiz-box {
+      background: #0f1a1a;
+      border: 1px solid #1a3a3a;
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .quiz-progress {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .quiz-step { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.6px; }
+    .quiz-dots { display: flex; gap: 4px; }
+    .quiz-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #1a3a3a;
+      transition: background 0.2s;
+    }
+    .quiz-dot.active { background: #0d9488; }
+    .quiz-dot.done { background: #34d399; }
+
+    .quiz-question {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 16px; }
+
+    .quiz-option {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #0d1f1f;
+      border: 2px solid #1a3a3a;
+      border-radius: 8px;
+      padding: 20px 24px;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #ccc;
+      text-align: left;
+      font-family: inherit;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      width: 100%;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      box-shadow: none;
+    }
+    .quiz-option:hover:not(:disabled) { border-color: #0d9488; color: #fff; background: #0f2a2a; }
+    .quiz-option:active:not(:disabled) { transform: scale(0.985); }
+    .quiz-option.correct { background: #052e1a; border-color: #34d399; color: #34d399; border-width: 2px; }
+    .quiz-option.wrong { background: #1f0808; border-color: #f87171; color: #f87171; border-width: 2px; }
+    .quiz-option:disabled { cursor: default; }
+    .quiz-option:disabled:not(.correct):not(.wrong) { opacity: 0.5; }
+
+    .quiz-feedback {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #5eead4;
+      display: none;
+      padding: 10px 14px;
+      background: #050f0d;
+      border-radius: 4px;
+      border: 1px solid #065f46;
+    }
+    .quiz-feedback.wrong-fb { color: #f87171; background: #150505; border-color: #5f1a1a; }
+    .quiz-feedback.visible { display: block; }
+
+    .quiz-next {
+      display: none;
+      margin-top: 14px;
+      background: transparent;
+      border: 1px solid #0d9488;
+      color: #5eead4;
+      padding: 8px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .quiz-next:hover { background: #0a1a1a; }
+    .quiz-next.visible { display: inline-block; }
+
+    #quiz-result { display: none; }
+    #quiz-result.visible { display: block; }
+
+    .result-box {
+      background: #050f0d;
+      border: 1px solid #065f46;
+      border-radius: 6px;
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .result-score { font-size: 36px; font-weight: 700; color: #34d399; margin-bottom: 8px; }
+    .result-label { font-size: 13px; color: #5eead4; margin-bottom: 8px; }
+    .result-round-label { font-size: 12px; color: #4a7a70; margin-bottom: 20px; }
+    .result-contribution {
+      display: inline-block;
+      background: #0a1a1a;
+      border: 1px solid #0d9488;
+      border-radius: 4px;
+      padding: 8px 20px;
+      font-size: 13px;
+      color: #5eead4;
+      margin-bottom: 20px;
+    }
+
+    .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-replay {
+      background: transparent;
+      border: 1px solid #1a3a3a;
+      color: #aaa;
+      padding: 8px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-replay:hover { border-color: #555; color: #eee; }
+
+    #mission-accomplished { display: none; }
+    #mission-accomplished.visible { display: block; }
+
+    .mission-box {
+      background: #052e1a;
+      border: 1px solid #065f46;
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .mission-icon { font-size: 40px; margin-bottom: 12px; }
+    .mission-title { font-size: 20px; font-weight: 700; color: #34d399; margin-bottom: 8px; }
+    .mission-text { font-size: 13px; color: #5eead4; }
+    .mission-text a { color: #5eead4; text-decoration: underline; }
+  </style>
+  <style is:global>
+    /* Quiz elements created dynamically by ngo-quiz.js — must be global to receive styles */
+    .quiz-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a3a3a; transition: background 0.2s; }
+    .quiz-dot.active { background: #0d9488; }
+    .quiz-dot.done { background: #34d399; }
+
+    .quiz-option {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #0d1f1f;
+      border: 2px solid #1a3a3a;
+      border-radius: 10px;
+      padding: 0;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.4;
+      color: #ccc;
+      text-align: left;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+    .opt-letter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #5a9a90;
+      border-right: 1px solid #1a3a3a;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .opt-text {
+      flex: 1;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+    }
+    .quiz-option:hover:not(:disabled) { border-color: #0d9488; background: #0f2a2a; color: #fff; }
+    .quiz-option:hover:not(:disabled) .opt-letter { color: #5eead4; border-right-color: #0d9488; }
+    .quiz-option:active:not(:disabled) { transform: scale(0.99); }
+    .quiz-option.correct { background: #052e1a; border-color: #34d399; color: #34d399; }
+    .quiz-option.correct .opt-letter { color: #34d399; border-right-color: #34d399; }
+    .quiz-option.wrong { background: #1f0808; border-color: #f87171; color: #f87171; }
+    .quiz-option.wrong .opt-letter { color: #f87171; border-right-color: #f87171; }
+    .quiz-option:disabled { cursor: default; }
+    .quiz-option:disabled:not(.correct):not(.wrong) { opacity: 0.4; }
+  </style>
+</head>
+<body>
+<main class="page">
+
+  <div class="header-row">
+    <a class="back-link" href="/ngo/">
+      <span class="t-en">← Back to L'Asso-Mer</span>
+      <span class="t-fr">← Retour à L'Asso-Mer</span>
+      <span class="t-kr">← Retounen nan L'Asso-Mer</span>
+      <span class="t-es">← Volver a L'Asso-Mer</span>
+    </a>
+    <div class="lang-group">
+      <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+      <button class="lang-btn" data-lang="kr" title="Kréyol">🇭🇹</button>
+      <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+      <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+    </div>
+  </div>
+
+  <div class="quiz-page-title">
+    <span class="t-en">🧠 Marine ecology quiz</span>
+    <span class="t-fr">🧠 Quiz d'écologie marine</span>
+    <span class="t-kr">🧠 Kwiz ekoloji maren</span>
+    <span class="t-es">🧠 Quiz de ecología marina</span>
+  </div>
+  <div class="quiz-page-sub">
+    <span class="t-en">No financial contribution needed. Every time the quiz gauge fills before the fight ends, the season is extended 7 days (up to twice) — more time for both sides.</span>
+    <span class="t-fr">Aucune contribution financière requise. Chaque fois que la jauge du quiz se remplit avant la fin du fight, la saison est prolongée de 7 jours (2 fois maximum) — plus de temps pour les deux camps.</span>
+    <span class="t-kr">Pa gen kontribisyon finansye ki nesesè. Chak fwa jwaj kwiz la ranpli avan konba a fini, sezon an pwolonje 7 jou (2 fwa maksimòm).</span>
+    <span class="t-es">No se necesita contribución financiera. Cada vez que el medidor del quiz se llena antes de que termine la pelea, la temporada se extiende 7 días (hasta dos veces).</span>
+  </div>
+
+  <div class="quiz-cta">
+    <button class="btn-quiz" id="btn-start-quiz">
+      <span class="t-en">🧠 Take the quiz</span>
+      <span class="t-fr">🧠 Faire le quiz</span>
+      <span class="t-kr">🧠 Fè kwiz la</span>
+      <span class="t-es">🧠 Hacer el quiz</span>
+    </button>
+  </div>
+
+  <!-- Quiz question flow — DOM structure, IDs and classes unchanged from ngo.astro;
+       public/scripts/ngo-quiz.js's quiz logic (startQuiz, renderQuizQuestion,
+       selectAnswer, etc.) targets these same IDs and needs no further changes. -->
+  <div id="quiz-section">
+    <div class="quiz-box">
+      <div class="quiz-progress">
+        <div class="quiz-step" id="quiz-step-label">
+          <span class="t-en">Question 1 of 8</span>
+          <span class="t-fr">Question 1 sur 8</span>
+          <span class="t-kr">Kèstyon 1 sou 8</span>
+          <span class="t-es">Pregunta 1 de 8</span>
+        </div>
+        <div class="quiz-dots" id="quiz-dots"></div>
+      </div>
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <button class="quiz-next" id="quiz-next">
+        <span class="t-en">Next →</span>
+        <span class="t-fr">Suivant →</span>
+        <span class="t-kr">Swivan →</span>
+        <span class="t-es">Siguiente →</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="quiz-result">
+    <div class="result-box">
+      <div class="result-score" id="result-score">0/5</div>
+      <div class="result-label" id="result-label"></div>
+      <div class="result-contribution" id="result-contribution"></div>
+      <div class="result-round-label" id="result-round-label"></div>
+      <div class="result-actions">
+        <button class="btn-replay" id="btn-replay">
+          <span class="t-en">Play again</span>
+          <span class="t-fr">Rejouer</span>
+          <span class="t-kr">Jwe ankò</span>
+          <span class="t-es">Jugar de nuevo</span>
+        </button>
+        <a class="btn-donate" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">
+          <span class="t-en">Donate to go further →</span>
+          <span class="t-fr">Faire un don pour aller plus loin →</span>
+          <span class="t-kr">Fè on don pou avanse plis →</span>
+          <span class="t-es">Donar para ir más lejos →</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission accomplished — copy updated from ngo.astro's original: that version said
+       "check the countdown above, it may have just changed", which made sense when the
+       Fight countdown lived on the same page. Now it links to /ngo-support/ instead,
+       since the Fight moved to its own page. -->
+  <div id="mission-accomplished">
+    <div class="mission-box">
+      <div class="mission-icon">🎉</div>
+      <div class="mission-title">
+        <span class="t-en">Mission accomplished!</span>
+        <span class="t-fr">Mission accomplie !</span>
+        <span class="t-kr">Misyon akonpli !</span>
+        <span class="t-es">¡Misión cumplida!</span>
+      </div>
+      <div class="mission-text">
+        <span class="t-en">The quiz gauge reached 100%! This pushes the fight forward — see the current standings on the <a href="/ngo-support/">Support page</a>.</span>
+        <span class="t-fr">La jauge du quiz a atteint 100 % ! Cela fait avancer le fight — consultez l'état actuel sur la <a href="/ngo-support/">page Soutenir</a>.</span>
+        <span class="t-kr">Jwaj kwiz la rive 100% ! Sa a ede konba a avanse — gade eta aktyèl la sou <a href="/ngo-support/">paj Sipòte a</a>.</span>
+        <span class="t-es">¡El medidor del quiz alcanzó el 100%! Esto impulsa la pelea — consulta el estado actual en la <a href="/ngo-support/">página Apoyar</a>.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="quiz-data" hidden data-questions={JSON.stringify(quizQuestions)}></div>
+<script is:inline src="/scripts/ngo-quiz.js" defer></script>
+<PageFooter />
+</body>
+</html>

@@ -1,0 +1,133 @@
+---
+import LiveBanner from "../components/LiveBanner.astro";
+import PageFooter from "../components/PageFooter.astro";
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply as an NGO — countdowns.co</title>
+  <meta name="description" content="Apply to become the featured conservation NGO on countdowns.co — for NGOs only, not companies. A simple step-by-step wizard." />
+  <style is:global>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f0f; color: #e0e0e0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px; line-height: 1.6;
+      min-height: 100vh; padding: 48px 24px 80px;
+    }
+    .page { max-width: 540px; margin: 0 auto; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .page-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
+    .back-link:hover { color: #999; }
+    .lang-group { display: flex; gap: 4px; flex-shrink: 0; }
+    .lang-btn { background: transparent; border: 1px solid #555; border-radius: 3px; cursor: pointer; font-size: 16px; padding: 2px 6px; color: #aaa; font-family: inherit; transition: all 0.15s; opacity: 0.75; }
+    .lang-btn:hover { border-color: #888; opacity: 0.8; }
+    .lang-btn.active { background: #1a1a1a; border-color: #555; opacity: 1; }
+    details.criteria-box { background: #0a0f1a; border: 1px solid #1e3a5f; border-radius: 4px; padding: 10px 16px; margin-bottom: 32px; }
+    .criteria-toggle { cursor: pointer; list-style: none; font-size: 13px; color: #7ec8e3; }
+    .criteria-toggle:hover { color: #b3e4f7; }
+    .criteria-toggle::marker { display: none; }
+    .criteria-list { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1e3a5f; display: flex; flex-direction: column; gap: 6px; }
+    .criteria-list span { color: #5a8fad; font-size: 12px; }
+    .criteria-list strong { color: #7ec8e3; }
+    #wizardProgress { display: flex; gap: 3px; margin-bottom: 36px; }
+    .progress-seg { height: 3px; flex: 1; background: #333; border-radius: 2px; transition: background 0.2s; }
+    .progress-seg.filled { background: #2d6aa0; }
+    #wizardStep { min-height: 200px; }
+    .step-num { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #999999; margin-bottom: 10px; }
+    .step-question { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .step-hint { font-size: 12px; color: #999999; margin-bottom: 20px; }
+    .step-input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #e0e0e0; font-family: inherit; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
+    .step-input:focus { border-color: #2d6aa0; }
+    .step-textarea { resize: vertical; min-height: 80px; }
+    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .date-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #999999; margin-bottom: 6px; }
+    .done-title { font-size: 16px; font-weight: 700; color: #4ade80; margin-bottom: 6px; }
+    .done-hint { font-size: 12px; color: #999999; margin-bottom: 20px; }
+    .btn-submit { width: 100%; background: #0d2a1a; border: 1px solid #166534; color: #4ade80; border-radius: 4px; padding: 12px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 600; transition: background 0.15s; margin-bottom: 16px; }
+    .btn-submit:hover:not(:disabled) { background: #113520; }
+    .btn-submit:disabled { opacity: 0.5; cursor: wait; }
+    .submit-error { font-size: 12px; color: #f87171; margin-bottom: 12px; }
+    #wizardNav { display: flex; gap: 10px; margin-top: 28px; }
+    .is-hidden { display: none; }
+    #btnBack { background: transparent; border: 1px solid #333; border-radius: 4px; color: #999999; font-size: 13px; font-family: inherit; padding: 10px 22px; cursor: pointer; transition: all 0.15s; }
+    #btnBack:hover { border-color: #555; color: #aaa; }
+    #btnNext { background: #1e3a5f; border: 1px solid #2d6aa0; border-radius: 4px; color: #7ec8e3; font-size: 13px; font-family: inherit; font-weight: 600; padding: 10px 28px; cursor: pointer; transition: background 0.15s; }
+    #btnNext:hover:not(:disabled) { background: #24497a; }
+    #btnNext:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Actions list */
+    .action-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .action-input { flex: 1; }
+    .btn-remove-action { background: transparent; border: 1px solid #333; border-radius: 4px; color: #999999; font-size: 16px; line-height: 1; padding: 8px 12px; cursor: pointer; flex-shrink: 0; transition: all 0.15s; }
+    .btn-remove-action:hover { border-color: #f87171; color: #f87171; }
+    .btn-add-action { background: transparent; border: 1px dashed #333; border-radius: 4px; color: #7ec8e3; font-size: 12px; font-family: inherit; padding: 8px 14px; cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+    .btn-add-action:hover { border-color: #2d6aa0; }
+
+    /* Receipt file upload */
+    #receiptFileInput { display: block; color: #999; font-size: 12px; }
+    .receipt-preview { display: block; max-width: 100%; max-height: 240px; border-radius: 4px; border: 1px solid #333; margin-bottom: 10px; }
+    .btn-remove-file { background: transparent; border: 1px solid #333; border-radius: 4px; color: #f87171; font-size: 12px; font-family: inherit; padding: 6px 14px; cursor: pointer; transition: all 0.15s; }
+    .btn-remove-file:hover { border-color: #f87171; }
+
+    /* Booking box */
+    .booking-box { background: #0a0f1a; border: 1px solid #1e3a5f; border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+    .booking-link { display: inline-block; font-size: 13px; font-weight: 700; color: #7ec8e3; text-decoration: underline; margin-bottom: 6px; }
+    .booking-link:hover { color: #b3e4f7; }
+    .booking-note { font-size: 11px; color: #5a8fad; margin: 0; }
+  </style>
+</head>
+<body>
+<LiveBanner />
+<main class="page">
+  <div class="page-header">
+    <a class="back-link" href="/">
+      <span class="t-en">← Back</span>
+      <span class="t-fr">← Retour</span>
+      <span class="t-kr">← Retounen</span>
+      <span class="t-es">← Volver</span>
+    </a>
+    <div class="lang-group">
+      <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+      <button class="lang-btn" data-lang="kr" title="Kréyol">🇭🇹</button>
+      <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+      <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+    </div>
+  </div>
+  <h1 class="page-title">🌱 <span class="t-en">Apply as an NGO</span><span class="t-fr">Postuler en tant qu'ONG</span><span class="t-kr">Aplike kòm yon ONG</span><span class="t-es">Postular como ONG</span></h1>
+  <details class="criteria-box" open>
+    <summary class="criteria-toggle">
+      <span class="t-en">▸ Before you apply</span>
+      <span class="t-fr">▸ Avant de postuler</span>
+      <span class="t-kr">▸ Anvan ou aplike</span>
+      <span class="t-es">▸ Antes de postular</span>
+    </summary>
+    <div class="criteria-list">
+      <span>
+        <span class="t-en"><strong>NGOs / Associations only.</strong> Sponsors deal directly with the featured NGO or association, not with Countdowns.co.</span>
+        <span class="t-fr"><strong>Réservé aux ONG / Associations.</strong> Les sponsors traitent directement avec l'ONG ou l'association mise en avant, pas avec Countdowns.co.</span>
+        <span class="t-kr"><strong>Sèlman pou ONG / Asosyasyon.</strong> Sponsor yo trete dirèkteman ak ONG oswa asosyasyon ki mete devan a, pa ak Countdowns.co.</span>
+        <span class="t-es"><strong>Solo para ONG / Asociaciones.</strong> Los patrocinadores tratan directamente con la ONG o asociación destacada, no con Countdowns.co.</span>
+      </span>
+      <span>
+        <span class="t-en">We review every application manually and may ask questions before listing you.</span>
+        <span class="t-fr">Nous examinons chaque candidature manuellement et il est possible que des questions complémentaires soient posées avant de procéder au référencement.</span>
+        <span class="t-kr">Nou egzamine chak kandidati manyèlman epi nou ka poze kesyon anvan nou liste ou.</span>
+        <span class="t-es">Revisamos cada solicitud manualmente y podemos hacer preguntas antes de listarte.</span>
+      </span>
+    </div>
+  </details>
+  <div id="wizardProgress"></div>
+  <div id="wizardStep"></div>
+  <div id="wizardNav">
+    <button id="btnBack" class="is-hidden"></button>
+    <button id="btnNext"></button>
+  </div>
+</main>
+<script is:inline src="/scripts/ngo-apply.js" defer></script>
+<PageFooter />
+</body>
+</html>

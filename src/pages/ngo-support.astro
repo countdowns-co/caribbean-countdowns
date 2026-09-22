@@ -1,0 +1,257 @@
+---
+import PageFooter from "../components/PageFooter.astro";
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Support the Fight — L'Asso-Mer — countdowns.co</title>
+  <meta name="description" content="Companies vs. Community: report your contribution to L'Asso-Mer and push your side forward in this season's Fight." />
+  <style>.t-fr,.t-kr,.t-es{display:none}.ngo-cta{text-align:center;padding:8px 0 0}.ngo-cta-link{font-size:12px;color:#5a9a90;text-decoration:underline}</style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0f0f;
+      color: #e0e0e0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .back-link { font-size: 12px; color: #999999; text-decoration: underline; }
+    .back-link:hover { color: #999; }
+
+    .lang-group { display: flex; gap: 4px; }
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      padding: 4px 10px;
+      color: #aaa;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .lang-btn:hover { border-color: #888; color: #eee; }
+    .lang-btn.active { background: #0d2a2a; border-color: #0d9488; color: #5eead4; }
+
+    .divider { border: none; border-top: 1px solid #1a2e2e; margin: 32px 0; }
+
+    .fight-header { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom: 6px; }
+    .fight-sub { font-size: 12px; color: #5a9a90; margin-bottom: 18px; }
+    .fight-countdown-wrap { display:flex; align-items:center; justify-content:center; gap:10px; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 6px; padding: 12px; margin-bottom: 20px; }
+    .fight-countdown-label { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fight-countdown-time { font-size: 18px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+    .fight-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 480px) { .fight-grid { grid-template-columns: 1fr; } }
+    .fight-card { background: #0a1a1a; border: 1px solid #1a3a3a; border-radius: 8px; padding: 16px; }
+    .fight-card.leading { border-color: #34d399; box-shadow: 0 0 0 1px #34d399 inset; }
+    .fight-side-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #e0e0e0; margin-bottom: 10px; }
+    .fight-amount { font-size: 22px; font-weight: 700; color: #34d399; font-variant-numeric: tabular-nums; }
+    .fight-goal { font-size: 12px; color: #7a9a9a; font-weight: 400; }
+    .fight-gauge-track { background: #0f2a2a; border-radius: 9px; height: 10px; overflow: hidden; margin: 10px 0 8px; }
+    .fight-gauge-fill { height: 100%; border-radius: 9px; background: linear-gradient(90deg, #0d9488, #34d399); width: 0%; transition: width 0.4s ease; }
+    .fight-meta { font-size: 11px; color: #5a9a90; }
+    .fight-report-cta { display:flex; align-items:center; justify-content:space-between; gap: 12px; flex-wrap: wrap; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .fight-report-cta p { margin:0; font-size:13px; color: #7a9a9a; flex:1; min-width:180px; }
+    .btn-report { background: #0d9488; color: #06201c; font-weight: 700; font-size: 13px; border: none; border-radius: 5px; padding: 10px 18px; cursor: pointer; white-space: nowrap; }
+    #fight-form { display:none; flex-direction:column; gap:10px; background: #0a1a1a; border: 1px solid #0d3d35; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    #fight-form.visible { display:flex; }
+    #fight-form label { font-size: 11px; color: #5a9a90; text-transform: uppercase; letter-spacing: 0.5px; }
+    #fight-form > div:not(.fight-side-choice) { display:flex; flex-direction:column; gap: 6px; }
+    #fight-form input, #fight-form textarea { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; color: #fff; font-family: inherit; font-size: 13px; padding: 8px 10px; width: 100%; }
+    #fight-form .fight-side-choice { display:flex; gap: 14px; font-size: 13px; color: #e0e0e0; }
+    #fight-form button[type=submit] { background: #0d9488; color: #06201c; font-weight: 700; border: none; border-radius: 5px; padding: 10px; cursor: pointer; }
+    .fight-form-msg { font-size: 12px; }
+    .fight-form-msg.visible { color: #34d399; }
+    .fight-form-msg.visible.error { color: #f0a0a0; }
+    .fight-history-title { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .fight-history-row { display:flex; align-items:center; justify-content:space-between; gap:10px; background: #0a1a1a; border: 1px solid #1a3a3a; border-radius: 6px; padding: 10px 14px; font-size: 12px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+<main class="page">
+
+  <div class="header-row">
+    <a class="back-link" href="/ngo/">
+      <span class="t-en">← Back to L'Asso-Mer</span>
+      <span class="t-fr">← Retour à L'Asso-Mer</span>
+      <span class="t-kr">← Retounen nan L'Asso-Mer</span>
+      <span class="t-es">← Volver a L'Asso-Mer</span>
+    </a>
+    <div class="lang-group">
+      <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+      <button class="lang-btn" data-lang="kr" title="Kréyol">🇭🇹</button>
+      <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+      <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+    </div>
+  </div>
+
+  <div class="fight-header">
+    <span class="fight-title">
+      <span class="t-en">⚔️ The Fight — Season <span id="fight-season-num">1</span></span>
+      <span class="t-fr">⚔️ Le Fight — Saison <span id="fight-season-num-fr">1</span></span>
+      <span class="t-kr">⚔️ Konba a — Sezon <span id="fight-season-num-kr">1</span></span>
+      <span class="t-es">⚔️ La Pelea — Temporada <span id="fight-season-num-es">1</span></span>
+    </span>
+  </div>
+  <div class="fight-sub">
+    <span class="t-en">Companies vs. Community: who will support L'Asso-Mer the most before the season ends?</span>
+    <span class="t-fr">Entreprises contre Communauté : qui soutiendra le plus L'Asso-Mer avant la fin de la saison ?</span>
+    <span class="t-kr">Konpayi kont Kominote : ki moun ki pral sipòte L'Asso-Mer plis avan sezon an fini?</span>
+    <span class="t-es">Empresas contra Comunidad: ¿quién apoyará más a L'Asso-Mer antes de que termine la temporada?</span>
+  </div>
+
+  <div class="fight-countdown-wrap">
+    <span class="fight-countdown-label">
+      <span class="t-en">Season ends in</span>
+      <span class="t-fr">Fin de saison dans</span>
+      <span class="t-kr">Sezon fini nan</span>
+      <span class="t-es">La temporada termina en</span>
+    </span>
+    <span class="fight-countdown-time" id="fight-countdown">—</span>
+  </div>
+
+  <div class="fight-grid">
+    <div class="fight-card" id="fight-community-card">
+      <div class="fight-side-label">
+        <span class="t-en">Community</span>
+        <span class="t-fr">Communauté</span>
+        <span class="t-kr">Kominote</span>
+        <span class="t-es">Comunidad</span>
+      </div>
+      <div class="fight-amount"><span id="fight-community-amount">€0</span> <span class="fight-goal">/ <span id="fight-community-goal">€5,000</span></span></div>
+      <div class="fight-gauge-track"><div class="fight-gauge-fill" id="fight-community-fill"></div></div>
+      <div class="fight-meta"><span id="fight-community-contributors">0</span>
+        <span class="t-en"> contributors</span>
+        <span class="t-fr"> contributeurs</span>
+        <span class="t-kr"> kontribistè</span>
+        <span class="t-es"> contribuyentes</span>
+      </div>
+    </div>
+
+    <div class="fight-card" id="fight-company-card">
+      <div class="fight-side-label">
+        <span class="t-en">Companies</span>
+        <span class="t-fr">Entreprises</span>
+        <span class="t-kr">Konpayi</span>
+        <span class="t-es">Empresas</span>
+      </div>
+      <div class="fight-amount"><span id="fight-company-amount">€0</span> <span class="fight-goal">/ <span id="fight-company-goal">€5,000</span></span></div>
+      <div class="fight-gauge-track"><div class="fight-gauge-fill" id="fight-company-fill"></div></div>
+      <div class="fight-meta"><span id="fight-company-contributors">0</span>
+        <span class="t-en"> companies</span>
+        <span class="t-fr"> entreprises</span>
+        <span class="t-kr"> konpayi</span>
+        <span class="t-es"> empresas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fight-report-cta">
+    <p>
+      <span class="t-en">Did you give to L'Asso-Mer? Report your contribution to push your side forward.</span>
+      <span class="t-fr">Vous avez donné à L'Asso-Mer ? Signalez votre contribution pour faire avancer votre camp.</span>
+      <span class="t-kr">Ou te bay L'Asso-Mer? Rapòte kontribisyon ou pou fè kan ou avanse.</span>
+      <span class="t-es">¿Le diste a L'Asso-Mer? Reporta tu contribución para hacer avanzar a tu equipo.</span>
+    </p>
+    <button class="btn-report" id="btn-report-contribution" type="button">
+      <span class="t-en">Report a contribution</span>
+      <span class="t-fr">Signaler une contribution</span>
+      <span class="t-kr">Rapòte yon kontribisyon</span>
+      <span class="t-es">Reportar una contribución</span>
+    </button>
+  </div>
+
+  <form id="fight-form">
+    <div class="fight-side-choice">
+      <label><input type="radio" name="side" value="community" checked />
+        <span class="t-en">Community</span><span class="t-fr">Communauté</span><span class="t-kr">Kominote</span><span class="t-es">Comunidad</span>
+      </label>
+      <label><input type="radio" name="side" value="company" />
+        <span class="t-en">Company</span><span class="t-fr">Entreprise</span><span class="t-kr">Konpayi</span><span class="t-es">Empresa</span>
+      </label>
+    </div>
+    <div>
+      <label for="fight-amount">
+        <span class="t-en">Amount given (€)</span><span class="t-fr">Montant donné (€)</span><span class="t-kr">Kantite bay (€)</span><span class="t-es">Monto dado (€)</span>
+      </label>
+      <input type="number" id="fight-amount" min="1" step="1" required />
+    </div>
+    <div>
+      <label for="fight-name">
+        <span class="t-en">Name (optional — company or, if you want to be listed, your name)</span>
+        <span class="t-fr">Nom (optionnel — nom d'entreprise, ou le vôtre si vous voulez être listé)</span>
+        <span class="t-kr">Non (opsyonèl)</span>
+        <span class="t-es">Nombre (opcional)</span>
+      </label>
+      <input type="text" id="fight-name" maxlength="120" />
+    </div>
+    <div>
+      <label for="fight-siret">
+        <span class="t-en">SIRET (companies only)</span><span class="t-fr">SIRET (entreprises uniquement)</span><span class="t-kr">SIRET (konpayi sèlman)</span><span class="t-es">SIRET (solo empresas)</span>
+      </label>
+      <input type="text" id="fight-siret" maxlength="14" pattern="[0-9]{14}" />
+    </div>
+    <div>
+      <label for="fight-note">
+        <span class="t-en">Note (optional, for our review only — never shown publicly)</span>
+        <span class="t-fr">Note (optionnelle, pour notre vérification uniquement — jamais publique)</span>
+        <span class="t-kr">Nòt (opsyonèl)</span>
+        <span class="t-es">Nota (opcional)</span>
+      </label>
+      <textarea id="fight-note" maxlength="500" rows="2"></textarea>
+    </div>
+    <button type="submit">
+      <span class="t-en">Submit</span><span class="t-fr">Envoyer</span><span class="t-kr">Voye</span><span class="t-es">Enviar</span>
+    </button>
+    <div class="fight-form-msg" id="fight-form-msg"></div>
+  </form>
+
+  <hr class="divider" />
+
+  <div class="fight-history-title">
+    <span class="t-en">Previous seasons</span>
+    <span class="t-fr">Saisons précédentes</span>
+    <span class="t-kr">Sezon anvan yo</span>
+    <span class="t-es">Temporadas anteriores</span>
+  </div>
+  <div id="fight-history-list"></div>
+
+  <hr class="divider" />
+
+  <!-- Sponsor CTA -->
+  <div class="ngo-cta">
+    <a href="/sponsor/" class="ngo-cta-link">
+      <span class="t-en">Become a sponsor and give more time to the mission →</span>
+      <span class="t-fr">Devenir sponsor et offrir plus de temps à la mission →</span>
+      <span class="t-kr">Vin sponsor epi ban misyon la plis tan →</span>
+      <span class="t-es">Conviértete en sponsor y da más tiempo a la misión →</span>
+    </a>
+  </div>
+
+</main>
+
+<script is:inline src="/scripts/ngo-support.js" defer></script>
+<PageFooter />
+</body>
+</html>
