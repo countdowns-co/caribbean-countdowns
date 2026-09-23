@@ -208,7 +208,10 @@ import PageFooter from "../components/PageFooter.astro";
       display: flex;
       gap: 20px;
       align-items: flex-start;
+      text-decoration: none;
+      transition: border-color 0.15s;
     }
+    .ngo-card:hover { border-color: #444; text-decoration: none; }
 
     .ngo-badge {
       background: #0d2a2a;
@@ -233,14 +236,7 @@ import PageFooter from "../components/PageFooter.astro";
       margin-bottom: 4px;
     }
 
-    .ngo-info p { color: #888; font-size: 12px; margin-bottom: 8px; }
-
-    .ngo-link {
-      font-size: 12px;
-      color: #7ec8e3;
-      text-decoration: underline;
-    }
-    .ngo-link:hover { color: #b3e0f2; }
+    .ngo-info p { color: #888; font-size: 12px; margin-bottom: 0; }
 
     .tiers {
       display: grid;
@@ -568,13 +564,136 @@ import PageFooter from "../components/PageFooter.astro";
       <span class="t-es">countdowns.co ofrece visibilidad a marcas y organizaciones que apoyan causas que protegen el Caribe. Ningún dinero va a este sitio — el 100% de las donaciones van directamente a la ONG destacada.</span>
     </p>
 
-    <div class="gain-box">
-      <strong>
-        <span class="t-en">What you gain</span>
-        <span class="t-fr">Ce que vous gagnez</span>
-        <span class="t-kr">Sa ou genyen</span>
-        <span class="t-es">Qué ganas</span>
-      </strong>
+    <hr class="divider" />
+
+    <!-- Current cause -->
+    <h2>
+      <span class="t-en">Current cause</span>
+      <span class="t-fr">Cause actuelle</span>
+      <span class="t-kr">Koz aktyèl la</span>
+      <span class="t-es">Causa actual</span>
+    </h2>
+
+    <a class="ngo-card" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">
+      <span class="ngo-badge">NGO</span>
+      <div class="ngo-info">
+        <strong>L'Asso-Mer</strong>
+        <p>
+          <span class="t-en">Marine conservation nonprofit based in Martinique. Since 2016, they protect coral reefs, sea turtles and Caribbean marine heritage through science, restoration, and public education.</span>
+          <span class="t-fr">Association de conservation marine basée en Martinique. Depuis 2016, ils protègent les récifs coralliens, les tortues marines et le patrimoine marin caribéen par la science, la restauration et la sensibilisation.</span>
+          <span class="t-kr">Asosyasyon konsèvasyon maren sitye Matinik. Depi 2016, yo ka pwoteje koray, tòti maren epi patrimwàn maren Karayib la atravè siyans, restòrasyon epi edikasyon piblik.</span>
+          <span class="t-es">ONG de conservación marina con sede en Martinica. Desde 2016 protegen los arrecifes de coral, las tortugas marinas y el patrimonio marino caribeño a través de la ciencia, la restauración y la educación.</span>
+        </p>
+      </div>
+    </a>
+
+    <div class="cta-block">
+      <p class="cta-lead">
+        <span class="t-en">Are you an NGO or nonprofit protecting the Caribbean? Apply for a free listing.</span>
+        <span class="t-fr">Vous êtes une ONG ou association protégeant la Caraïbe ? Demandez un référencement gratuit.</span>
+        <span class="t-kr">Ou se yon ONG oswa asosyasyon ki pwoteje Karayib la ? Mande yon enskripsyon gratis.</span>
+        <span class="t-es">¿Eres una ONG o asociación que protege el Caribe? Solicita un listado gratuito.</span>
+      </p>
+      <a class="cta-btn" href="/ngo-apply">
+        <span class="t-en">Apply now</span>
+        <span class="t-fr">Postuler</span>
+        <span class="t-kr">Aplike</span>
+        <span class="t-es">Postular</span>
+      </a>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- How it works -->
+    <h2>
+      <span class="t-en">How it works</span>
+      <span class="t-fr">Comment ça fonctionne</span>
+      <span class="t-kr">Kouman sa mache</span>
+      <span class="t-es">Cómo funciona</span>
+    </h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <span>
+            <span class="t-en">Estimate your contribution and donate directly to the featured NGO. Keep your proof of donation.</span>
+            <span class="t-fr">Estimez votre participation et faites votre don directement à l'ONG partenaire. Conservez votre preuve de don.</span>
+            <span class="t-kr">Estime patisipasyon ou epi fè don ou dirèkteman bay NGO patnè a. Gade prèv don ou.</span>
+            <span class="t-es">Estima tu participación y dona directamente a la ONG destacada. Guarda tu comprobante de donación.</span>
+          </span>
+          <div class="tax-note">
+            <span class="t-en">💡 Run a simulation of the tax-deductible share for your company, based on your country.</span>
+            <span class="t-fr">💡 Faites une simulation de la part déductible des impôts pour votre entreprise, selon votre pays.</span>
+            <span class="t-kr">💡 Fè yon similasyon pati ki dediktib nan taks pou konpayi ou, selon peyi ou.</span>
+            <span class="t-es">💡 Haz una simulación de la parte deducible de impuestos para tu empresa, según tu país.</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <span>
+            <span class="t-en">Contact the featured NGO with your website link AND your logo.</span>
+            <span class="t-fr">Contactez l'ONG partenaire avec le lien de votre site ET votre logo.</span>
+            <span class="t-kr">Kontakte NGO patnè a ak lyen sit ou a EPI logo ou.</span>
+            <span class="t-es">Contacta a la ONG destacada con el enlace de tu sitio web Y tu logo.</span>
+          </span>
+          <div class="tax-note">
+            <span class="t-en">💡 countdowns.co never handles your donation receipt or company details.</span>
+            <span class="t-fr">💡 countdowns.co ne traite jamais votre reçu de don ni vos informations d'entreprise.</span>
+            <span class="t-kr">💡 countdowns.co pa janm trete resi don ou oswa enfòmasyon konpayi ou.</span>
+            <span class="t-es">💡 countdowns.co nunca gestiona tu comprobante de donación ni los datos de tu empresa.</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <span>
+            <span class="t-en">The featured NGO confirms your sponsorship directly with countdowns.co.</span>
+            <span class="t-fr">L'ONG partenaire confirme directement auprès de countdowns.co votre sponsoring.</span>
+            <span class="t-kr">NGO patnè a konfime sponsoring ou dirèkteman ak countdowns.co.</span>
+            <span class="t-es">La ONG destacada confirma tu patrocinio directamente con countdowns.co.</span>
+          </span>
+          <div class="tax-note">
+            <span class="t-en">💡 Verification of data accuracy (identification, amount, date).</span>
+            <span class="t-fr">💡 Vérification de l'exactitude des données (identification, montant, date).</span>
+            <span class="t-kr">💡 Verifikasyon egzaktitid done yo (idantifikasyon, kantite, dat).</span>
+            <span class="t-es">💡 Verificación de la exactitud de los datos (identificación, monto, fecha).</span>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>
+            <span class="t-en">You appear on the site</span>
+            <span class="t-fr">Vous apparaissez sur le site</span>
+            <span class="t-kr">Ou parèt sou sit la</span>
+            <span class="t-es">Apareces en el sitio</span>
+          </strong>
+          <span>
+            <span class="t-en">Your brand or organization is displayed on the main page for 3 to 6 months depending on your level of support.</span>
+            <span class="t-fr">Votre marque ou organisation est affichée sur la page principale pendant 3 à 6 mois selon la hauteur de votre soutien.</span>
+            <span class="t-kr">Mak ou oswa òganizasyon ou afiche sou paj prensipal la pandan 3 a 6 mwa selon nivo sipò ou.</span>
+            <span class="t-es">Tu marca u organización se muestra en la página principal durante 3 a 6 meses según tu nivel de apoyo.</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- What you gain -->
+    <h2>
+      <span class="t-en">What you gain</span>
+      <span class="t-fr">Ce que vous gagnez</span>
+      <span class="t-kr">Sa ou genyen</span>
+      <span class="t-es">Qué ganas</span>
+    </h2>
+
+    <div class="gain-box" style="margin-top:0;">
       <ul class="gain-list">
         <li>
           <span class="gain-check">✓</span>
@@ -608,82 +727,12 @@ import PageFooter from "../components/PageFooter.astro";
 
     <hr class="divider" />
 
-    <!-- How it works -->
-    <h2>
-      <span class="t-en">How it works</span>
-      <span class="t-fr">Comment ça fonctionne</span>
-      <span class="t-kr">Kouman sa mache</span>
-      <span class="t-es">Cómo funciona</span>
-    </h2>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <strong>
-            <span class="t-en">Choose a tier and donate</span>
-            <span class="t-fr">Choisissez un palier et faites un don</span>
-            <span class="t-kr">Chwazi on nivo epi fè on don</span>
-            <span class="t-es">Elige un nivel y dona</span>
-          </strong>
-          <span>
-            <span class="t-en">Make your donation directly to the featured NGO. Keep your proof of donation.</span>
-            <span class="t-fr">Faites votre don directement à l'ONG partenaire. Gardez votre preuve de don.</span>
-            <span class="t-kr">Fè don ou dirèktèman bay NGO a. Gade prèv don ou.</span>
-            <span class="t-es">Haz tu donación directamente a la ONG destacada. Guarda tu comprobante.</span>
-          </span>
-          <div class="tax-note">
-            <span class="t-en">💡 This donation may be tax-deductible for your company, depending on your country.</span>
-            <span class="t-fr">💡 Ce don peut être déductible des impôts de votre entreprise, selon votre pays.</span>
-            <span class="t-kr">💡 Don sa a ka dediktib nan taks konpayi ou, selon peyi ou.</span>
-            <span class="t-es">💡 Esta donación puede ser deducible de impuestos para tu empresa, según tu país.</span>
-          </div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <strong>
-            <span class="t-en">Send the NGO your website link or logo</span>
-            <span class="t-fr">Envoyez à l'ONG le lien de votre site ou votre logo</span>
-            <span class="t-kr">Voye ONG a lyen sit ou a oswa logo a</span>
-            <span class="t-es">Envía a la ONG el enlace de tu sitio web o tu logo</span>
-          </strong>
-          <span>
-            <span class="t-en">countdowns.co never handles your donation receipt or company details — the NGO confirms your sponsorship with us directly once everything checks out.</span>
-            <span class="t-fr">countdowns.co ne traite jamais votre reçu de don ni vos informations d'entreprise — l'ONG confirme votre sponsoring directement auprès de nous une fois tout vérifié.</span>
-            <span class="t-kr">countdowns.co pa janm trete resi don ou oswa enfòmasyon konpayi ou — ONG a konfime sponsoring ou dirèkteman ak nou yon fwa tout bagay verifye.</span>
-            <span class="t-es">countdowns.co nunca gestiona tu comprobante de donación ni los datos de tu empresa — la ONG confirma tu patrocinio directamente con nosotros una vez verificado todo.</span>
-          </span>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <strong>
-            <span class="t-en">You will appears on the site</span>
-            <span class="t-fr">Vous apparaitrez sur le site</span>
-            <span class="t-kr">Ou ké parèt sou sit la</span>
-            <span class="t-es">Tu aparece en el sitio</span>
-          </strong>
-          <span>
-            <span class="t-en">Your brand or organization is listed on the main page for the duration of your tier.</span>
-            <span class="t-fr">Votre marque ou organisation est affichée sur la page principale pendant la durée de votre palier.</span>
-            <span class="t-kr">Mak ou, òganizasyon ou afiche sou paj prensipal la pandan dire nivo ou a.</span>
-            <span class="t-es">Tu marca u organización aparece en la página principal durante el periodo de tu nivel.</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <hr class="divider" />
-
     <!-- Simulator -->
     <h2>
-      <span class="t-en">Estimate your cost after tax</span>
-      <span class="t-fr">Estimez votre coût après impôt</span>
-      <span class="t-kr">Estimen kout ou apre taks</span>
-      <span class="t-es">Estima tu costo después de impuestos</span>
+      <span class="t-en">Estimate your applicable reduction</span>
+      <span class="t-fr">Estimez la réduction applicable</span>
+      <span class="t-kr">Estime rediksyon aplikab la</span>
+      <span class="t-es">Estima la reducción aplicable</span>
     </h2>
 
     <div class="simulator">
@@ -884,30 +933,6 @@ import PageFooter from "../components/PageFooter.astro";
       </p>
     </div>
 
-    <hr class="divider" />
-
-    <!-- Featured NGO -->
-    <h2>
-      <span class="t-en">Current cause</span>
-      <span class="t-fr">Cause actuelle</span>
-      <span class="t-kr">Koz aktyèl la</span>
-      <span class="t-es">Causa actual</span>
-    </h2>
-
-    <div class="ngo-card">
-      <span class="ngo-badge">NGO</span>
-      <div class="ngo-info">
-        <strong>L'Asso-Mer</strong>
-        <p>
-          <span class="t-en">Marine conservation nonprofit based in Martinique. Since 2016, they protect coral reefs, sea turtles and Caribbean marine heritage through science, restoration, and public education.</span>
-          <span class="t-fr">Association de conservation marine basée en Martinique. Depuis 2016, ils protègent les récifs coralliens, les tortues marines et le patrimoine marin caribéen par la science, la restauration et la sensibilisation.</span>
-          <span class="t-kr">Asosyasyon konsèvasyon maren sitye Matinik. Depi 2016, yo ka pwoteje koray, tòti maren epi patrimwàn maren Karayib la atravè siyans, restòrasyon epi edikasyon piblik.</span>
-          <span class="t-es">ONG de conservación marina con sede en Martinica. Desde 2016 protegen los arrecifes de coral, las tortugas marinas y el patrimonio marino caribeño a través de la ciencia, la restauración y la educación.</span>
-        </p>
-        <a class="ngo-link" href="https://www.lassomer.fr/" target="_blank" rel="noopener noreferrer">lassomer.fr ↗</a>
-      </div>
-    </div>
-
     <!-- CTA -->
     <div class="cta-block cta-flush">
       <p>
@@ -921,21 +946,6 @@ import PageFooter from "../components/PageFooter.astro";
         <span class="t-fr">Contacter L'Asso-Mer</span>
         <span class="t-kr">Kontakte L'Asso-Mer</span>
         <span class="t-es">Contactar a L'Asso-Mer</span>
-      </a>
-    </div>
-
-    <div class="cta-block">
-      <p class="cta-lead">
-        <span class="t-en">Are you an NGO or nonprofit protecting the Caribbean? Apply for a free listing.</span>
-        <span class="t-fr">Vous êtes une ONG ou association protégeant la Caraïbe ? Demandez un référencement gratuit.</span>
-        <span class="t-kr">Ou se yon ONG oswa asosyasyon ki pwoteje Karayib la ? Mande yon enskripsyon gratis.</span>
-        <span class="t-es">¿Eres una ONG o asociación que protege el Caribe? Solicita un listado gratuito.</span>
-      </p>
-      <a class="cta-btn" href="/ngo-apply">
-        <span class="t-en">Apply now</span>
-        <span class="t-fr">Postuler</span>
-        <span class="t-kr">Aplike</span>
-        <span class="t-es">Postular</span>
       </a>
     </div>
 
