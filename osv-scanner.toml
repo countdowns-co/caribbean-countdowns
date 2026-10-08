@@ -9,7 +9,3 @@ reason = "Deno-specific vulnerability in esbuild's Deno module (uses Deno.env, D
 [[IgnoredVulns]]
 id = "GHSA-g7r4-m6w7-qqqr"
 reason = "Affects esbuild's development server on Windows only. CI runs on ubuntu-latest and executes npm run build (no dev server). Production is static HTML on GitHub Pages — no server process. No Windows runners are used."
-
-[[IgnoredVulns]]
-id = "GHSA-ch52-4w7c-c8xp"
-reason = "http-cache-semantics is a direct dependency of astro itself (dev-only build tool), never loaded at runtime by the deployed static site. The vulnerability requires a long-lived shared cache serving multiple untrusted users' cookies via max-stale requests — this project's only runtime for the package is a single ephemeral CI build or a single developer's local machine, never a shared multi-user cache. No fixed version exists upstream yet (all published versions through 4.2.0 are affected, kornelski/http-cache-semantics#56 still open)."
