@@ -10,7 +10,7 @@ var COUNTRIES = [
   "Guadeloupe", "La Désirade", "Les Saintes", "Marie-Galante", "Martinique",
   "Montserrat", "Saba", "Saint Barthélemy", "Saint Kitts and Nevis", "Saint Lucia",
   "Saint Martin", "Saint Vincent and the Grenadines", "Sint Maarten", "Sint Eustatius",
-  "Trinidad and Tobago", "Turks and Caicos Islands", "U.S. Virgin Islands",
+  "Tobago", "Trinidad", "Trinidad and Tobago", "Turks and Caicos Islands", "U.S. Virgin Islands",
   "Bahamas", "Bermuda", "Cuba", "Dominican Republic", "Haiti", "Jamaica",
   "Puerto Rico", "French Guiana", "Suriname",
 ];
