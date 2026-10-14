@@ -32,7 +32,9 @@ const seenKey = (hash) => `fight:${NGO_ID}:seen:${hash}`;
 
 function newSeason(now = Date.now()) {
   return {
-    seasonId: now,
+    // Millisecond prefix keeps ids roughly sortable; the random suffix keeps two
+    // seasons created in the same millisecond from sharing an id.
+    seasonId: `${now}-${crypto.randomUUID().slice(0, 8)}`,
     start: now,
     end: now + SEASON_DAYS * 86400000,
     extensionsUsed: 0,
