@@ -161,7 +161,7 @@ import PageFooter from "../components/PageFooter.astro";
         <p>Ce site <strong>n'utilise pas de cookies</strong>.</p>
         <p><strong>Préférence de langue</strong> — enregistrée localement via <strong>localStorage</strong> (FR, EN, KR, ES). Reste sur votre appareil, jamais transmise à un serveur.</p>
         <p><strong>Compteur de visites</strong> — compteur agrégé première partie, servi par notre propre Cloudflare Worker (<strong>/api/hit</strong>). Aucune adresse IP n'est stockée ni transmise à un tiers : les visites uniques du jour sont estimées via une empreinte anonyme non réversible (hachage salé renouvelé chaque jour, jamais conservé en clair, expirée sous 24 h). Aucun cookie déposé.</p>
-        <p><strong>Statistiques NGO</strong> — la jauge de progression communautaire enregistre un incrément anonyme sur Cloudflare KV (nombre uniquement). Aucun identifiant personnel ni adresse IP n'est associé à cette action.</p>
+        <p><strong>Statistiques NGO</strong> — le compteur de manches réussies du quiz communautaire enregistre un incrément anonyme sur Cloudflare KV (nombre uniquement). Aucun identifiant personnel ni adresse IP n'est associé à cette action.</p>
         <p><strong>Formulaire de suggestion d'événement</strong> — les données saisies (contenu de l'événement uniquement) sont envoyées à notre Worker Cloudflare et stockées de façon privée le temps de leur examen. Aucune adresse IP, aucun email, aucune donnée personnelle n'est collectée ni stockée.</p>
         <p>Conformément au RGPD, ce site ne traite aucune donnée personnelle directement et le compteur de visites ne conserve aucun identifiant.</p>
       </div>
@@ -228,7 +228,7 @@ import PageFooter from "../components/PageFooter.astro";
         <p>This site <strong>does not use cookies</strong>.</p>
         <p><strong>Language preference</strong> — stored locally via <strong>localStorage</strong> (FR, EN, KR, ES). Stays on your device, never sent to a server.</p>
         <p><strong>Visit counter</strong> — first-party aggregate counter served by our own Cloudflare Worker (<strong>/api/hit</strong>). No IP address is stored or shared with any third party: daily unique visits are estimated from a non-reversible anonymous fingerprint (salted hash rotated daily, never stored raw, expired within 24 h). No cookies are set.</p>
-        <p><strong>NGO stats</strong> — the community progress gauge records an anonymous increment on Cloudflare KV (a number only). No personal identifier or IP address is associated with this action.</p>
+        <p><strong>NGO stats</strong> — the community quiz's passing-round counter records an anonymous increment on Cloudflare KV (a number only). No personal identifier or IP address is associated with this action.</p>
         <p><strong>Suggest-event form</strong> — the data entered (event content only) is sent to our Cloudflare Worker and stored privately while we review it. No IP address, no email, no personal data is collected or stored.</p>
         <p>This site does not directly process personal data under GDPR; the visit counter keeps no identifiers.</p>
       </div>
@@ -295,7 +295,7 @@ import PageFooter from "../components/PageFooter.astro";
         <p>Sit la <strong>pa itilize okenn kuki</strong>.</p>
         <p><strong>Preferans lang</strong> — anrejistreye lokalman pa <strong>localStorage</strong> (FR, EN, KR, ES). Rèsté sou aparèy ou, pa janmen transmèt bay on sèvè.</p>
         <p><strong>Konptè vizit</strong> — konptè agreje premye pati, sèvi pa pwòp Cloudflare Worker nou (<strong>/api/hit</strong>). Okenn adrès IP pa estoke ni pataje ak yon tyès : vizit inik chak jou estime ak yon anprent anonim ki pa ka envèse (hash sale ki chanje chak jou, ki pa janm konsève an klè, ki ekspire nan 24 è). Okenn kuki depoze.</p>
-        <p><strong>Estatistik NGO</strong> — jòj pwogresyon kominotè a anrejistreye yon inkreman anonim sou Cloudflare KV (nonb sèlman). Okenn idantifyan pèsonèl ni adrès IP pa asosyé epi aksyon sa a.</p>
+        <p><strong>Estatistik NGO</strong> — konteur manche reyisi kwiz kominotè a anrejistreye yon inkreman anonim sou Cloudflare KV (nonb sèlman). Okenn idantifyan pèsonèl ni adrès IP pa asosyé epi aksyon sa a.</p>
         <p><strong>Fòmilè sijesyon evènman</strong> — done ou antre yo (kontni evènman an sèlman) voye nan Worker Cloudflare nou an epi yo estoke an prive pandan nou ap egzamine yo. Pa gen adrès IP, pa gen imèl, pa gen done pèsonèl ki kolekte ni estoke.</p>
         <p>Sit la pa trete okenn done pèsonèl dirèkteman ; konptè vizit la pa konsève okenn idantifyan.</p>
       </div>
@@ -361,7 +361,7 @@ import PageFooter from "../components/PageFooter.astro";
         <p>Este sitio <strong>no utiliza cookies</strong>.</p>
         <p><strong>Preferencia de idioma</strong> — almacenada localmente mediante <strong>localStorage</strong> (FR, EN, KR, ES). Permanece en su dispositivo, nunca se transmite a un servidor.</p>
         <p><strong>Contador de visitas</strong> — contador agregado de primera parte, servido por nuestro propio Cloudflare Worker (<strong>/api/hit</strong>). No se almacena ni se comparte ninguna dirección IP con terceros: las visitas únicas diarias se estiman mediante una huella anónima no reversible (hash con sal rotada a diario, nunca guardado en claro, expirado en 24 h). No se instalan cookies.</p>
-        <p><strong>Estadísticas NGO</strong> — el medidor de progreso comunitario registra un incremento anónimo en Cloudflare KV (solo un número). Ningún identificador personal ni dirección IP se asocia a esta acción.</p>
+        <p><strong>Estadísticas NGO</strong> — el contador de rondas aprobadas del quiz comunitario registra un incremento anónimo en Cloudflare KV (solo un número). Ningún identificador personal ni dirección IP se asocia a esta acción.</p>
         <p><strong>Formulario de sugerencia de evento</strong> — los datos introducidos (solo el contenido del evento) se envían a nuestro Worker de Cloudflare y se almacenan de forma privada mientras los revisamos. No se recopila ni almacena ninguna dirección IP, correo o dato personal.</p>
         <p>Este sitio no trata datos personales directamente bajo el RGPD; el contador de visitas no conserva ningún identificador.</p>
       </div>
