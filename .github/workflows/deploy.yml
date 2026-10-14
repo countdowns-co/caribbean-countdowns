@@ -86,7 +86,16 @@ jobs:
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
         run: |
+          # Diagnostic (temporary): lengths and Cloudflare's own verify answers, never the secret itself.
+          echo "token length: ${#CF_API_TOKEN} (user tokens ~40, account tokens ~53); zone id length: ${#CF_ZONE_ID} (expected 32)"
+          case "$CF_API_TOKEN" in *[[:space:]]*) echo "token contains whitespace";; esac
+          case "$CF_ZONE_ID" in *[[:space:]]*) echo "zone id contains whitespace";; esac
+          echo "user-token verify:"
+          curl -sS "https://api.cloudflare.com/client/v4/user/tokens/verify" -H "Authorization: Bearer ${CF_API_TOKEN}" || true; echo
+          echo "account-token verify:"
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/tokens/verify" -H "Authorization: Bearer ${CF_API_TOKEN}" || true; echo
           curl --fail-with-body -sS -X POST \
             "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
