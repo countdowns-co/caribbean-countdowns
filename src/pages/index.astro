@@ -22,6 +22,11 @@ const enriched = festivals
   .sort((a, b) => {
     if (a.status === "ENDED" && b.status !== "ENDED") return 1;
     if (a.status !== "ENDED" && b.status === "ENDED") return -1;
+    // Ended events: most recently ended first. Active events: soonest start first.
+    if (a.status === "ENDED") {
+      return new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        || new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+    }
     return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
   });
 
