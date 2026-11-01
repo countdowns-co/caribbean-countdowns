@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   lighthouse:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # After a deploy: only audit if the deploy succeeded. Schedule/dispatch: always run.
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
