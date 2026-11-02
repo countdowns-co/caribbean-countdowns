@@ -171,6 +171,15 @@ const eventDateStr =
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
+  /* Desktop: every card gets the same box, so event images share one ratio
+     (812x270 -> 860x286 exports, see caribbean-countdowns-image-tool-v1.html).
+     Description reserves 2 lines; the image-card floor absorbs the footer
+     (eco badge + tags) and LIVE-border variance. Mobile stays content-sized. */
+  @media (min-width: 601px) {
+    .festival-description { min-height: 3.2em; }
+    .festival-entry.has-image { min-height: 270px; }
+  }
+
   .festival-dates {
     font-size: 13px;
     color: #eee;
