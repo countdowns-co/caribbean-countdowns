@@ -172,12 +172,41 @@ const eventDateStr =
   }
 
   /* Desktop: every card gets the same box, so event images share one ratio
-     (812x270 -> 860x286 exports, see caribbean-countdowns-image-tool-v1.html).
-     Description reserves 2 lines; the image-card floor absorbs the footer
-     (eco badge + tags) and LIVE-border variance. Mobile stays content-sized. */
+     (812x270 -> 860x286 exports, see caribbean-countdowns-image-tool-v2.html).
+     Description reserves 2 lines. Image cards are a 2-column grid with two
+     bottom rows pinned to the bottom edge: Tickets + eco badge, then status +
+     tags (the spacer row above them absorbs height variance).
+     Footer wrappers use display: contents so their children join the grid.
+     Larger, brighter text on a darker overlay keeps it readable on bright images.
+     Mobile stays content-sized and unchanged. */
   @media (min-width: 601px) {
     .festival-description { min-height: 3.2em; }
-    .festival-entry.has-image { min-height: 270px; }
+    .festival-entry.has-image {
+      min-height: 270px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto auto auto auto minmax(10px, 1fr) auto auto;
+    }
+    .festival-entry.has-image::before {
+      background: linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.9) 100%);
+    }
+    .festival-entry.has-image > .festival-header { grid-column: 1 / -1; grid-row: 1; }
+    .festival-entry.has-image > .festival-description { grid-column: 1 / -1; grid-row: 2; font-size: 14px; color: #e6e6e6; }
+    .festival-entry.has-image > .festival-dates { grid-column: 1 / -1; grid-row: 3; font-size: 15px; }
+    .festival-entry.has-image > .festival-meta { grid-column: 1 / -1; grid-row: 4; font-size: 13px; }
+    .festival-entry.has-image > .festival-description,
+    .festival-entry.has-image > .festival-dates,
+    .festival-entry.has-image > .festival-meta { text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8); }
+    .festival-entry.has-image .festival-footer,
+    .festival-entry.has-image .frow-meta { display: contents; }
+    .festival-entry.has-image .ticket-links { grid-column: 1; grid-row: 6; align-self: center; margin-bottom: 0; }
+    .festival-entry.has-image .eco-badge { grid-column: 2; grid-row: 6; align-self: center; justify-self: end; }
+    .festival-entry.has-image .status-badge { grid-column: 1; grid-row: 7; align-self: end; justify-self: start; margin-top: 5px; }
+    .festival-entry.has-image .detail-tags { grid-column: 2; grid-row: 7; align-self: end; margin-top: 5px; }
+    /* grandchildren are no longer direct children: keep them above the dark overlay */
+    .festival-entry.has-image .eco-badge,
+    .festival-entry.has-image .status-badge,
+    .festival-entry.has-image .detail-tags { position: relative; }
   }
 
   .festival-dates {
