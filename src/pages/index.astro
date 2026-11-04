@@ -428,14 +428,6 @@ function splitLines(text: string) {
       justify-content: center;
       gap: 8px;
     }
-    .past-count {
-      font-size: 10px;
-      color: #999999;
-      font-family: monospace;
-      padding: 1px 5px;
-      border: 1px solid #1e1e1e;
-      border-radius: 3px;
-    }
 
     @media (max-width: 600px) {
       .sponsor-cause {
@@ -635,11 +627,10 @@ function splitLines(text: string) {
       <div id="past-toggle-card" class="past-toggle-card" role="button" tabindex="0" aria-expanded="false">
         <span class="past-chevron past-chevron-l">▶</span>
         <span class="past-label">
-          <span class="t-en">Past events</span>
-          <span class="t-fr">Événements passés</span>
-          <span class="t-kr">Evènman ki fini</span>
-          <span class="t-es">Eventos pasados</span>
-          <span class="past-count">{endedFestivals.length}</span>
+          <span class="t-en">Last {endedFestivals.length} events</span>
+          <span class="t-fr">{endedFestivals.length} derniers événements</span>
+          <span class="t-kr">{endedFestivals.length} dènyé evènman</span>
+          <span class="t-es">Últimos {endedFestivals.length} eventos</span>
         </span>
         <span class="past-chevron past-chevron-r">◀</span>
       </div>
