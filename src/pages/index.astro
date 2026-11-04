@@ -41,7 +41,6 @@ const eventTypeLabels: Record<string, Record<string, string>> = {
 };
 
 const details = ["All", ...Array.from(new Set(festivals.flatMap(f => f.details ?? []).filter(v => v)))];
-const countries = ["All", ...Array.from(new Set(festivals.map(f => f.country).filter(Boolean)))];
 
 // All grades A–F always shown; the filter matches each event by its computed grade
 // (data-eco-grade on the row, set in FestivalRow). Chips for grades with no event
@@ -53,8 +52,16 @@ const lastUpdateFr = new Date().toLocaleDateString("fr-FR", { day: "numeric", mo
 const lastUpdateEs = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 
 const liveFestivals   = enriched.filter(f => f.status === "LIVE");
-const endedFestivals  = enriched.filter(f => f.status === "ENDED");
+// Past events: only the most recent ones are listed (enriched is sorted most recently
+// ended first). Display only: older events stay in the data files.
+const PAST_EVENTS_LIMIT = 10;
+const endedFestivals  = enriched.filter(f => f.status === "ENDED").slice(0, PAST_EVENTS_LIMIT);
 const activeFestivals = enriched.filter(f => f.status !== "ENDED");
+
+// Filter options come from the events the page lists, so no option matches nothing.
+const listed = [...activeFestivals, ...endedFestivals];
+const listedCountries = new Set(listed.map(f => f.country));
+const countries = ["All", ...Array.from(new Set(festivals.map(f => f.country).filter(Boolean))).filter(c => listedCountries.has(c))];
 
 // LCP hint: the first active card with an image is the likely largest-paint
 // element. Preload it (fetchpriority high) so the browser fetches it early
