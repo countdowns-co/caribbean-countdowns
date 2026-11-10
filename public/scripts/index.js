@@ -236,14 +236,13 @@ var pastOpen    = false;
 if (pastCard && pastSection) {
   function togglePast() {
     pastOpen = !pastOpen;
-    pastSection.style.display = pastOpen ? "" : "none";
     pastCard.classList.toggle("open", pastOpen);
     pastCard.setAttribute("aria-expanded", String(pastOpen));
     var l = pastCard.querySelector(".past-chevron-l");
     var r = pastCard.querySelector(".past-chevron-r");
     if (l) l.textContent = pastOpen ? "▼" : "▶";
     if (r) r.textContent = pastOpen ? "▼" : "◀";
-    if (pastOpen) applyFilters();
+    applyFilters();
   }
   pastCard.addEventListener("click", togglePast);
   pastCard.addEventListener("keydown", function(e) {
