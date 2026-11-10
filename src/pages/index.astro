@@ -6,17 +6,28 @@ import sponsors from "../data/sponsors.json";
 import ngos from "../data/ngos.json";
 import { tzDayStart, tzDayEnd } from "../utils/tz";
 
-const festivals = [...festivals2026, ...festivals2027];
+// Each event remembers the year file it comes from: an event keeps the same internal id from year to year,
+// so a price entry must only match the events of its own year.
+const festivals = [
+  ...festivals2026.map(f => ({ ...f, dataYear: "2026" })),
+  ...festivals2027.map(f => ({ ...f, dataYear: "2027" })),
+];
 
 // Price estimates (events-{year}-pricerange.json, synced from R2 with the other data files).
 // Optional: import.meta.glob does not fail the build when no such file exists yet.
-// Joined by the internal event id (survives a rename), name + country as fallback. The id is
-// only used for this join and is never rendered.
-const priceRows = Object.values(
-  import.meta.glob("../data/events-*-pricerange.json", { eager: true, import: "default" }),
-).flat() as any[];
-const priceById = new Map(priceRows.filter(p => p.id).map(p => [p.id, p]));
-const priceByKey = new Map(priceRows.map(p => [`${p.name}::${p.country}`, p]));
+// Joined by the internal event id (survives a rename), name + country as fallback, always within the
+// same year: ids repeat from year to year. The id is only used for this join and is never rendered.
+const priceFiles = import.meta.glob("../data/events-*-pricerange.json", { eager: true, import: "default" }) as Record<string, any[]>;
+const priceById = new Map<string, any>();
+const priceByKey = new Map<string, any>();
+for (const [path, rows] of Object.entries(priceFiles)) {
+  const year = path.match(/events-(\d{4})-pricerange/)?.[1];
+  for (const p of rows) {
+    if (p.id) priceById.set(`${year}:${p.id}`, p);
+    priceByKey.set(`${year}:${p.name}::${p.country}`, p);
+  }
+}
+
 import FestivalRow from "../components/FestivalRow.astro";
 
 function getStatus(f: any) {
@@ -29,7 +40,7 @@ function getStatus(f: any) {
 
 const enriched = festivals
   .map(f => {
-    const price = ((f as any).id && priceById.get((f as any).id)) || priceByKey.get(`${f.name}::${f.country}`);
+    const price = ((f as any).id && priceById.get(`${f.dataYear}:${(f as any).id}`)) || priceByKey.get(`${f.dataYear}:${f.name}::${f.country}`);
     return {
       ...f,
       status: getStatus(f),
