@@ -25,7 +25,7 @@ function post(body, headers = {}) {
 const VALID = {
   name: "Test Fest", website: "https://example.com", description: "A test festival.",
   startDate: "2026-08-01", endDate: "2026-08-02", city: "Le Moule",
-  country: "Guadeloupe", timezone: "America/Guadeloupe", type: "music festival",
+  country: "Guadeloupe", timezone: "America/Guadeloupe", type: "music",
   details: ["zouk", "kompa"], image: "https://example.com/img.webp",
   tickets: [{ name: "Website", url: "https://example.com/tickets" }],
   eco: ["water", "reusable"], notes: "2nd edition",
@@ -98,6 +98,21 @@ test("missing required fields → 400 with field", async () => {
 test("bad date format → 400", async () => {
   const res = await worker.fetch(post({ ...VALID, startDate: "01/08/2026" }), makeEnv());
   assert.equal(res.status, 400);
+});
+
+test("former type values are rejected (they match no homepage filter)", async () => {
+  for (const old of ["music festival", "carnival", "sailing race"]) {
+    const res = await worker.fetch(post({ ...VALID, type: old }), makeEnv());
+    assert.equal(res.status, 400, old);
+    assert.equal((await res.json()).field, "type");
+  }
+});
+
+test("every current filter type is accepted", async () => {
+  for (const t of ["music", "sport", "sailing", "art", "other"]) {
+    const res = await worker.fetch(post({ ...VALID, type: t }), makeEnv());
+    assert.equal(res.status, 201, t);
+  }
 });
 
 test("unknown type → 400", async () => {

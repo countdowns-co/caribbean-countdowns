@@ -34,7 +34,7 @@ function get(path, headers = {}) {
 const MAIN_EVENT = {
   name: "Test Fest", website: "https://example.com", description: "A test festival.",
   startDate: "2026-08-01", endDate: "2026-08-02", city: "Le Moule",
-  country: "Guadeloupe", timezone: "America/Guadeloupe", type: "music festival",
+  country: "Guadeloupe", timezone: "America/Guadeloupe", type: "music",
   details: ["zouk"], image: "https://example.com/img.webp",
   tickets: [{ name: "Website", url: "https://example.com/tickets" }],
 };
@@ -42,7 +42,7 @@ const MAIN_EVENT = {
 const CANDIDATE_EVENT = {
   name: "Soolang Pangui Fest", website: "", description: "",
   startDate: "2026-08-02", endDate: "2026-08-02", city: "Saint-Laurent du Maroni",
-  country: "French Guiana", timezone: "America/Cayenne", type: "music festival",
+  country: "French Guiana", timezone: "America/Cayenne", type: "music",
   details: [], image: "",
   tickets: [{ name: "Tickets", url: "https://www.bizouk.com/events/details/soolang-pangui-fest/123800" }],
   createdYear: 2026,

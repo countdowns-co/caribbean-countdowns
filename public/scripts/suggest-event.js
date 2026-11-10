@@ -134,14 +134,15 @@ var STEPS = [
     question:{ en:"Who organizes this event?",             fr:"Qui organise cet événement ?",            kr:"Ki moun ki òganize évènman sa a ?",   es:"¿Quién organiza este evento?" },
     hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
   { id:"type",        required:true,  type:"select",
-    options:["music festival","carnival","sailing race","art","sport","other"],
+    // Same values as the homepage filter (eventTypes in src/pages/index.astro): a type that is not listed
+    // there matches no filter chip. A carnival, a festival of any kind or a regatta falls under one of these.
+    options:["music","sport","sailing","art","other"],
     optionLabels:{
-      "music festival":{ en:"Music festival", fr:"Festival de musique", kr:"Fèstival mizik",  es:"Festival de música" },
-      "carnival":      { en:"Carnival",       fr:"Carnaval",            kr:"Kanaval",         es:"Carnaval" },
-      "sailing race":  { en:"Sailing race",   fr:"Course à la voile",   kr:"Kous vwal",       es:"Carrera de vela" },
-      "art":           { en:"Art",            fr:"Art",                 kr:"Atizay",          es:"Arte" },
-      "sport":         { en:"Sport",          fr:"Sport",               kr:"Spo",             es:"Deporte" },
-      "other":         { en:"Other",          fr:"Autre",               kr:"Le restan",       es:"Otro" },
+      "music":  { en:"Music",   fr:"Musique", kr:"Mizik",    es:"Música" },
+      "sport":  { en:"Sport",   fr:"Sport",   kr:"Spo",      es:"Deporte" },
+      "sailing":{ en:"Sailing", fr:"Voile",   kr:"Vwal",     es:"Vela" },
+      "art":    { en:"Art",     fr:"Art",     kr:"Atizay",   es:"Arte" },
+      "other":  { en:"Other",   fr:"Autre",   kr:"Le restan",es:"Otro" },
     },
     question:{ en:"What type of event is it?",            fr:"Quel type d'événement est-ce ?",          kr:"Ki kalité évènman li ye ?",            es:"¿Qué tipo de evento es?" },
     hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },

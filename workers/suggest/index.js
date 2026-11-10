@@ -13,7 +13,9 @@ const MAX_BODY = 10 * 1024;
 const DATE_RE  = /^\d{4}-\d{2}-\d{2}$/;
 const EDITION_RE = /^\d{1,3}$/;
 const YEAR_RE  = /^\d{4}$/;
-const TYPES    = ['music festival', 'carnival', 'sailing race', 'art', 'sport', 'other'];
+// Same values as the homepage filter (eventTypes in src/pages/index.astro). Former values (music festival,
+// carnival, sailing race) are rejected on purpose: they match no filter chip.
+const TYPES    = ['music', 'sport', 'sailing', 'art', 'other'];
 const ECO_IDS  = ['transport', 'no_plastic', 'reusable', 'water', 'ngo'];
 const ATTENDANCE_OPTIONS = ['under_200', '200_1000', '1000_plus'];
 const ORGANIZER_OPTIONS  = ['association', 'company', 'municipality', 'media', 'individual'];
