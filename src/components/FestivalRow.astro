@@ -404,20 +404,6 @@ const eventDateStr =
   <div class="festival-meta">{festival.city ? `${festival.city}, ${festival.country}` : festival.country}</div>
 
   <div class="ticket-links">
-    {festival.tickets?.filter((t: { name: string; url: string }) => t.name).length > 0 ? (
-      festival.tickets.filter((t: { name: string; url: string }) => t.name).map((t: { name: string; url: string }) => (
-        <a class="ticket-link" href={t.url} target="_blank" rel="noopener noreferrer">
-          {t.name}
-        </a>
-      ))
-    ) : !hasPriceData ? (
-      <span class="free-badge">
-        <span class="t-en">Free</span>
-        <span class="t-fr">Gratuit</span>
-        <span class="t-kr">Gratis</span>
-        <span class="t-es">Gratis</span>
-      </span>
-    ) : null}
     {freeToWatch && (
       <span class="price-badge price-watch">
         <span class="t-en">Free to watch</span>
@@ -442,6 +428,20 @@ const eventDateStr =
         <span class="t-es">{enterRange} para participar</span>
       </span>
     )}
+    {festival.tickets?.filter((t: { name: string; url: string }) => t.name).length > 0 ? (
+      festival.tickets.filter((t: { name: string; url: string }) => t.name).map((t: { name: string; url: string }) => (
+        <a class="ticket-link" href={t.url} target="_blank" rel="noopener noreferrer">
+          {t.name}
+        </a>
+      ))
+    ) : !hasPriceData ? (
+      <span class="free-badge">
+        <span class="t-en">Free</span>
+        <span class="t-fr">Gratuit</span>
+        <span class="t-kr">Gratis</span>
+        <span class="t-es">Gratis</span>
+      </span>
+    ) : null}
   </div>
 
   <div class="festival-footer">
