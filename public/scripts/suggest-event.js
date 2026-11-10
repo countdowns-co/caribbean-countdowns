@@ -33,7 +33,7 @@ var TZ_MAP = {
   "Turks and Caicos Islands": "America/Grand_Turk",
   "U.S. Virgin Islands":    "America/Virgin",
   "Bahamas":                "America/Nassau",
-  "Bermuda":                "America/Bermuda",
+  "Bermuda":                "Atlantic/Bermuda",
   "Cuba":                   "America/Havana",
   "Dominican Republic":     "America/Santo_Domingo",
   "Haiti":                  "America/Port-au-Prince",
