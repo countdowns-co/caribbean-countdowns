@@ -14,7 +14,10 @@
  *                        Also merges in events-{year}-candidates.json (events failing a
  *                        listing criterion, e.g. not yet 2nd edition), tagged listed:false.
  *                        Also merges in events-{year}-pricerange.json (ticket price-range
- *                        estimates keyed by name+country) as priceRangeEstimate/priceCheckedDate.
+ *                        estimates, joined by internal id with name+country as fallback) as
+ *                        priceRangeEstimate (visitor: watch/attend), participantPriceRangeEstimate
+ *                        (entry fee for participants) and priceCheckedDate. The internal id itself is
+ *                        never returned.
  *                        Free/medium never fetch either object.
  *
  * Security (see caribbean-countdowns-api/api-authorization-audit.html):
@@ -36,11 +39,13 @@ const FIELDS = {
   // expose it until it is listed here — turns a data edit back into a deliberate code decision.
   // 'listed' is stamped by fetch() below (true for events-{year}.json, false for
   // events-{year}-candidates.json) — it is never present in the source JSON files.
-  // priceRangeEstimate/priceCheckedDate come from events-{year}-pricerange.json —
-  // premium-only ticket price tracking, never on free/medium.
+  // priceRangeEstimate/participantPriceRangeEstimate/priceCheckedDate come from
+  // events-{year}-pricerange.json — premium-only price tracking, never on free/medium.
+  // priceRangeEstimate = what a visitor pays to watch/attend (free = known free, absent = unknown);
+  // participantPriceRangeEstimate = what a participant pays to enter (absent = no entry fee data).
   premium: ['name', 'startDate', 'endDate', 'country', 'description', 'type', 'website',
             'timezone', 'city', 'details', 'image', 'tickets', 'eco', 'listed',
-            'priceRangeEstimate', 'priceCheckedDate'],
+            'priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate'],
 };
 
 // Constant-time key comparison — avoids a timing side-channel on the secret keys.
@@ -161,9 +166,9 @@ export default {
         ...candidates.map(e => ({ ...e, listed: false })),
       ];
 
-      // Premium only: attach ticket price-range estimates from a separate R2 object,
-      // produced by the price-tracking script. Keyed by name+country (events have no
-      // stable id). Missing object (no pricing run yet that year) → [], same as candidates.
+      // Premium only: attach price-range estimates from a separate R2 object, produced by the
+      // price-tracking script and the review page. Missing object (no pricing run yet that year)
+      // → [], same as candidates.
       const pricerangeObject = await env.CARIBBEAN_DATA.get(`events-${year}-pricerange.json`);
       let priceranges = [];
       if (pricerangeObject) {
@@ -173,12 +178,17 @@ export default {
           return jsonResponse({ error: 'Data parse error' }, 500, {}, cors);
         }
       }
+      // Joined by the internal id when both sides have one (survives a rename), otherwise by
+      // name+country. The id is only used here: it is not in any FIELDS list, so it is never returned.
+      const priceById  = new Map(priceranges.filter(p => p.id).map(p => [p.id, p]));
       const priceByKey = new Map(priceranges.map(p => [`${p.name}::${p.country}`, p]));
       events = events.map(e => {
-        const price = priceByKey.get(`${e.name}::${e.country}`);
-        return price
-          ? { ...e, priceRangeEstimate: price.priceRangeEstimate, priceCheckedDate: price.priceCheckedDate }
-          : e;
+        const price = (e.id && priceById.get(e.id)) || priceByKey.get(`${e.name}::${e.country}`);
+        if (!price) return e;
+        const merged = { ...e, priceCheckedDate: price.priceCheckedDate };
+        if (price.priceRangeEstimate !== undefined)            merged.priceRangeEstimate = price.priceRangeEstimate;
+        if (price.participantPriceRangeEstimate !== undefined) merged.participantPriceRangeEstimate = price.participantPriceRangeEstimate;
+        return merged;
       });
     }
 

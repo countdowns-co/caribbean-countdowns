@@ -8,7 +8,7 @@ var COUNTRIES = [
   "Antigua and Barbuda", "Anguilla", "Aruba", "Barbados", "Bonaire",
   "British Virgin Islands", "Cayman Islands", "Curaçao", "Dominica", "Grenada",
   "Guadeloupe", "La Désirade", "Les Saintes", "Marie-Galante", "Martinique",
-  "Montserrat", "Saba", "Saint Barthélemy", "Saint Kitts and Nevis", "Saint Lucia",
+  "Montserrat", "Saba", "St. Barth", "Saint Kitts and Nevis", "Saint Lucia",
   "Saint Martin", "Saint Vincent and the Grenadines", "Sint Maarten", "Sint Eustatius",
   "Tobago", "Trinidad", "Trinidad and Tobago", "Turks and Caicos Islands", "U.S. Virgin Islands",
   "Bahamas", "Bermuda", "Cuba", "Dominican Republic", "Haiti", "Jamaica",

@@ -7,6 +7,16 @@ import ngos from "../data/ngos.json";
 import { tzDayStart, tzDayEnd } from "../utils/tz";
 
 const festivals = [...festivals2026, ...festivals2027];
+
+// Price estimates (events-{year}-pricerange.json, synced from R2 with the other data files).
+// Optional: import.meta.glob does not fail the build when no such file exists yet.
+// Joined by the internal event id (survives a rename), name + country as fallback. The id is
+// only used for this join and is never rendered.
+const priceRows = Object.values(
+  import.meta.glob("../data/events-*-pricerange.json", { eager: true, import: "default" }),
+).flat() as any[];
+const priceById = new Map(priceRows.filter(p => p.id).map(p => [p.id, p]));
+const priceByKey = new Map(priceRows.map(p => [`${p.name}::${p.country}`, p]));
 import FestivalRow from "../components/FestivalRow.astro";
 
 function getStatus(f: any) {
@@ -18,7 +28,16 @@ function getStatus(f: any) {
 }
 
 const enriched = festivals
-  .map(f => ({ ...f, status: getStatus(f) }))
+  .map(f => {
+    const price = ((f as any).id && priceById.get((f as any).id)) || priceByKey.get(`${f.name}::${f.country}`);
+    return {
+      ...f,
+      status: getStatus(f),
+      // visitor: what it costs to watch (free = known free, absent = unknown); participant: entry fee bucket
+      priceVisitor: price?.priceRangeEstimate as string | undefined,
+      priceParticipant: price?.participantPriceRangeEstimate as string | undefined,
+    };
+  })
   .sort((a, b) => {
     if (a.status === "ENDED" && b.status !== "ENDED") return 1;
     if (a.status !== "ENDED" && b.status === "ENDED") return -1;
