@@ -1,5 +1,5 @@
 const buttons = document.querySelectorAll<HTMLButtonElement>(".filter-tag");
-const rows = document.querySelectorAll<HTMLElement>(".festival-entry");
+const rows = document.querySelectorAll<HTMLElement>(".event-entry");
 
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {

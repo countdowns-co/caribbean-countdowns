@@ -10,7 +10,7 @@
   var schedule = window.requestIdleCallback || function (fn) { setTimeout(fn, 1); };
 
   schedule(function () {
-    var festivals = JSON.parse(dataEl.getAttribute("data-festivals"));
+    var events = JSON.parse(dataEl.getAttribute("data-events"));
 
     // Intl.DateTimeFormat construction is expensive — one formatter per
     // timezone, one offset computation per (date, timezone) pair.
@@ -48,7 +48,7 @@
 
     var nowMs = Date.now();
 
-    var live = festivals.filter(function (f) {
+    var live = events.filter(function (f) {
       var tz = f.timezone || "America/Martinique";
       return nowMs >= tzDayStart(f.startDate, tz) && nowMs <= tzDayEnd(f.endDate, tz);
     });

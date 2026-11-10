@@ -4,7 +4,7 @@ import f2025 from "../data/events-2025.json";
 import f2026 from "../data/events-2026.json";
 import f2027 from "../data/events-2027.json";
 
-const festivals = [...(f2024 as any[]), ...(f2025 as any[]), ...(f2026 as any[]), ...(f2027 as any[])]
+const events = [...(f2024 as any[]), ...(f2025 as any[]), ...(f2026 as any[]), ...(f2027 as any[])]
   .filter((f: any) => f.startDate && f.endDate)
   .map((f: any) => ({
     name: f.name,
@@ -30,7 +30,7 @@ const festivals = [...(f2024 as any[]), ...(f2025 as any[]), ...(f2026 as any[])
   </div>
 </div>
 
-<div id="live-banner-data" hidden data-festivals={JSON.stringify(festivals)}></div>
+<div id="live-banner-data" hidden data-events={JSON.stringify(events)}></div>
 <script is:inline src="/scripts/live-banner.js" defer></script>
 
 <style is:global>

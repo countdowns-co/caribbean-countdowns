@@ -1,16 +1,16 @@
 ---
 import LiveBanner from "../components/LiveBanner.astro";
-import festivals2026 from "../data/events-2026.json";
-import festivals2027 from "../data/events-2027.json";
+import events2026 from "../data/events-2026.json";
+import events2027 from "../data/events-2027.json";
 import sponsors from "../data/sponsors.json";
 import ngos from "../data/ngos.json";
 import { tzDayStart, tzDayEnd } from "../utils/tz";
 
 // Each event remembers the year file it comes from: an event keeps the same internal id from year to year,
 // so a price entry must only match the events of its own year.
-const festivals = [
-  ...festivals2026.map(f => ({ ...f, dataYear: "2026" })),
-  ...festivals2027.map(f => ({ ...f, dataYear: "2027" })),
+const events = [
+  ...events2026.map(f => ({ ...f, dataYear: "2026" })),
+  ...events2027.map(f => ({ ...f, dataYear: "2027" })),
 ];
 
 // Price estimates (events-{year}-pricerange.json, synced from R2 with the other data files).
@@ -28,7 +28,7 @@ for (const [path, rows] of Object.entries(priceFiles)) {
   }
 }
 
-import FestivalRow from "../components/FestivalRow.astro";
+import EventRow from "../components/EventRow.astro";
 
 function getStatus(f: any) {
   const tz = f.timezone ?? "America/Martinique";
@@ -38,7 +38,7 @@ function getStatus(f: any) {
   return "UPCOMING";
 }
 
-const enriched = festivals
+const enriched = events
   .map(f => {
     const price = ((f as any).id && priceById.get(`${f.dataYear}:${(f as any).id}`)) || priceByKey.get(`${f.dataYear}:${f.name}::${f.country}`);
     return {
@@ -70,10 +70,10 @@ const eventTypeLabels: Record<string, Record<string, string>> = {
   "other":   { en: "Other",       fr: "Autre",          kr: "Le restan",    es: "Otro" },
 };
 
-const details = ["All", ...Array.from(new Set(festivals.flatMap(f => f.details ?? []).filter(v => v)))];
+const details = ["All", ...Array.from(new Set(events.flatMap(f => f.details ?? []).filter(v => v)))];
 
 // All grades A–F always shown; the filter matches each event by its computed grade
-// (data-eco-grade on the row, set in FestivalRow). Chips for grades with no event
+// (data-eco-grade on the row, set in EventRow). Chips for grades with no event
 // yet simply match nothing until events are graded.
 const ecoGrades = ["All", "A", "B", "C", "D", "F"];
 
@@ -81,22 +81,22 @@ const lastUpdateEn = new Date().toLocaleDateString("en-US", { day: "numeric", mo
 const lastUpdateFr = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 const lastUpdateEs = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 
-const liveFestivals   = enriched.filter(f => f.status === "LIVE");
+const liveEvents   = enriched.filter(f => f.status === "LIVE");
 // Past events: only the most recent ones are listed (enriched is sorted most recently
 // ended first). Display only: older events stay in the data files.
 const PAST_EVENTS_LIMIT = 10;
-const endedFestivals  = enriched.filter(f => f.status === "ENDED").slice(0, PAST_EVENTS_LIMIT);
-const activeFestivals = enriched.filter(f => f.status !== "ENDED");
+const endedEvents  = enriched.filter(f => f.status === "ENDED").slice(0, PAST_EVENTS_LIMIT);
+const activeEvents = enriched.filter(f => f.status !== "ENDED");
 
 // Filter options come from the events the page lists, so no option matches nothing.
-const listed = [...activeFestivals, ...endedFestivals];
+const listed = [...activeEvents, ...endedEvents];
 const listedCountries = new Set(listed.map(f => f.country));
-const countries = ["All", ...Array.from(new Set(festivals.map(f => f.country).filter(Boolean))).filter(c => listedCountries.has(c))];
+const countries = ["All", ...Array.from(new Set(events.map(f => f.country).filter(Boolean))).filter(c => listedCountries.has(c))];
 
 // LCP hint: the first active card with an image is the likely largest-paint
 // element. Preload it (fetchpriority high) so the browser fetches it early
 // instead of waiting for the CSS background-image to be discovered.
-const lcpImage = activeFestivals.find(f => f.image)?.image ?? null;
+const lcpImage = activeEvents.find(f => f.image)?.image ?? null;
 
 const { ngo } = ngos;
 const { sponsor } = sponsors;
@@ -546,14 +546,14 @@ function splitLines(text: string) {
     </div>
 
     <!-- Live banner -->
-    {liveFestivals.length > 0 && (
+    {liveEvents.length > 0 && (
       <div class="live-banner">
         <span class="live-dot"></span>
         <span>
-          <span class="t-en"><strong>{liveFestivals.length}</strong> {liveFestivals.length === 1 ? "event is" : "events are"} happening now.</span>
-          <span class="t-fr"><strong>{liveFestivals.length}</strong> {liveFestivals.length === 1 ? "évènement est" : "évènements sont"} en cours.</span>
-          <span class="t-kr"><strong>{liveFestivals.length}</strong> {liveFestivals.length === 1 ? "evènman ap" : "evènman ap"} fèt kounye a.</span>
-          <span class="t-es"><strong>{liveFestivals.length}</strong> {liveFestivals.length === 1 ? "evento está" : "eventos están"} ocurriendo ahora.</span>
+          <span class="t-en"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "event is" : "events are"} happening now.</span>
+          <span class="t-fr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "évènement est" : "évènements sont"} en cours.</span>
+          <span class="t-kr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evènman ap" : "evènman ap"} fèt kounye a.</span>
+          <span class="t-es"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evento está" : "eventos están"} ocurriendo ahora.</span>
         </span>
       </div>
     )}
@@ -647,30 +647,30 @@ function splitLines(text: string) {
 
     <hr class="divider" />
 
-    <!-- Festival list — active events (first 3 eager for LCP; rest lazy) -->
-    {activeFestivals.map((festival, i) => (
-      <FestivalRow festival={festival} eager={i < 3 || festival.image === lcpImage} />
+    <!-- Event list — active events (first 3 eager for LCP; rest lazy) -->
+    {activeEvents.map((event, i) => (
+      <EventRow event={event} eager={i < 3 || event.image === lcpImage} />
     ))}
 
     <!-- Past events toggle card -->
-    {endedFestivals.length > 0 && (
+    {endedEvents.length > 0 && (
       <div id="past-toggle-card" class="past-toggle-card" role="button" tabindex="0" aria-expanded="false">
         <span class="past-chevron past-chevron-l">▶</span>
         <span class="past-label">
-          <span class="t-en">Last {endedFestivals.length} events</span>
-          <span class="t-fr">{endedFestivals.length} derniers événements</span>
-          <span class="t-kr">{endedFestivals.length} dènyé evènman</span>
-          <span class="t-es">Últimos {endedFestivals.length} eventos</span>
+          <span class="t-en">Last {endedEvents.length} events</span>
+          <span class="t-fr">{endedEvents.length} derniers événements</span>
+          <span class="t-kr">{endedEvents.length} dènyé evènman</span>
+          <span class="t-es">Últimos {endedEvents.length} eventos</span>
         </span>
         <span class="past-chevron past-chevron-r">◀</span>
       </div>
     )}
 
     <!-- Past events — hidden by default -->
-    {endedFestivals.length > 0 && (
+    {endedEvents.length > 0 && (
       <div id="past-events-section" class="is-hidden">
-        {endedFestivals.map(festival => (
-          <FestivalRow festival={festival} />
+        {endedEvents.map(event => (
+          <EventRow event={event} />
         ))}
       </div>
     )}

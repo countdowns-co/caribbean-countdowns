@@ -4,24 +4,24 @@ import { tzDayStart, tzDayEnd } from "../utils/tz";
 import { computeEcoGrade } from "../utils/eco";
 // `eager` cards (above the fold) paint their background inline; others defer it
 // to a data-bg attribute loaded on scroll (see index.js IntersectionObserver).
-const { festival, eager = false } = Astro.props;
+const { event, eager = false } = Astro.props;
 
-const ecoGrade = computeEcoGrade(festival.eco, ecoCriteria as any[]);
+const ecoGrade = computeEcoGrade(event.eco, ecoCriteria as any[]);
 
 // Price badges. Visitor price: only "free" is shown ("Free to watch"); a paid visitor price is not
 // badged. Participant price: bucket -> range (language-neutral, euros), then a translated suffix.
 const priceRanges: Record<string, string> = {
   under_20: "< 20 €", "20_50": "20–50 €", "50_100": "50–100 €", over_100: "> 100 €",
 };
-const freeToWatch = festival.priceVisitor === "free";
-const enterRange = festival.priceParticipant ? priceRanges[festival.priceParticipant] : undefined;
-const freeToEnter = festival.priceParticipant === "free";
+const freeToWatch = event.priceVisitor === "free";
+const enterRange = event.priceParticipant ? priceRanges[event.priceParticipant] : undefined;
+const freeToEnter = event.priceParticipant === "free";
 const hasPriceBadge = freeToWatch || !!enterRange || freeToEnter;
-const hasPriceData = !!festival.priceVisitor || !!festival.priceParticipant;
+const hasPriceData = !!event.priceVisitor || !!event.priceParticipant;
 
-const tz = festival.timezone ?? "America/Martinique";
-const startMs = tzDayStart(festival.startDate, tz);
-const endMs   = tzDayEnd(festival.endDate, tz);
+const tz = event.timezone ?? "America/Martinique";
+const startMs = tzDayStart(event.startDate, tz);
+const endMs   = tzDayEnd(event.endDate, tz);
 const nowMs   = Date.now();
 
 let status = "";
@@ -40,8 +40,8 @@ const countdownTarget =
 
 // Use noon UTC so toLocaleDateString always shows the correct calendar date
 // regardless of build-server timezone (startMs/endMs can cross midnight UTC)
-const [sy, sm, sd] = festival.startDate.split("-").map(Number);
-const [ey, em, ed] = festival.endDate.split("-").map(Number);
+const [sy, sm, sd] = event.startDate.split("-").map(Number);
+const [ey, em, ed] = event.endDate.split("-").map(Number);
 const start = new Date(Date.UTC(sy, sm - 1, sd, 12, 0, 0));
 const end   = new Date(Date.UTC(ey, em - 1, ed, 12, 0, 0));
 
@@ -60,23 +60,23 @@ const eventDateStr =
 
 <style>
   .frow-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-  .festival-entry {
+  .event-entry {
     padding: 20px 0 18px;
   }
 
-  .festival-entry.live {
+  .event-entry.live {
     background: #1a0a0a;
     border: 1px solid #3a1010;
     border-radius: 6px;
     padding: 20px;
   }
 
-  .festival-entry.live .countdown {
+  .event-entry.live .countdown {
     color: #f87171;
     animation: pulse 1.4s infinite;
   }
 
-  .festival-entry.has-image {
+  .event-entry.has-image {
     background-size: cover;
     background-position: center;
     border-radius: 6px;
@@ -85,7 +85,7 @@ const eventDateStr =
     min-height: 180px;
   }
 
-  .festival-entry.has-image::before {
+  .event-entry.has-image::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -94,11 +94,11 @@ const eventDateStr =
     pointer-events: none;
   }
 
-  .festival-entry.has-image > * {
+  .event-entry.has-image > * {
     position: relative;
   }
 
-  .festival-header {
+  .event-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -107,7 +107,7 @@ const eventDateStr =
   }
 
 
-  .festival-name {
+  .event-name {
     font-size: 18px;
     font-weight: 700;
     display: inline-flex;
@@ -115,7 +115,7 @@ const eventDateStr =
     gap: 6px;
   }
 
-  .festival-name a {
+  .event-name a {
     color: #fff;
     text-decoration: none;
     text-shadow:
@@ -124,14 +124,14 @@ const eventDateStr =
       0 2px 12px rgba(0,0,0,0.7);
   }
 
-  .festival-name a:hover { text-decoration: underline; }
+  .event-name a:hover { text-decoration: underline; }
 
-  .festival-entry.live .festival-name {
+  .event-entry.live .event-name {
     font-size: 20px;
     letter-spacing: -0.3px;
   }
 
-  .festival-entry.live .festival-name a {
+  .event-entry.live .event-name a {
     color: #fff;
     text-shadow:
       0 0 12px rgba(239, 68, 68, 0.6),
@@ -168,14 +168,14 @@ const eventDateStr =
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  .festival-meta {
+  .event-meta {
     font-size: 12px;
     color: #ddd;
     margin-bottom: 4px;
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  .festival-description {
+  .event-description {
     font-size: 12px;
     color: #bbb;
     margin-bottom: 8px;
@@ -191,43 +191,43 @@ const eventDateStr =
      Larger, brighter text on a darker overlay keeps it readable on bright images.
      Mobile stays content-sized and unchanged. */
   @media (min-width: 601px) {
-    .festival-description { min-height: 3.2em; }
-    .festival-entry.has-image {
+    .event-description { min-height: 3.2em; }
+    .event-entry.has-image {
       min-height: 270px;
       display: grid;
       grid-template-columns: 1fr auto;
       grid-template-rows: auto auto auto auto minmax(10px, 1fr) auto auto;
     }
-    .festival-entry.has-image::before {
+    .event-entry.has-image::before {
       background: linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.9) 100%);
     }
-    .festival-entry.has-image > .festival-header { grid-column: 1 / -1; grid-row: 1; }
-    .festival-entry.has-image > .festival-description { grid-column: 1 / -1; grid-row: 2; font-size: 14px; color: #e6e6e6; }
-    .festival-entry.has-image > .festival-dates { grid-column: 1 / -1; grid-row: 3; font-size: 15px; }
-    .festival-entry.has-image > .festival-meta { grid-column: 1 / -1; grid-row: 4; font-size: 13px; }
-    .festival-entry.has-image > .festival-description,
-    .festival-entry.has-image > .festival-dates,
-    .festival-entry.has-image > .festival-meta { text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8); }
-    .festival-entry.has-image .festival-footer,
-    .festival-entry.has-image .frow-meta { display: contents; }
-    .festival-entry.has-image .ticket-links { grid-column: 1; grid-row: 6; align-self: center; margin-bottom: 0; }
-    .festival-entry.has-image .eco-badge { grid-column: 2; grid-row: 6; align-self: center; justify-self: end; }
-    .festival-entry.has-image .status-badge { grid-column: 1; grid-row: 7; align-self: end; justify-self: start; margin-top: 5px; }
-    .festival-entry.has-image .detail-tags { grid-column: 2; grid-row: 7; align-self: end; margin-top: 5px; }
+    .event-entry.has-image > .event-header { grid-column: 1 / -1; grid-row: 1; }
+    .event-entry.has-image > .event-description { grid-column: 1 / -1; grid-row: 2; font-size: 14px; color: #e6e6e6; }
+    .event-entry.has-image > .event-dates { grid-column: 1 / -1; grid-row: 3; font-size: 15px; }
+    .event-entry.has-image > .event-meta { grid-column: 1 / -1; grid-row: 4; font-size: 13px; }
+    .event-entry.has-image > .event-description,
+    .event-entry.has-image > .event-dates,
+    .event-entry.has-image > .event-meta { text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8); }
+    .event-entry.has-image .event-footer,
+    .event-entry.has-image .frow-meta { display: contents; }
+    .event-entry.has-image .ticket-links { grid-column: 1; grid-row: 6; align-self: center; margin-bottom: 0; }
+    .event-entry.has-image .eco-badge { grid-column: 2; grid-row: 6; align-self: center; justify-self: end; }
+    .event-entry.has-image .status-badge { grid-column: 1; grid-row: 7; align-self: end; justify-self: start; margin-top: 5px; }
+    .event-entry.has-image .detail-tags { grid-column: 2; grid-row: 7; align-self: end; margin-top: 5px; }
     /* grandchildren are no longer direct children: keep them above the dark overlay */
-    .festival-entry.has-image .eco-badge,
-    .festival-entry.has-image .status-badge,
-    .festival-entry.has-image .detail-tags { position: relative; }
+    .event-entry.has-image .eco-badge,
+    .event-entry.has-image .status-badge,
+    .event-entry.has-image .detail-tags { position: relative; }
   }
 
-  .festival-dates {
+  .event-dates {
     font-size: 13px;
     color: #eee;
     margin-bottom: 4px;
     text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   }
 
-  .festival-footer {
+  .event-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -332,11 +332,11 @@ const eventDateStr =
     border: 1px solid #065f46;
   }
 
-  .festival-entry.ended .festival-name a,
-  .festival-entry.ended .countdown { color: #999999; }
+  .event-entry.ended .event-name a,
+  .event-entry.ended .countdown { color: #999999; }
 
-  .festival-entry.ended .festival-meta,
-  .festival-entry.ended .festival-dates { color: #3a3a3a; }
+  .event-entry.ended .event-meta,
+  .event-entry.ended .event-dates { color: #3a3a3a; }
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -367,19 +367,19 @@ const eventDateStr =
 </style>
 
 <div
-  class={`festival-entry${status === "ENDED" ? " ended" : ""}${status === "LIVE" ? " live" : ""}${(festival.image && status !== "ENDED") ? " has-image" : ""}`}
-  data-name={festival.name ?? ""}
-  data-type={festival.type ?? ""}
-  data-details={(festival.details ?? []).join(",")}
-  data-country={festival.country ?? ""}
+  class={`event-entry${status === "ENDED" ? " ended" : ""}${status === "LIVE" ? " live" : ""}${(event.image && status !== "ENDED") ? " has-image" : ""}`}
+  data-name={event.name ?? ""}
+  data-type={event.type ?? ""}
+  data-details={(event.details ?? []).join(",")}
+  data-country={event.country ?? ""}
   data-eco-grade={ecoGrade ?? ""}
-  data-bg={(!eager && festival.image && status !== "ENDED") ? festival.image : undefined}
-  data-bg-eager={(eager && festival.image && status !== "ENDED") ? festival.image : undefined}
+  data-bg={(!eager && event.image && status !== "ENDED") ? event.image : undefined}
+  data-bg-eager={(eager && event.image && status !== "ENDED") ? event.image : undefined}
 >
-  <div class="festival-header">
-    <div class="festival-name">
-      <a href={festival.website} target="_blank" rel="noopener noreferrer">
-        {festival.name}
+  <div class="event-header">
+    <div class="event-name">
+      <a href={event.website} target="_blank" rel="noopener noreferrer">
+        {event.name}
       </a>
       <span class="ext-icon">↗</span>
     </div>
@@ -397,11 +397,11 @@ const eventDateStr =
     </div>
   </div>
 
-  <div class="festival-description">{festival.description}</div>
+  <div class="event-description">{event.description}</div>
 
-  <div class="festival-dates">{eventDateStr}</div>
+  <div class="event-dates">{eventDateStr}</div>
 
-  <div class="festival-meta">{festival.city ? `${festival.city}, ${festival.country}` : festival.country}</div>
+  <div class="event-meta">{event.city ? `${event.city}, ${event.country}` : event.country}</div>
 
   <div class="ticket-links">
     {freeToWatch && (
@@ -428,8 +428,8 @@ const eventDateStr =
         <span class="t-es">{enterRange} para participar</span>
       </span>
     )}
-    {festival.tickets?.filter((t: { name: string; url: string }) => t.name).length > 0 ? (
-      festival.tickets.filter((t: { name: string; url: string }) => t.name).map((t: { name: string; url: string }) => (
+    {event.tickets?.filter((t: { name: string; url: string }) => t.name).length > 0 ? (
+      event.tickets.filter((t: { name: string; url: string }) => t.name).map((t: { name: string; url: string }) => (
         <a class="ticket-link" href={t.url} target="_blank" rel="noopener noreferrer">
           {t.name}
         </a>
@@ -444,7 +444,7 @@ const eventDateStr =
     ) : null}
   </div>
 
-  <div class="festival-footer">
+  <div class="event-footer">
     <span class={`status-badge status-${status}`}>
       <span class="t-en">{status}</span>
       <span class="t-fr">{status === "UPCOMING" ? "À VENIR" : status === "LIVE" ? "EN COURS" : "TERMINÉ"}</span>
@@ -455,9 +455,9 @@ const eventDateStr =
       {ecoGrade && (
         <a href="/sustainability" class={`eco-badge eco-${ecoGrade}`}>♻️ {ecoGrade}</a>
       )}
-      {festival.details?.filter((v: string) => v).length > 0 && (
+      {event.details?.filter((v: string) => v).length > 0 && (
         <div class="detail-tags">
-          {festival.details.filter((v: string) => v).map((g: string) => (
+          {event.details.filter((v: string) => v).map((g: string) => (
             <span class="detail-tag">{g}</span>
           ))}
         </div>

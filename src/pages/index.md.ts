@@ -1,10 +1,10 @@
 import type { APIRoute } from "astro";
-import festivals2026 from "../data/events-2026.json";
-import festivals2027 from "../data/events-2027.json";
+import events2026 from "../data/events-2026.json";
+import events2027 from "../data/events-2027.json";
 
 type Ev = { name: string; startDate: string; endDate: string; country: string; website?: string };
 
-const all = [...festivals2026, ...festivals2027] as Ev[];
+const all = [...events2026, ...events2027] as Ev[];
 const today = new Date().toISOString().slice(0, 10);
 const upcoming = all
   .filter((e) => e.endDate >= today)

@@ -103,7 +103,7 @@ function applyFilters() {
   var pastEl = document.getElementById("past-events-section");
   var pastMatch = false;
 
-  document.querySelectorAll(".festival-entry").forEach(function(row) {
+  document.querySelectorAll(".event-entry").forEach(function(row) {
     var rowName    = (row.getAttribute("data-name")   || "").toLowerCase();
     var rowType    = row.getAttribute("data-type")    || "";
     var rowDetails = (row.getAttribute("data-details") || "").split(",").filter(Boolean);
