@@ -1,8 +1,8 @@
 import type { APIRoute, GetStaticPaths } from "astro";
-import festivals2026 from '../../data/events-2026.json';
-import festivals2027 from '../../data/events-2027.json';
+import events2026 from '../../data/events-2026.json';
+import events2027 from '../../data/events-2027.json';
 
-type Festival = {
+type EventRecord = {
   name: string;
   startDate: string;
   endDate: string;
@@ -12,15 +12,15 @@ type Festival = {
   website?: string;
 };
 
-const festivalsByYear: Record<string, Festival[]> = {
-  '2026': festivals2026 as Festival[],
-  '2027': festivals2027 as Festival[],
+const eventsByYear: Record<string, EventRecord[]> = {
+  '2026': events2026 as EventRecord[],
+  '2027': events2027 as EventRecord[],
 };
 
 // Merge all years into a single array for "all"
-const allFestivals: Festival[] = [
-  ...festivalsByYear['2026'],
-  ...festivalsByYear['2027'],
+const allEvents: EventRecord[] = [
+  ...eventsByYear['2026'],
+  ...eventsByYear['2027'],
 ];
 
 function toIcalDate(dateStr: string) {
@@ -31,19 +31,19 @@ function escapeIcal(str: string = "") {
   return str.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
 }
 
-function buildIcal(entries: Festival[]) {
+function buildIcal(entries: EventRecord[]) {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Caribbean Festival Deadlines//EN",
+    "PRODID:-//Caribbean Event Deadlines//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    "X-WR-CALNAME:Caribbean Festival Deadlines",
+    "X-WR-CALNAME:Caribbean Event Deadlines",
     "X-WR-TIMEZONE:America/Martinique",
   ];
 
   for (const f of entries) {
-    const uid = `${f.name.toLowerCase().replace(/\s+/g, "-")}@caribbean-festival-deadlines`;
+    const uid = `${f.name.toLowerCase().replace(/\s+/g, "-")}@caribbean-event-deadlines`;
     lines.push(
       "BEGIN:VEVENT",
       `UID:${uid}`,
@@ -63,7 +63,7 @@ function buildIcal(entries: Festival[]) {
 
 export const getStaticPaths: GetStaticPaths = () => {
   const countries = [
-    ...new Set(allFestivals.map((f) => f.country).filter(Boolean)),
+    ...new Set(allEvents.map((f) => f.country).filter(Boolean)),
   ];
   return [
     { params: { country: "all" } },
@@ -79,8 +79,8 @@ export const GET: APIRoute = ({ params }) => {
 
   const source =
     country === "all"
-      ? allFestivals
-      : allFestivals.filter(
+      ? allEvents
+      : allEvents.filter(
           (f) => f.country.toLowerCase().replace(/\s+/g, "-") === country
         );
 

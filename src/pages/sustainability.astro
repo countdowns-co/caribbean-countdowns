@@ -7,7 +7,7 @@ import f2025 from "../data/events-2025.json";
 import f2026 from "../data/events-2026.json";
 import f2027 from "../data/events-2027.json";
 
-const allFestivals = [...(f2024 as any[]), ...(f2025 as any[]), ...(f2026 as any[]), ...(f2027 as any[])];
+const allEvents = [...(f2024 as any[]), ...(f2025 as any[]), ...(f2026 as any[]), ...(f2027 as any[])];
 
 function computeScore(eco: any): number {
   let total = 0;
@@ -27,7 +27,7 @@ function getGrade(score: number): string {
   return "F";
 }
 
-const evaluated = allFestivals
+const evaluated = allEvents
   .filter((f: any) => f.eco)
   .map((f: any) => {
     const score = computeScore(f.eco);
@@ -42,7 +42,7 @@ const evaluated = allFestivals
   })
   .sort((a: any, b: any) => b.score - a.score);
 
-const notEvaluated = allFestivals.filter((f: any) => !f.eco);
+const notEvaluated = allEvents.filter((f: any) => !f.eco);
 ---
 
 <html lang="en">
@@ -159,8 +159,8 @@ const notEvaluated = allFestivals.filter((f: any) => !f.eco);
       margin-bottom: 16px;
     }
 
-    /* Festival card */
-    .festival-card {
+    /* Event card */
+    .event-card {
       background: #0d1a1a;
       border: 1px solid #1a3030;
       border-radius: 8px;
@@ -176,16 +176,16 @@ const notEvaluated = allFestivals.filter((f: any) => !f.eco);
       gap: 16px;
     }
 
-    .festival-name-link {
+    .event-name-link {
       font-size: 16px;
       font-weight: 700;
       color: #fff;
     }
-    .festival-name-link:hover { text-decoration: underline; }
+    .event-name-link:hover { text-decoration: underline; }
 
     .ext-icon { font-size: 11px; color: #999999; margin-left: 4px; }
 
-    .festival-loc {
+    .event-loc {
       font-size: 12px;
       color: #999999;
       margin-top: 2px;
@@ -466,13 +466,13 @@ const notEvaluated = allFestivals.filter((f: any) => !f.eco);
         </div>
 
         {(evaluated as any[]).map((f: any) => (
-          <div class="festival-card">
+          <div class="event-card">
             <div class="card-header">
               <div>
-                <a href={f.website} class="festival-name-link" target="_blank" rel="noopener noreferrer">
+                <a href={f.website} class="event-name-link" target="_blank" rel="noopener noreferrer">
                   {f.name}<span class="ext-icon">↗</span>
                 </a>
-                <div class="festival-loc">
+                <div class="event-loc">
                   {f.city ? `${f.city}, ` : ""}{f.country}
                 </div>
               </div>
