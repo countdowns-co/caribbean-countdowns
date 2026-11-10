@@ -8,6 +8,17 @@ const { festival, eager = false } = Astro.props;
 
 const ecoGrade = computeEcoGrade(festival.eco, ecoCriteria as any[]);
 
+// Price badges. Visitor price: only "free" is shown ("Free to watch"); a paid visitor price is not
+// badged. Participant price: bucket -> range (language-neutral, euros), then a translated suffix.
+const priceRanges: Record<string, string> = {
+  under_20: "< 20 €", "20_50": "20–50 €", "50_100": "50–100 €", over_100: "> 100 €",
+};
+const freeToWatch = festival.priceVisitor === "free";
+const enterRange = festival.priceParticipant ? priceRanges[festival.priceParticipant] : undefined;
+const freeToEnter = festival.priceParticipant === "free";
+const hasPriceBadge = freeToWatch || !!enterRange || freeToEnter;
+const hasPriceData = !!festival.priceVisitor || !!festival.priceParticipant;
+
 const tz = festival.timezone ?? "America/Martinique";
 const startMs = tzDayStart(festival.startDate, tz);
 const endMs   = tzDayEnd(festival.endDate, tz);
@@ -266,6 +277,19 @@ const eventDateStr =
     text-decoration: none;
   }
 
+  .price-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .price-watch { background: #0d2a2a; color: #5eead4; border-color: #115e59; }
+  .price-enter { background: #1a1a2e; color: #a5b4fc; border-color: #3730a3; }
+
   .status-badge {
     display: inline-block;
     font-size: 10px;
@@ -386,12 +410,36 @@ const eventDateStr =
           {t.name}
         </a>
       ))
-    ) : (
+    ) : !hasPriceData ? (
       <span class="free-badge">
         <span class="t-en">Free</span>
         <span class="t-fr">Gratuit</span>
         <span class="t-kr">Gratis</span>
         <span class="t-es">Gratis</span>
+      </span>
+    ) : null}
+    {freeToWatch && (
+      <span class="price-badge price-watch">
+        <span class="t-en">Free to watch</span>
+        <span class="t-fr">Gratuit pour le public</span>
+        <span class="t-kr">Gratis pou gadé</span>
+        <span class="t-es">Gratis para el público</span>
+      </span>
+    )}
+    {freeToEnter && (
+      <span class="price-badge price-enter">
+        <span class="t-en">Free to enter</span>
+        <span class="t-fr">Participation gratuite</span>
+        <span class="t-kr">Patisipasyon gratis</span>
+        <span class="t-es">Participación gratuita</span>
+      </span>
+    )}
+    {enterRange && (
+      <span class="price-badge price-enter">
+        <span class="t-en">{enterRange} to enter</span>
+        <span class="t-fr">{enterRange} pour participer</span>
+        <span class="t-kr">{enterRange} pou patisipé</span>
+        <span class="t-es">{enterRange} para participar</span>
       </span>
     )}
   </div>

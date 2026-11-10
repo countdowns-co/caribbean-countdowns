@@ -175,3 +175,67 @@ test("missing events-{year}-pricerange.json object does not error, behaves as be
   assert.equal(body[0].name, "Solo Event");
   assert.equal("priceRangeEstimate" in body[0], false);
 });
+
+test("premium tier receives participantPriceRangeEstimate; free and medium never do", async () => {
+  const files = {
+    "events-2026.json": JSON.stringify([
+      { name: "Test Race", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01", description: "d", type: "sport", website: "https://example.com" },
+    ]),
+    "events-2026-pricerange.json": JSON.stringify([
+      { name: "Test Race", country: "Testland", priceRangeEstimate: "free", participantPriceRangeEstimate: "20_50", priceCheckedDate: "2026-11-10" },
+    ]),
+  };
+  const premium = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(files))).json();
+  assert.equal(premium[0].priceRangeEstimate, "free");
+  assert.equal(premium[0].participantPriceRangeEstimate, "20_50");
+  for (const headers of [{}, { "X-API-Key": "medium-secret" }]) {
+    const body = await (await worker.fetch(get("/api/events/2026", headers), makeEnv(files))).json();
+    assert.equal("priceRangeEstimate" in body[0], false);
+    assert.equal("participantPriceRangeEstimate" in body[0], false);
+  }
+});
+
+test("an entry with only a participant bucket leaves the visitor bucket absent (unknown, not free)", async () => {
+  const env = makeEnv({
+    "events-2026.json": JSON.stringify([{ name: "Test Race", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01" }]),
+    "events-2026-pricerange.json": JSON.stringify([
+      { name: "Test Race", country: "Testland", participantPriceRangeEstimate: "over_100", priceCheckedDate: "2026-11-10" },
+    ]),
+  });
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), env)).json();
+  assert.equal(event.participantPriceRangeEstimate, "over_100");
+  assert.equal("priceRangeEstimate" in event, false);
+});
+
+test("price entries are joined by internal id when present, so a renamed event keeps its price", async () => {
+  const env = makeEnv({
+    "events-2026.json": JSON.stringify([{ id: "evt_aaaaaaaaaaaaaaaa", name: "Renamed Fest", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01" }]),
+    "events-2026-pricerange.json": JSON.stringify([
+      { id: "evt_aaaaaaaaaaaaaaaa", name: "Old Name Fest", country: "Testland", priceRangeEstimate: "20_50", priceCheckedDate: "2026-11-10" },
+    ]),
+  });
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), env)).json();
+  assert.equal(event.priceRangeEstimate, "20_50");
+  assert.equal("id" in event, false);
+});
+
+test("id is an internal join key: never exposed on any tier, even when present in events, candidates and pricerange", async () => {
+  const files = {
+    "events-2026.json": JSON.stringify([
+      { id: "evt_testfest0000001", name: "Test Fest", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01", description: "d", type: "music", website: "https://example.com" },
+    ]),
+    "events-2026-candidates.json": JSON.stringify([
+      { id: "evt_candfest0000001", name: "Cand Fest", country: "Testland", startDate: "2026-02-01", endDate: "2026-02-01" },
+    ]),
+    "events-2026-pricerange.json": JSON.stringify([
+      { id: "evt_testfest0000001", name: "Test Fest", country: "Testland", priceRangeEstimate: "20_50", priceCheckedDate: "2026-11-10" },
+    ]),
+  };
+  for (const headers of [{}, { "X-API-Key": "medium-secret" }, { "X-API-Key": "premium-secret" }]) {
+    const res = await worker.fetch(get("/api/events/2026", headers), makeEnv(files));
+    assert.equal(res.status, 200);
+    const text = await res.text();
+    assert.ok(!text.includes("evt_testfest0000001") && !text.includes("evt_candfest0000001"), `id leaked for ${JSON.stringify(headers)}`);
+    for (const e of JSON.parse(text)) assert.equal("id" in e, false);
+  }
+});

@@ -20,7 +20,7 @@ var TZ_MAP = {
   "Martinique":             "America/Martinique",
   "Montserrat":             "America/Montserrat",
   "Saba":                   "America/Curacao",
-  "Saint Barthélemy":       "America/St_Barthelemy",
+  "St. Barth":              "America/St_Barthelemy",
   "Saint Kitts and Nevis":  "America/St_Kitts",
   "Saint Lucia":            "America/St_Lucia",
   "Saint Martin":           "America/Martinique",
