@@ -13,11 +13,12 @@
  *   premium KEY_PREMIUM→ explicit allowlist of known fields (NOT a raw passthrough).
  *                        Also merges in events-{year}-candidates.json (events failing a
  *                        listing criterion, e.g. not yet 2nd edition), tagged listed:false.
- *                        Also merges in events-{year}-pricerange.json (ticket price-range
- *                        estimates, joined by internal id with name+country as fallback) as
- *                        priceRangeEstimate (visitor: watch/attend), participantPriceRangeEstimate
- *                        (entry fee for participants) and priceCheckedDate. The internal id itself is
- *                        never returned.
+ *                        Also merges in events-{year}-premium.json (falls back to the older
+ *                        events-{year}-pricerange.json), joined by internal id with name+country as
+ *                        fallback: priceRangeEstimate (visitor: watch/attend),
+ *                        participantPriceRangeEstimate (entry fee for participants), priceCheckedDate,
+ *                        avgAttendance (under_200 | 200_1000 | 1000_plus), attendanceYear and
+ *                        attendanceSource. The internal id itself is never returned.
  *                        Free/medium never fetch either object.
  *
  * Security (see caribbean-countdowns-api/api-authorization-audit.html):
@@ -39,14 +40,22 @@ const FIELDS = {
   // expose it until it is listed here — turns a data edit back into a deliberate code decision.
   // 'listed' is stamped by fetch() below (true for events-{year}.json, false for
   // events-{year}-candidates.json) — it is never present in the source JSON files.
-  // priceRangeEstimate/participantPriceRangeEstimate/priceCheckedDate come from
-  // events-{year}-pricerange.json — premium-only price tracking, never on free/medium.
+  // priceRangeEstimate/participantPriceRangeEstimate/priceCheckedDate and
+  // avgAttendance/attendanceYear/attendanceSource come from events-{year}-premium.json
+  // (falls back to the older events-{year}-pricerange.json) — premium-only, never on free/medium.
   // priceRangeEstimate = what a visitor pays to watch/attend (free = known free, absent = unknown);
   // participantPriceRangeEstimate = what a participant pays to enter (absent = no entry fee data).
+  // Price buckets from 100 up are floors: over_100 = 100-200 EUR ... over_1000 = 1000 EUR and more.
+  // avgAttendance = under_200 | 200_1000 | 1000_plus, for the year in attendanceYear, with its source.
   premium: ['name', 'startDate', 'endDate', 'country', 'description', 'type', 'website',
             'timezone', 'city', 'details', 'image', 'tickets', 'eco', 'listed',
-            'priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate'],
+            'priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate',
+            'avgAttendance', 'attendanceYear', 'attendanceSource'],
 };
+
+// Keys copied from an events-{year}-premium.json entry onto the matching event (premium only).
+const PREMIUM_ENRICHMENT = ['priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate',
+                            'avgAttendance', 'attendanceYear', 'attendanceSource'];
 
 // Constant-time key comparison — avoids a timing side-channel on the secret keys.
 function safeEq(a, b) {
@@ -166,28 +175,28 @@ export default {
         ...candidates.map(e => ({ ...e, listed: false })),
       ];
 
-      // Premium only: attach price-range estimates from a separate R2 object, produced by the
-      // price-tracking script and the review page. Missing object (no pricing run yet that year)
-      // → [], same as candidates.
-      const pricerangeObject = await env.CARIBBEAN_DATA.get(`events-${year}-pricerange.json`);
-      let priceranges = [];
-      if (pricerangeObject) {
+      // Premium only: attach the enrichment data (price ranges, attendance) from a separate R2 object,
+      // joined by the internal id when both sides have one (survives a rename), otherwise by name+country.
+      // events-{year}-premium.json is the current file; events-{year}-pricerange.json is read only while
+      // it does not exist yet. Missing both → [], same as candidates.
+      // The id is only used here: it is not in any FIELDS list, so it is never returned.
+      const premiumObject = await env.CARIBBEAN_DATA.get(`events-${year}-premium.json`)
+        || await env.CARIBBEAN_DATA.get(`events-${year}-pricerange.json`);
+      let enrichment = [];
+      if (premiumObject) {
         try {
-          priceranges = JSON.parse(await pricerangeObject.text());
+          enrichment = JSON.parse(await premiumObject.text());
         } catch {
           return jsonResponse({ error: 'Data parse error' }, 500, {}, cors);
         }
       }
-      // Joined by the internal id when both sides have one (survives a rename), otherwise by
-      // name+country. The id is only used here: it is not in any FIELDS list, so it is never returned.
-      const priceById  = new Map(priceranges.filter(p => p.id).map(p => [p.id, p]));
-      const priceByKey = new Map(priceranges.map(p => [`${p.name}::${p.country}`, p]));
+      const enrichById  = new Map(enrichment.filter(p => p.id).map(p => [p.id, p]));
+      const enrichByKey = new Map(enrichment.map(p => [`${p.name}::${p.country}`, p]));
       events = events.map(e => {
-        const price = (e.id && priceById.get(e.id)) || priceByKey.get(`${e.name}::${e.country}`);
-        if (!price) return e;
-        const merged = { ...e, priceCheckedDate: price.priceCheckedDate };
-        if (price.priceRangeEstimate !== undefined)            merged.priceRangeEstimate = price.priceRangeEstimate;
-        if (price.participantPriceRangeEstimate !== undefined) merged.participantPriceRangeEstimate = price.participantPriceRangeEstimate;
+        const extra = (e.id && enrichById.get(e.id)) || enrichByKey.get(`${e.name}::${e.country}`);
+        if (!extra) return e;
+        const merged = { ...e };
+        for (const k of PREMIUM_ENRICHMENT) if (extra[k] !== undefined) merged[k] = extra[k];
         return merged;
       });
     }

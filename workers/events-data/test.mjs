@@ -239,3 +239,74 @@ test("id is an internal join key: never exposed on any tier, even when present i
     for (const e of JSON.parse(text)) assert.equal("id" in e, false);
   }
 });
+
+// ── events-{year}-premium.json (price ranges + attendance) ──────────────────────────────
+
+const PREMIUM_FILES = (extra = {}) => ({
+  "events-2026.json": JSON.stringify([
+    { id: "evt_testfest0000001", name: "Test Fest", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01", description: "d", type: "music", website: "https://example.com" },
+  ]),
+  "events-2026-premium.json": JSON.stringify([
+    { id: "evt_testfest0000001", name: "Test Fest", country: "Testland", priceRangeEstimate: "over_400", priceCheckedDate: "2026-11-14",
+      avgAttendance: "200_1000", attendanceYear: 2026, attendanceSource: "https://example.com/article" },
+  ]),
+  ...extra,
+});
+
+test("premium tier receives price and attendance from the premium file", async () => {
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(PREMIUM_FILES()))).json();
+  assert.equal(event.priceRangeEstimate, "over_400");
+  assert.equal(event.avgAttendance, "200_1000");
+  assert.equal(event.attendanceYear, 2026);
+  assert.equal(event.attendanceSource, "https://example.com/article");
+  assert.equal("id" in event, false);
+});
+
+test("free and medium never receive price or attendance keys, and never fetch the premium file", async () => {
+  for (const headers of [{}, { "X-API-Key": "medium-secret" }]) {
+    const env = makeEnv(PREMIUM_FILES());
+    const [event] = await (await worker.fetch(get("/api/events/2026", headers), env)).json();
+    for (const k of ["avgAttendance", "attendanceYear", "attendanceSource", "priceRangeEstimate", "priceCheckedDate"]) assert.equal(k in event, false, k);
+    assert.ok(!env.calls.includes("events-2026-premium.json"));
+    assert.ok(!env.calls.includes("events-2026-pricerange.json"));
+  }
+});
+
+test("an attendance-only entry adds no price keys and no priceCheckedDate", async () => {
+  const env = makeEnv(PREMIUM_FILES({
+    "events-2026-premium.json": JSON.stringify([{ id: "evt_testfest0000001", name: "Test Fest", country: "Testland", avgAttendance: "under_200", attendanceYear: 2026, attendanceSource: "organizer-suggestion" }]),
+  }));
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), env)).json();
+  assert.equal(event.avgAttendance, "under_200");
+  for (const k of ["priceRangeEstimate", "participantPriceRangeEstimate", "priceCheckedDate"]) assert.equal(k in event, false, k);
+});
+
+test("the premium file wins over the older pricerange file and the older file is not read", async () => {
+  const env = makeEnv(PREMIUM_FILES({
+    "events-2026-pricerange.json": JSON.stringify([{ id: "evt_testfest0000001", name: "Test Fest", country: "Testland", priceRangeEstimate: "free", priceCheckedDate: "2025-01-01" }]),
+  }));
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), env)).json();
+  assert.equal(event.priceRangeEstimate, "over_400");
+  assert.ok(!env.calls.includes("events-2026-pricerange.json"));
+});
+
+test("without a premium file the older pricerange file is still used", async () => {
+  const files = PREMIUM_FILES(); delete files["events-2026-premium.json"];
+  files["events-2026-pricerange.json"] = JSON.stringify([{ id: "evt_testfest0000001", name: "Test Fest", country: "Testland", priceRangeEstimate: "free", priceCheckedDate: "2026-11-10" }]);
+  const [event] = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(files))).json();
+  assert.equal(event.priceRangeEstimate, "free");
+  assert.equal("avgAttendance" in event, false);
+});
+
+test("a premium entry is joined by id after a rename, and the id never leaves the Worker", async () => {
+  const files = PREMIUM_FILES({ "events-2026.json": JSON.stringify([{ id: "evt_testfest0000001", name: "Renamed Fest", country: "Testland", startDate: "2026-01-01", endDate: "2026-01-01" }]) });
+  const text = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(files))).text();
+  assert.ok(!text.includes("evt_testfest0000001"));
+  assert.equal(JSON.parse(text)[0].avgAttendance, "200_1000");
+});
+
+test("a malformed premium file returns a 500 for premium, never for free", async () => {
+  const files = PREMIUM_FILES({ "events-2026-premium.json": "{not json" });
+  assert.equal((await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(files))).status, 500);
+  assert.equal((await worker.fetch(get("/api/events/2026"), makeEnv(files))).status, 200);
+});
