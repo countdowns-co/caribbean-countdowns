@@ -101,7 +101,7 @@ test("bad date format → 400", async () => {
 });
 
 test("former type values are rejected (they match no homepage filter)", async () => {
-  for (const old of ["music festival", "carnival", "sailing race"]) {
+  for (const old of ["music festival", "sailing race"]) {
     const res = await worker.fetch(post({ ...VALID, type: old }), makeEnv());
     assert.equal(res.status, 400, old);
     assert.equal((await res.json()).field, "type");
@@ -109,7 +109,7 @@ test("former type values are rejected (they match no homepage filter)", async ()
 });
 
 test("every current filter type is accepted", async () => {
-  for (const t of ["music", "sport", "sailing", "art", "other"]) {
+  for (const t of ["music", "sport", "sailing", "art", "carnival", "culture", "food", "other"]) {
     const res = await worker.fetch(post({ ...VALID, type: t }), makeEnv());
     assert.equal(res.status, 201, t);
   }
