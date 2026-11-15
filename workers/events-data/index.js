@@ -47,10 +47,13 @@ const FIELDS = {
   // participantPriceRangeEstimate = what a participant pays to enter (absent = no entry fee data).
   // Price buckets from 100 up are floors: over_100 = 100-200 EUR ... over_1000 = 1000 EUR and more.
   // avgAttendance = under_200 | 200_1000 | 1000_plus, for the year in attendanceYear, with its source.
+  // edition = number of this edition, firstYear = year of the first edition; both come from events-{year}.json
+  // and are optional (absent when unknown). Exposed on premium only.
   premium: ['name', 'startDate', 'endDate', 'country', 'description', 'type', 'website',
             'timezone', 'city', 'details', 'image', 'tickets', 'eco', 'listed',
             'priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate',
-            'avgAttendance', 'attendanceYear', 'attendanceSource'],
+            'avgAttendance', 'attendanceYear', 'attendanceSource',
+            'edition', 'firstYear'],
 };
 
 // Keys copied from an events-{year}-premium.json entry onto the matching event (premium only).

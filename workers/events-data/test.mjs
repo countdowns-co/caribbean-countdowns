@@ -310,3 +310,17 @@ test("a malformed premium file returns a 500 for premium, never for free", async
   assert.equal((await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv(files))).status, 500);
   assert.equal((await worker.fetch(get("/api/events/2026"), makeEnv(files))).status, 200);
 });
+
+test("premium tier receives edition and firstYear when present; free and medium never do", async () => {
+  const env = makeEnv({ "events-2026.json": JSON.stringify([{ ...MAIN_EVENT, edition: 34, firstYear: 1993 }, { ...MAIN_EVENT, name: "Other Fest" }]) });
+  const prem = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), env)).json();
+  const first = prem.find(e => e.name === "Test Fest"), other = prem.find(e => e.name === "Other Fest");
+  assert.equal(first.edition, 34);
+  assert.equal(first.firstYear, 1993);
+  assert.equal("edition" in other, false);
+  for (const headers of [{}, { "X-API-Key": "medium-secret" }]) {
+    const rows = await (await worker.fetch(get("/api/events/2026", headers), makeEnv({ "events-2026.json": JSON.stringify([{ ...MAIN_EVENT, edition: 34, firstYear: 1993 }]) }))).json();
+    assert.equal("edition" in rows[0], false);
+    assert.equal("firstYear" in rows[0], false);
+  }
+});
