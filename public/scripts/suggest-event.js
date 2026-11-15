@@ -134,15 +134,18 @@ var STEPS = [
     question:{ en:"Who organizes this event?",             fr:"Qui organise cet événement ?",            kr:"Ki moun ki òganize évènman sa a ?",   es:"¿Quién organiza este evento?" },
     hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
   { id:"type",        required:true,  type:"select",
-    // Same values as the homepage filter (eventTypes in src/pages/index.astro): a type that is not listed
-    // there matches no filter chip. A carnival, a festival of any kind or a regatta falls under one of these.
-    options:["music","sport","sailing","art","other"],
+    // Same values as the homepage filter (eventTypes in src/pages/index.astro) and the suggest Worker (TYPES):
+    // a type that is not listed there matches no filter chip. Labels are the ones of the filter chips.
+    options:["music","sport","sailing","art","carnival","culture","food","other"],
     optionLabels:{
-      "music":  { en:"Music",   fr:"Musique", kr:"Mizik",    es:"Música" },
-      "sport":  { en:"Sport",   fr:"Sport",   kr:"Spo",      es:"Deporte" },
-      "sailing":{ en:"Sailing", fr:"Voile",   kr:"Vwal",     es:"Vela" },
-      "art":    { en:"Art",     fr:"Art",     kr:"Atizay",   es:"Arte" },
-      "other":  { en:"Other",   fr:"Autre",   kr:"Le restan",es:"Otro" },
+      "music":   { en:"Music",   fr:"Musique",     kr:"Mizik",     es:"Música" },
+      "sport":   { en:"Sport",   fr:"Sport",       kr:"Spo",       es:"Deporte" },
+      "sailing": { en:"Sailing", fr:"Voile",       kr:"Vwal",      es:"Vela" },
+      "art":     { en:"Art",     fr:"Art",         kr:"Atizay",    es:"Arte" },
+      "carnival":{ en:"Carnival",fr:"Carnaval",    kr:"Kanaval",   es:"Carnaval" },
+      "culture": { en:"Culture", fr:"Culture",     kr:"Kilti",     es:"Cultura" },
+      "food":    { en:"Food",    fr:"Gastronomie", kr:"Bon manjé", es:"Gastronomía" },
+      "other":   { en:"Other",   fr:"Autre",       kr:"Le restan", es:"Otro" },
     },
     question:{ en:"What type of event is it?",            fr:"Quel type d'événement est-ce ?",          kr:"Ki kalité évènman li ye ?",            es:"¿Qué tipo de evento es?" },
     hint:    { en:"",                                     fr:"",                                        kr:"",                                    es:"" } },
