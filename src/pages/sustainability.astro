@@ -27,22 +27,46 @@ function getGrade(score: number): string {
   return "F";
 }
 
-const evaluated = allEvents
-  .filter((f: any) => f.eco)
+// One card = one edition (one year = one eco badge). Editions of the build year and later are all listed;
+// a past edition is listed only when it was evaluated (past evaluations stay in the data files, and
+// past editions that were never assessed are not shown: nobody will assess them now).
+// Evaluated cards come first, sorted by score; the others are grade F "not evaluated yet", latest first.
+// An assessment is an object; an empty list (eco: [] from the suggestion form) means not evaluated.
+const SHOW_PROGRESSION = true; // set to false to hide the "since last edition" line on the cards
+const FIRST_LISTED_YEAR = new Date().getFullYear();
+const hasEco = (f: any) => !!f.eco && !Array.isArray(f.eco);
+const yearOf = (f: any) => String(f.startDate ?? "").slice(0, 4);
+const sameEvent = (a: any, b: any) => (a.id && b.id) ? a.id === b.id : (a.name === b.name && a.country === b.country);
+
+const scored = allEvents
+  .filter(hasEco)
   .map((f: any) => {
     const score = computeScore(f.eco);
-    const grade = getGrade(score);
+    return { ...f, score, grade: getGrade(score) };
+  });
+
+const evaluated = scored
+  .map((f: any) => {
     const breakdown = (ecoCriteria as any[]).map(cat => {
       const met = cat.criteria.filter((c: any) => f.eco[cat.key]?.[c.key] === true).length;
       const unmet = cat.criteria.filter((c: any) => !f.eco[cat.key]?.[c.key]);
       return { ...cat, met, unmet };
     });
     const totalTips = breakdown.reduce((s: number, c: any) => s + c.unmet.length, 0);
-    return { ...f, score, grade, breakdown, totalTips };
+    // Progression: the latest earlier edition of the same event that was also evaluated.
+    const prev = SHOW_PROGRESSION
+      ? scored
+          .filter((o: any) => sameEvent(o, f) && yearOf(o) < yearOf(f))
+          .sort((a: any, b: any) => yearOf(b).localeCompare(yearOf(a)))[0]
+      : undefined;
+    const progress = prev ? { year: yearOf(prev), grade: prev.grade, delta: f.score - prev.score } : null;
+    return { ...f, breakdown, totalTips, progress };
   })
   .sort((a: any, b: any) => b.score - a.score);
 
-const notEvaluated = allEvents.filter((f: any) => !f.eco);
+const notEvaluated = allEvents
+  .filter((f: any) => !hasEco(f) && Number(yearOf(f)) >= FIRST_LISTED_YEAR)
+  .sort((a: any, b: any) => String(b.startDate).localeCompare(String(a.startDate)));
 ---
 
 <html lang="en">
@@ -120,6 +144,8 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
       flex-wrap: wrap;
       margin-bottom: 8px;
     }
+    /* keeps the F pill and its text together when the legend wraps */
+    .legend-group { display: flex; align-items: center; gap: 8px; }
     .legend-item {
       display: flex;
       align-items: center;
@@ -327,28 +353,16 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
       line-height: 1.5;
     }
 
-    /* Not evaluated section */
-    .not-evaluated {
-      margin-top: 48px;
-      border-top: 1px solid #1a2a2a;
-      padding-top: 32px;
-    }
+    /* Progression since the last evaluated edition */
+    .progress { font-size: 12px; margin-top: 4px; font-weight: 600; }
+    .progress-up { color: #4ade80; }
+    .progress-down { color: #f87171; }
+    .progress-same { color: #999999; }
 
-    .not-evaluated-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .not-evaluated-item {
-      font-size: 11px;
-      color: #999999;
-      background: #0d1515;
-      border: 1px solid #1a2a2a;
-      border-radius: 4px;
-      padding: 4px 10px;
-    }
+    /* Events without an assessment yet: compact card, grade F */
+    .event-card.pending { padding: 14px 24px; margin-bottom: 10px; }
+    .event-card.pending .card-header { margin-bottom: 8px; }
+    .pending-note { font-size: 12px; color: #999999; }
 
     /* Empty state */
     .empty-state {
@@ -422,12 +436,14 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
           <span class="t-es">20–39 — Fase inicial</span>
         </span>
         <span class="sep">·</span>
-        <span class="legend-pill grade-F">F</span>
-        <span class="legend-item">
-          <span class="t-en">0–19, or not evaluated yet</span>
-          <span class="t-fr">0–19, ou pas encore évalué</span>
-          <span class="t-kr">0–19, poko evalye</span>
-          <span class="t-es">0–19, o aún sin evaluar</span>
+        <span class="legend-group">
+          <span class="legend-pill grade-F">F</span>
+          <span class="legend-item">
+            <span class="t-en">0–19, or not evaluated yet</span>
+            <span class="t-fr">0–19, ou pas encore évalué</span>
+            <span class="t-kr">0–19, poko evalye</span>
+            <span class="t-es">0–19, o aún sin evaluar</span>
+          </span>
         </span>
       </div>
     </div>
@@ -464,10 +480,10 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
     ) : (
       <>
         <div class="section-heading">
-          <span class="t-en">{evaluated.length} event{evaluated.length > 1 ? "s" : ""} evaluated</span>
-          <span class="t-fr">{evaluated.length} événement{evaluated.length > 1 ? "s" : ""} évalué{evaluated.length > 1 ? "s" : ""}</span>
-          <span class="t-kr">{evaluated.length} festivàl evalye</span>
-          <span class="t-es">{evaluated.length} evento{evaluated.length > 1 ? "s" : ""} evaluado{evaluated.length > 1 ? "s" : ""}</span>
+          <span class="t-en">Evaluated events</span>
+          <span class="t-fr">Événements évalués</span>
+          <span class="t-kr">Festivàl evalye</span>
+          <span class="t-es">Eventos evaluados</span>
         </div>
 
         {(evaluated as any[]).map((f: any) => (
@@ -478,8 +494,27 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
                   {f.name}<span class="ext-icon">↗</span>
                 </a>
                 <div class="event-loc">
-                  {f.city ? `${f.city}, ` : ""}{f.country}
+                  {f.city ? `${f.city}, ` : ""}{f.country} · {yearOf(f)}
                 </div>
+                {f.progress && (
+                  <div class={`progress ${f.progress.delta > 0 ? "progress-up" : f.progress.delta < 0 ? "progress-down" : "progress-same"}`}>
+                    {f.progress.delta === 0 ? (
+                      <>
+                        <span class="t-en">= same as {f.progress.year} (grade {f.progress.grade})</span>
+                        <span class="t-fr">= identique à {f.progress.year} (note {f.progress.grade})</span>
+                        <span class="t-kr">= menm bagay ak {f.progress.year} (nòt {f.progress.grade})</span>
+                        <span class="t-es">= igual que {f.progress.year} (nota {f.progress.grade})</span>
+                      </>
+                    ) : (
+                      <>
+                        <span class="t-en">{f.progress.delta > 0 ? "▲" : "▼"} {f.progress.delta > 0 ? "+" : "−"}{Math.abs(f.progress.delta)} pts since {f.progress.year} ({f.progress.grade} → {f.grade})</span>
+                        <span class="t-fr">{f.progress.delta > 0 ? "▲" : "▼"} {f.progress.delta > 0 ? "+" : "−"}{Math.abs(f.progress.delta)} pts depuis {f.progress.year} ({f.progress.grade} → {f.grade})</span>
+                        <span class="t-kr">{f.progress.delta > 0 ? "▲" : "▼"} {f.progress.delta > 0 ? "+" : "−"}{Math.abs(f.progress.delta)} pwen depi {f.progress.year} ({f.progress.grade} → {f.grade})</span>
+                        <span class="t-es">{f.progress.delta > 0 ? "▲" : "▼"} {f.progress.delta > 0 ? "+" : "−"}{Math.abs(f.progress.delta)} pts desde {f.progress.year} ({f.progress.grade} → {f.grade})</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               <div class={`grade-circle grade-${f.grade}`}>
                 {f.grade}
@@ -550,19 +585,39 @@ const notEvaluated = allEvents.filter((f: any) => !f.eco);
     )}
 
     {notEvaluated.length > 0 && (
-      <div class="not-evaluated">
+      <>
         <div class="section-heading">
-          <span class="t-en">Awaiting evaluation</span>
-          <span class="t-fr">En attente d'évaluation</span>
-          <span class="t-kr">Ap tann evalyasyon</span>
-          <span class="t-es">Pendiente de evaluación</span>
+          <span class="t-en">Events not evaluated yet — grade F</span>
+          <span class="t-fr">Événements pas encore évalués — note F</span>
+          <span class="t-kr">Festivàl poko evalye — nòt F</span>
+          <span class="t-es">Eventos aún sin evaluar — nota F</span>
         </div>
-        <div class="not-evaluated-list">
-          {(notEvaluated as any[]).map((f: any) => (
-            <span class="not-evaluated-item">{f.name} — {f.country}</span>
-          ))}
-        </div>
-      </div>
+
+        {(notEvaluated as any[]).map((f: any) => (
+          <div class="event-card pending">
+            <div class="card-header">
+              <div>
+                <a href={f.website} class="event-name-link" target="_blank" rel="noopener noreferrer">
+                  {f.name}<span class="ext-icon">↗</span>
+                </a>
+                <div class="event-loc">
+                  {f.city ? `${f.city}, ` : ""}{f.country} · {yearOf(f)}
+                </div>
+              </div>
+              <div class="grade-circle grade-F">
+                F
+                <span class="grade-score">—</span>
+              </div>
+            </div>
+            <div class="pending-note">
+              <span class="t-en">No eco assessment yet, so grade F. Organiser? Use the <a href="/eco-evaluator/" class="lnk-teal">eco evaluator</a>.</span>
+              <span class="t-fr">Pas encore évalué, donc note F. Organisateur ? Utilisez l'<a href="/eco-evaluator/" class="lnk-teal">évaluateur éco</a>.</span>
+              <span class="t-kr">Poko gen evalyasyon, donk nòt F. Òganizatè ? Itilize <a href="/eco-evaluator/" class="lnk-teal">evaluatè eko a</a>.</span>
+              <span class="t-es">Aún sin evaluación, por eso nota F. ¿Organizas? Usa el <a href="/eco-evaluator/" class="lnk-teal">evaluador eco</a>.</span>
+            </div>
+          </div>
+        ))}
+      </>
     )}
 
   </main>
