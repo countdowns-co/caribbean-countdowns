@@ -184,7 +184,7 @@ const eventDateStr =
      tags (the spacer row above them absorbs height variance).
      Footer wrappers use display: contents so their children join the grid.
      Larger, brighter text on a darker overlay keeps it readable on bright images.
-     Mobile stays content-sized and unchanged. */
+     Phones get the same idea in the block below. */
   @media (min-width: 601px) {
     .event-description { min-height: 3.2em; }
     .event-entry.has-image {
@@ -210,6 +210,36 @@ const eventDateStr =
     .event-entry.has-image .status-badge { grid-column: 1; grid-row: 7; align-self: end; justify-self: start; margin-top: 5px; }
     .event-entry.has-image .detail-tags { grid-column: 2; grid-row: 7; align-self: end; margin-top: 5px; }
     /* grandchildren are no longer direct children: keep them above the dark overlay */
+    .event-entry.has-image .eco-badge,
+    .event-entry.has-image .status-badge,
+    .event-entry.has-image .detail-tags { position: relative; }
+  }
+
+  /* Phones: the countdown sits on its own line under the name (a long name used to push it past
+     the card edge), and image cards share one minimum height like on desktop. Ticket links take
+     the full width, then one bottom row pinned to the bottom edge: status, eco badge, type tags. */
+  @media (max-width: 600px) {
+    .event-header { flex-wrap: wrap; row-gap: 4px; }
+    .event-name { flex: 1 1 100%; min-width: 0; }
+    .countdown-wrap { flex: 1 1 100%; display: flex; align-items: baseline; gap: 8px; text-align: left; }
+    .countdown-label { margin-bottom: 0; }
+    .countdown { font-size: 16px; }
+    .event-entry.has-image {
+      min-height: 300px;
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      grid-template-rows: auto auto auto auto minmax(10px, 1fr) auto auto;
+    }
+    .event-entry.has-image > .event-header { grid-column: 1 / -1; grid-row: 1; }
+    .event-entry.has-image > .event-description { grid-column: 1 / -1; grid-row: 2; }
+    .event-entry.has-image > .event-dates { grid-column: 1 / -1; grid-row: 3; }
+    .event-entry.has-image > .event-meta { grid-column: 1 / -1; grid-row: 4; }
+    .event-entry.has-image .event-footer,
+    .event-entry.has-image .frow-meta { display: contents; }
+    .event-entry.has-image .ticket-links { grid-column: 1 / -1; grid-row: 6; align-self: end; }
+    .event-entry.has-image .status-badge { grid-column: 1; grid-row: 7; align-self: end; justify-self: start; }
+    .event-entry.has-image .eco-badge { grid-column: 2; grid-row: 7; align-self: end; margin-left: 6px; }
+    .event-entry.has-image .detail-tags { grid-column: 3; grid-row: 7; align-self: end; justify-self: end; margin-left: 6px; }
     .event-entry.has-image .eco-badge,
     .event-entry.has-image .status-badge,
     .event-entry.has-image .detail-tags { position: relative; }
