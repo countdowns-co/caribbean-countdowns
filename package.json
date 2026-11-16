@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "test": "astro check && eslint public/scripts/",
+    "test": "astro check && eslint public/scripts/ && npm run test:workers",
+    "test:workers": "node --test \"workers/**/test.mjs\" \"workers/**/*.test.js\"",
     "lint": "eslint public/scripts/",
     "generate-next-year": "node scripts/generate-next-year.js"
   },

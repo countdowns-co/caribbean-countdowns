@@ -55,6 +55,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Worker tests
+        run: npm run test:workers
+
       - run: npm audit --audit-level=high --omit=dev
 
       - name: Build

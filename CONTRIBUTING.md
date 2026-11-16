@@ -27,7 +27,7 @@ Branch naming:
 
 - **Astro** (static output) — pages in `src/pages/`, components in `src/components/`
 - **JavaScript** — all scripts in `public/scripts/*.js` as classic (non-module) files
-- **Data** — festival JSON files in `src/data/`
+- **Data** — event JSON files live in a Cloudflare R2 bucket and are pulled into `src/data/` when the site is built (not stored in git)
 - **Images** — WebP format, `public/images/`
 
 ## Coding standards
@@ -65,22 +65,46 @@ The site supports four languages: English (`t-en`), French (`t-fr`), Kréyol ha�
 
 ## Tests and CI
 
-The CI pipeline (`build` job in `.github/workflows/deploy.yml`) runs on every PR:
+The CI pipeline (`build` job in `.github/workflows/deploy.yml`) runs on every pull request:
 
-1. Runs `npm test` (`astro check`) — validates all Astro components and TypeScript types
-2. Runs `npm run lint` (ESLint) — checks JavaScript files in `public/scripts/` for errors
-3. Validates all JSON files with a Python schema check — invalid JSON fails the build
-4. Runs `npm audit` — high-severity CVEs block the merge
-5. Runs `npm run build` — Astro must build without errors
+1. `npm run lint` (ESLint) — checks the JavaScript files in `public/scripts/`
+2. `npm run test:workers` — runs the automated tests of every Cloudflare Worker (`workers/*/test.mjs`, `node:test`)
+3. `npm audit` — high-severity vulnerabilities block the merge
 
-Run the test suite and linter locally:
+On pushes to `main`, the daily schedule and manual runs, which have access to the event data, the job also pulls the data from R2, validates every JSON file, runs `npm run check` (`astro check`, types) and `npm run build`, then deploys.
+
+`npm test` is the standard way to run the whole suite locally (type check, lint and Worker tests). It needs the event data in `src/data/`; without it the type check reports missing data files. The parts can be run on their own:
 
 ```bash
-npm test
-npm run lint
+npm test                # type check + lint + Worker tests
+npm run lint            # ESLint only
+npm run test:workers    # Worker tests only (no data needed)
 ```
 
 **Policy:** when major new functionality is added, tests for that functionality must be added to the automated test suite before the PR is merged.
+
+## Code review
+
+Every change reaches `main` through a pull request, and a maintainer reads the whole diff before merging. Nothing is merged automatically; Dependabot pull requests are reviewed the same way. The reviewer checks that:
+
+- the change matches its description and does not mix unrelated work
+- CI is green and tests exist for new functionality (see the policy above)
+- the coding standards above are respected: no inline scripts, text in all four languages, semantic HTML
+- any new dependency is justified and passes `npm audit`
+- commits carry a DCO sign-off
+- event data stays valid JSON and keeps premium-only fields out of public pages
+
+## Security review
+
+Changes that touch a Worker, the security headers or CSP, the CI/CD pipeline, authentication or anything that handles visitor input get a security review before merging. The reviewer checks input validation and size limits, that no secret or personal data is logged or stored, that error messages do not leak internals, and that access is limited to what is needed. Findings are fixed in the same pull request. The current security posture is described in [SECURITY.md](SECURITY.md).
+
+## Good first issues
+
+Small, self-contained tasks are labelled [`good first issue`](https://github.com/countdowns-co/caribbean-countdowns/labels/good%20first%20issue) in the issue tracker. Typical examples: a missing translation in one of the four languages, a typo or an unclear sentence, an accessibility fix on a single page, a small test for an existing Worker. Comment on the issue to say you are taking it; a maintainer answers and can point you to the right file. If an issue seems too big, ask before you start.
+
+## Account security
+
+Everyone with write access to this repository is expected to protect their GitHub account with two-factor authentication. GitHub supports authenticator apps (TOTP), security keys and passkeys; passkeys or security keys are preferred. Contributors who only open pull requests from a fork are encouraged to do the same.
 
 ## Sign-off (DCO)
 
