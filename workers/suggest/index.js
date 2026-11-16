@@ -60,6 +60,7 @@ function buildSuggestion(raw) {
     details:     Array.isArray(raw.details) ? raw.details : [],
     image:       str(raw.image),
     tickets:     Array.isArray(raw.tickets) ? raw.tickets : [],
+    register:    Array.isArray(raw.register) ? raw.register : [],
     eco:         Array.isArray(raw.eco) ? raw.eco : [],
     notes:       str(raw.notes),
     edition:     str(raw.edition),
@@ -99,7 +100,9 @@ function buildSuggestion(raw) {
     return { error: 'Invalid value', field: 'eco' };
   }
   if (s.tickets.length > 10) return { error: 'Too many items', field: 'tickets' };
+  if (s.register.length > 5) return { error: 'Too many items', field: 'register' };
   const tickets = [];
+  const register = [];
   for (const t of s.tickets) {
     if (typeof t !== 'object' || t === null || Array.isArray(t)) {
       return { error: 'Invalid value', field: 'tickets' };
@@ -108,9 +111,22 @@ function buildSuggestion(raw) {
     if (name.length > 40 || url.length > 300 || (url && !isHttpUrl(url))) {
       return { error: 'Invalid value', field: 'tickets' };
     }
-    tickets.push({ name, url });
+    // Stale clients still send registration links as a ticket named "Register": file them where they belong.
+    if (name === 'Register') { if (url) register.push({ url }); } else tickets.push({ name, url });
   }
+  for (const r of s.register) {
+    if (typeof r !== 'object' || r === null || Array.isArray(r)) {
+      return { error: 'Invalid value', field: 'register' };
+    }
+    const url = str(r.url);
+    if (url.length > 300 || (url && !isHttpUrl(url))) {
+      return { error: 'Invalid value', field: 'register' };
+    }
+    if (url) register.push({ url });
+  }
+  if (register.length > 5) return { error: 'Too many items', field: 'register' };
   s.tickets = tickets;
+  s.register = register;
   s.details = s.details.map(d => d.trim());
 
   return { suggestion: s };

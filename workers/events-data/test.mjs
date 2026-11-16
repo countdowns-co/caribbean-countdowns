@@ -324,3 +324,13 @@ test("premium tier receives edition and firstYear when present; free and medium 
     assert.equal("firstYear" in rows[0], false);
   }
 });
+
+test("premium tier receives register links; free and medium never do", async () => {
+  const event = { ...MAIN_EVENT, register: [{ url: "https://example.com/signup" }] };
+  const prem = await (await worker.fetch(get("/api/events/2026", { "X-API-Key": "premium-secret" }), makeEnv({ "events-2026.json": JSON.stringify([event]) }))).json();
+  assert.deepEqual(prem[0].register, [{ url: "https://example.com/signup" }]);
+  for (const headers of [{}, { "X-API-Key": "medium-secret" }]) {
+    const rows = await (await worker.fetch(get("/api/events/2026", headers), makeEnv({ "events-2026.json": JSON.stringify([event]) }))).json();
+    assert.equal("register" in rows[0], false);
+  }
+});
