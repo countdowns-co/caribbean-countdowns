@@ -111,8 +111,7 @@ function buildSuggestion(raw) {
     if (name.length > 40 || url.length > 300 || (url && !isHttpUrl(url))) {
       return { error: 'Invalid value', field: 'tickets' };
     }
-    // Stale clients still send registration links as a ticket named "Register": file them where they belong.
-    if (name === 'Register') { if (url) register.push({ url }); } else tickets.push({ name, url });
+    tickets.push({ name, url });
   }
   for (const r of s.register) {
     if (typeof r !== 'object' || r === null || Array.isArray(r)) {

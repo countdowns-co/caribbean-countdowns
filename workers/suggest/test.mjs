@@ -211,16 +211,6 @@ test("register links are stored separately from tickets", async () => {
   assert.deepEqual(s.tickets, [{ name: "Website", url: "https://example.com/tickets" }]);
 });
 
-test("a ticket named Register from an older form is moved to register", async () => {
-  const env = makeEnv();
-  const tickets = [{ name: "Register", url: "https://example.com/signup" }, { name: "Tickets", url: "https://example.com/buy" }];
-  const res = await worker.fetch(post({ ...VALID, tickets }), env);
-  assert.equal(res.status, 201);
-  const s = JSON.parse(env.puts[0].value).suggestion;
-  assert.deepEqual(s.register, [{ url: "https://example.com/signup" }]);
-  assert.deepEqual(s.tickets, [{ name: "Tickets", url: "https://example.com/buy" }]);
-});
-
 test("bad register shape, bad URL or more than 5 links → 400", async () => {
   for (const register of [["not-an-object"], [{ url: "javascript:alert(1)" }], Array.from({ length: 6 }, (_, i) => ({ url: `https://example.com/${i}` }))]) {
     const res = await worker.fetch(post({ ...VALID, register }), makeEnv());

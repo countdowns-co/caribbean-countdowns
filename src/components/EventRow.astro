@@ -9,13 +9,11 @@ const { event, eager = false } = Astro.props;
 const ecoGrade = computeEcoGrade(event.eco, ecoCriteria as any[]);
 
 // Links: `register` is how to take part ("Register to take part"); `tickets` is a ticket to attend ("Tickets",
-// "Tickets 2"). No price is shown. Older data may still name a link "Register" inside `tickets`: it is shown as
-// a register link. The "Free to watch" badge appears when the data confirms it (freeToWatch: true) and for events
+// "Tickets 2"). No price is shown. The "Free to watch" badge appears when the data confirms it (freeToWatch: true) and for events
 // without any link (not confirmed: a guess).
 type Link = { name?: string; url: string };
-const legacyRegister = (event.tickets ?? []).filter((t: Link) => t.name === "Register");
-const registerLinks: Link[] = [...(event.register ?? []), ...legacyRegister].filter((t: Link) => t.url);
-const ticketLinks: Link[] = (event.tickets ?? []).filter((t: Link) => t.name && t.name !== "Register");
+const registerLinks: Link[] = (event.register ?? []).filter((t: Link) => t.url);
+const ticketLinks: Link[] = (event.tickets ?? []).filter((t: Link) => t.name);
 const showFreeToWatch = event.freeToWatch === true || (registerLinks.length === 0 && ticketLinks.length === 0);
 
 const tz = event.timezone ?? "America/Martinique";
