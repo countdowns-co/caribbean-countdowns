@@ -50,7 +50,7 @@ const FIELDS = {
   // edition = number of this edition, firstYear = year of the first edition; both come from events-{year}.json
   // and are optional (absent when unknown). Exposed on premium only.
   premium: ['name', 'startDate', 'endDate', 'country', 'description', 'type', 'website',
-            'timezone', 'city', 'details', 'image', 'tickets', 'eco', 'listed',
+            'timezone', 'city', 'details', 'image', 'tickets', 'register', 'eco', 'listed',
             'priceRangeEstimate', 'participantPriceRangeEstimate', 'priceCheckedDate',
             'avgAttendance', 'attendanceYear', 'attendanceSource',
             'edition', 'firstYear'],
