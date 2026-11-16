@@ -169,7 +169,7 @@ var STEPS = [
     hint:    { en:"Select only what you know for certain — skip if unsure",   fr:"Cochez uniquement ce que vous savez avec certitude",           kr:"Chwazi sèlman sa ou konnen avèk sèten — pase si pa sèten", es:"Selecciona solo lo que sepas con certeza — omite si no estás seguro" } },
   { id:"notes",       required:false, type:"textarea",
     question:{ en:"Anything else to tell us?",            fr:"Autre chose à nous dire ?",               kr:"Eske gen lòt bagay ou vle di nou ?",   es:"¿Algo más que quieras decirnos?" },
-    hint:    { en:"Contact, sustainability page URL... (not included in the listing)", fr:"Contact, URL page durabilité... (non inclus dans la fiche)", kr:"Contact, URL paj dirab... (pa enkli nan lis la)", es:"Contacto, URL página sostenibilidad... (no se incluye en el listado)" } },
+    hint:    { en:"Anything else useful, e.g. a sustainability page URL (not included in the listing). Please do not enter personal details.", fr:"Autre information utile, par ex. l'URL d'une page durabilité (non incluse dans la fiche). Merci de ne pas saisir de données personnelles.", kr:"Lòt enfòmasyon itil, pa egzanp URL yon paj dirab (pa enkli nan lis la). Souplé pa ekri enfòmasyon pèsonèl.", es:"Cualquier otra información útil, p. ej. la URL de una página de sostenibilidad (no se incluye en el listado). Por favor, no introduzcas datos personales." } },
 ];
 
 var currentStep = 0;
