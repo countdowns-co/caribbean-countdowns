@@ -33,7 +33,7 @@ jobs:
         run: |
           aws s3 sync s3://caribbean-data/ src/data/ \
             --endpoint-url https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com \
-            --quiet
+            --only-show-errors
 
       - name: Validate JSON files
         if: github.event_name != 'pull_request'
