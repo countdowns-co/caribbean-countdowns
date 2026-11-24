@@ -38,9 +38,12 @@ jobs:
       - name: Validate JSON files
         if: github.event_name != 'pull_request'
         run: |
+          n=0
           for f in src/data/*.json; do
-            python3 -m json.tool "$f" > /dev/null && echo "✓ $f" || { echo "✗ Invalid JSON: $f"; exit 1; }
+            python3 -m json.tool "$f" > /dev/null || { echo "✗ Invalid JSON: $f"; exit 1; }
+            n=$((n+1))
           done
+          echo "✓ $n JSON files validated"
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
