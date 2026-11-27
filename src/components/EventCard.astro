@@ -1,0 +1,108 @@
+---
+// Carte d'événement du design v29 (grille). Aucun attribut style="" : l'image est un <img> en object-fit: cover
+// (même recadrage qu'un background-size: cover), tout le reste passe par des classes (CSP style-src 'self').
+import ecoCriteria from "../data/eco-criteria.json";
+import { tzDayStart, tzDayEnd } from "../utils/tz";
+import { computeEcoGrade } from "../utils/eco";
+
+const { event, eager = false, typeLabels } = Astro.props;
+
+type Link = { name?: string; url: string };
+const registerLinks: Link[] = (event.register ?? []).filter((t: Link) => t.url);
+const ticketLinks: Link[] = (event.tickets ?? []).filter((t: Link) => t.name);
+const showFree = event.freeToWatch === true || (registerLinks.length === 0 && ticketLinks.length === 0);
+
+const tz = event.timezone ?? "America/Martinique";
+const startMs = tzDayStart(event.startDate, tz);
+const endMs = tzDayEnd(event.endDate, tz);
+const nowMs = Date.now();
+const status = nowMs > endMs ? "ENDED" : nowMs >= startMs ? "LIVE" : "UPCOMING";
+const ecoGrade = computeEcoGrade(event.eco, ecoCriteria as any[]);
+
+const [sy, sm, sd] = event.startDate.split("-").map(Number);
+const monthShort = new Date(Date.UTC(sy, sm - 1, sd, 12)).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
+const tl = typeLabels[event.type] ?? typeLabels.other;
+const place = event.city ? `${event.city}, ${event.country}` : event.country;
+const searchText = `${event.name} ${event.city ?? ""} ${event.country ?? ""}`.toLowerCase();
+---
+
+<article
+  class={`dcard${status === "LIVE" ? " islive" : ""}`}
+  data-type={event.type ?? ""}
+  data-country={event.country ?? ""}
+  data-free={showFree ? "1" : "0"}
+  data-start={startMs}
+  data-end={endMs}
+  data-search={searchText}
+>
+  <div class={`dposter${event.image ? "" : " noimg"}`}>
+    {event.image && (
+      <img
+        class="dposter-img"
+        src={eager ? event.image : undefined}
+        data-src={eager ? undefined : event.image}
+        alt=""
+        width="860"
+        height="286"
+        decoding="async"
+        fetchpriority={eager ? "high" : undefined}
+      />
+    )}
+    <span class="dbadge"><span class="dbadge-m">{monthShort}</span><b>{sd}</b></span>
+    {showFree && (
+      <span class="dfree">
+        <span class="t-en">FREE TO WATCH</span>
+        <span class="t-fr">GRATUIT À REGARDER</span>
+        <span class="t-kr">POU AYEN</span>
+        <span class="t-es">GRATIS</span>
+      </span>
+    )}
+    <span class="dtag">
+      <span class="t-en">{tl.en}</span><span class="t-fr">{tl.fr}</span><span class="t-kr">{tl.kr}</span><span class="t-es">{tl.es}</span>
+    </span>
+    <span class={`dlive${status === "LIVE" ? "" : " is-hidden"}`}>LIVE</span>
+  </div>
+  <div class="dbody">
+    <div class="dloc-row">
+      <span class="dloc">{place}</span>
+      {ecoGrade && <a href="/sustainability" class={`deco deco-${ecoGrade}`}>♻️ {ecoGrade}</a>}
+    </div>
+    <h3 class="dname">
+      <a href={event.website} target="_blank" rel="noopener noreferrer">{event.name} <span class="ext-icon" aria-hidden="true">↗</span></a>
+    </h3>
+    {(registerLinks.length > 0 || ticketLinks.length > 0) && (
+      <div class="dlinks">
+        {registerLinks.map((t: Link, i: number) => (
+          <a class="dlink" href={t.url} target="_blank" rel="noopener noreferrer">
+            <span class="t-en">Register to take part{i > 0 ? ` ${i + 1}` : ""}</span>
+            <span class="t-fr">S'inscrire pour participer{i > 0 ? ` ${i + 1}` : ""}</span>
+            <span class="t-kr">Enskri pou partisipé{i > 0 ? ` ${i + 1}` : ""}</span>
+            <span class="t-es">Inscribirse para participar{i > 0 ? ` ${i + 1}` : ""}</span>
+          </a>
+        ))}
+        {ticketLinks.map((t: Link) => {
+          const n = (t.name ?? "").match(/\d+$/)?.[0];
+          return (
+            <a class="dlink" href={t.url} target="_blank" rel="noopener noreferrer">
+              <span class="t-en">Tickets to attend{n ? ` ${n}` : ""}</span>
+              <span class="t-fr">Billets pour assister{n ? ` ${n}` : ""}</span>
+              <span class="t-kr">Tikè pou asisté{n ? ` ${n}` : ""}</span>
+              <span class="t-es">Entradas para asistir{n ? ` ${n}` : ""}</span>
+            </a>
+          );
+        })}
+      </div>
+    )}
+    <div class="dcd">
+      <span class="dcd-l">
+        <span class={`lb-start${status === "LIVE" ? " is-hidden" : ""}`}>
+          <span class="t-en">starts in</span><span class="t-fr">commence dans</span><span class="t-kr">ka koumansé adan</span><span class="t-es">empieza en</span>
+        </span>
+        <span class={`lb-end${status === "LIVE" ? "" : " is-hidden"}`}>
+          <span class="t-en">ends in</span><span class="t-fr">se termine dans</span><span class="t-kr">ka fini adan</span><span class="t-es">termina en</span>
+        </span>
+      </span>
+      <span class="dcd-v" data-start={startMs} data-end={endMs}>0d 00h 00m 00s</span>
+    </div>
+  </div>
+</article>
