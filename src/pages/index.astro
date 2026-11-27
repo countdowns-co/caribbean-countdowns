@@ -199,7 +199,14 @@ let imageIndex = 0;
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     .dcard{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column;min-height:250px}
     .dcard:hover{border-color:var(--accent)}
-    .dcard.ended{opacity:.8}
+    /* carte terminée : grisée, sans bandeau de couleur (ni affiche, ni FREE TO WATCH, ni LIVE) : date et type en petites pastilles grises */
+    .dcard.ended{filter:grayscale(1);opacity:.78;min-height:0}
+    .dcard.ended:hover{border-color:var(--line)}
+    .dcard.ended .dposter{aspect-ratio:auto;background:none;overflow:visible;padding:12px 14px 0;display:flex;align-items:center;gap:8px}
+    .dcard.ended .dposter-img,.dcard.ended .dfree,.dcard.ended .dlive{display:none}
+    .dcard.ended .dbadge,.dcard.ended .dtag{position:static;background:var(--line);color:var(--muted);border-radius:6px;padding:2px 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;line-height:1.3}
+    .dcard.ended .dbadge{display:inline-flex;gap:4px;align-items:baseline}
+    .dcard.ended .dbadge b{display:inline;font-size:11px}
     .dcard.ended .dcd-v{color:var(--muted);text-shadow:none;font-size:15px}
     /* carte en cours : le contour pulse en rouge, la pastille LIVE et le compteur clignotent doucement (pulse 1,4 s comme l'ancien accueil) */
     @keyframes live-ring{0%,100%{border-color:var(--ring-a);box-shadow:0 0 0 0 transparent}50%{border-color:var(--ring-b);box-shadow:0 0 14px 1px var(--ring-glow)}}

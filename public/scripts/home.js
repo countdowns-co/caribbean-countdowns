@@ -101,6 +101,7 @@
         r.state = state;
         changed = true;
         r.card.classList.toggle("islive", state === "live");
+        r.card.classList.toggle("ended", state === "ended");
         if (r.liveFlag) r.liveFlag.classList.toggle("is-hidden", state !== "live");
         if (r.labelStart) r.labelStart.classList.toggle("is-hidden", state !== "upcoming");
         if (r.labelEnd) r.labelEnd.classList.toggle("is-hidden", state !== "live");
@@ -133,7 +134,7 @@
     var shown = 0;
     rows.forEach(function (r) {
       var c = r.card;
-      var ok = r.state !== "ended" || filters.ended;
+      var ok = filters.ended ? r.state === "ended" : r.state !== "ended";   // « Terminés » = seulement les terminés ; sinon jamais de terminés
       if (ok && filters.type && c.getAttribute("data-type") !== filters.type) ok = false;
       if (ok && filters.free && c.getAttribute("data-free") !== "1") ok = false;
       if (ok && filters.live && r.state !== "live") ok = false;
@@ -172,6 +173,16 @@
         var on = chip.getAttribute("aria-pressed") !== "true";
         chip.setAttribute("aria-pressed", String(on));
         filters[kind] = on;
+        /* « En cours » et « Terminés » s'excluent : activer l'un désactive l'autre */
+        if (on && kind === "live") {
+          filters.ended = false;
+          autoEnded = false;
+          syncChip("ended", false);
+        }
+        if (on && kind === "ended") {
+          filters.live = false;
+          syncChip("live", false);
+        }
         if (kind === "ended") autoEnded = false;
       }
       applyFilters();
@@ -256,6 +267,8 @@
     filters.country = filters.country === k ? "" : k;
     if (filters.country && Number(d.getAttribute("data-n")) === 0) {
       filters.ended = true;
+      filters.live = false;
+      syncChip("live", false);
       autoEnded = true;
     } else if (!filters.country && autoEnded) {
       filters.ended = false;
