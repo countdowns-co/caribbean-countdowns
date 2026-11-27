@@ -1,0 +1,59 @@
+---
+// Carte de la Caraïbe rendue côté serveur (aucun JavaScript pour l'affichage) : un point par pays,
+// taille = nombre d'événements à venir ou en cours, pulsation rouge = événement en cours, point creux = aucun événement à venir.
+// Le script public/scripts/home.js ajoute la bulle d'information, le clic (filtre par pays) et les libellés dans la langue choisie.
+// Aucun style="" : couleurs et animations par classes (CSP style-src 'self').
+import { CARIBBEAN_MAP as M, shortName } from "../utils/geo";
+
+const { stats } = Astro.props as { stats: Record<string, { n: number; live: number }> };
+const dots = Object.entries(stats)
+  .filter(([k]) => M.pts[k])
+  .sort((a, b) => b[1].n - a[1].n)
+  .map(([k, v]) => {
+    const [x, y] = M.pts[k];
+    const r = v.n ? 3.4 + 1.1 * Math.sqrt(v.n) : 4.2;
+    return { k, x, y, r: r.toFixed(1), n: v.n, live: v.live };
+  });
+---
+
+<figure class="cmap" id="cmap">
+  <svg id="mapsvg" viewBox={`0 0 ${M.w} ${M.h}`} role="group" aria-label="Map of the Caribbean: one dot per country">
+    <defs>
+      <radialGradient id="cmap-fade" cx=".5" cy=".5" r=".5">
+        <stop offset=".45" stop-color="#fff" />
+        <stop offset="1" stop-color="#000" />
+      </radialGradient>
+      <mask id="cmap-mask"><rect width={M.w} height={M.h} fill="url(#cmap-fade)" /></mask>
+    </defs>
+    <path class="land" mask="url(#cmap-mask)" d={M.path} />
+    {dots.filter((d) => d.live > 0).map((d) => (
+      <>
+        <circle class="pulse" cx={d.x} cy={d.y} r={d.r}></circle>
+        <circle class="pulse p2" cx={d.x} cy={d.y} r={d.r}></circle>
+      </>
+    ))}
+    {dots.map((d) => (
+      <circle
+        class={`dot${d.n ? "" : " hollow"}${d.live ? " live" : ""}`}
+        role="button"
+        tabindex="0"
+        aria-pressed="false"
+        aria-label={`${d.k}: ${d.n}`}
+        data-k={d.k}
+        data-short={shortName(d.k)}
+        data-n={d.n}
+        data-l={d.live}
+        cx={d.x}
+        cy={d.y}
+        r={d.r}
+      ></circle>
+    ))}
+    <g id="cmap-tip" pointer-events="none" visibility="hidden"><rect rx="5" ry="5"></rect><text></text></g>
+  </svg>
+  <figcaption>
+    <span class="t-en">Dot size = upcoming events · red pulse = happening now · click a dot to filter</span>
+    <span class="t-fr">Taille du point = événements à venir · pulsation rouge = en cours · cliquez sur un point pour filtrer</span>
+    <span class="t-kr">Gwosè pwen = evènman k ap vini · wouj k ap pilsé = an kou · klike sou yon pwen pou filtre</span>
+    <span class="t-es">Tamaño del punto = eventos próximos · pulso rojo = en curso · haz clic en un punto para filtrar</span>
+  </figcaption>
+</figure>

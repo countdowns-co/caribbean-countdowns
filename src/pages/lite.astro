@@ -1,0 +1,741 @@
+---
+import LiveBanner from "../components/LiveBanner.astro";
+import events2026 from "../data/events-2026.json";
+import events2027 from "../data/events-2027.json";
+import sponsors from "../data/sponsors.json";
+import ngos from "../data/ngos.json";
+import { tzDayStart, tzDayEnd } from "../utils/tz";
+
+const events = [...events2026, ...events2027];
+
+import EventRow from "../components/EventRow.astro";
+
+function getStatus(f: any) {
+  const tz = f.timezone ?? "America/Martinique";
+  const nowMs = Date.now();
+  if (nowMs > tzDayEnd(f.endDate, tz)) return "ENDED";
+  if (nowMs >= tzDayStart(f.startDate, tz)) return "LIVE";
+  return "UPCOMING";
+}
+
+const enriched = events
+  .map(f => ({ ...f, status: getStatus(f) }))
+  .sort((a, b) => {
+    if (a.status === "ENDED" && b.status !== "ENDED") return 1;
+    if (a.status !== "ENDED" && b.status === "ENDED") return -1;
+    // Ended events: most recently ended first. Active events: soonest start first.
+    if (a.status === "ENDED") {
+      return new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+        || new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+    }
+    return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+  });
+
+const eventTypes = ["All", "music", "sport", "sailing", "art", "carnival", "culture", "food", "other"];
+const eventTypeLabels: Record<string, Record<string, string>> = {
+  "All":     { en: "All types",   fr: "Tous les types", kr: "Tout kalité",  es: "Todos los tipos" },
+  "music":   { en: "Music",       fr: "Musique",        kr: "Mizik",        es: "Música" },
+  "sport":   { en: "Sport",       fr: "Sport",          kr: "Spo",          es: "Deporte" },
+  "sailing": { en: "Sailing",     fr: "Voile",          kr: "Vwal",         es: "Vela" },
+  "art":     { en: "Art",         fr: "Art",            kr: "Atizay",       es: "Arte" },
+  "carnival": { en: "Carnival",    fr: "Carnaval",       kr: "Kanaval",      es: "Carnaval" },
+  "culture": { en: "Culture",     fr: "Culture",        kr: "Kilti",        es: "Cultura" },
+  "food":    { en: "Food",        fr: "Gastronomie",    kr: "Bon manjé",    es: "Gastronomía" },
+  "other":   { en: "Other",       fr: "Autre",          kr: "Le restan",    es: "Otro" },
+};
+
+const details = ["All", ...Array.from(new Set(events.flatMap(f => f.details ?? []).filter(v => v)))];
+
+// All grades A–F always shown; the filter matches each event by its computed grade
+// (data-eco-grade on the row, set in EventRow). Chips for grades with no event
+// yet simply match nothing until events are graded.
+const ecoGrades = ["All", "A", "B", "C", "D", "F"];
+
+const lastUpdateEn = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
+const lastUpdateFr = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+const lastUpdateEs = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+
+const liveEvents   = enriched.filter(f => f.status === "LIVE");
+// Past events: only the most recent ones are listed (enriched is sorted most recently
+// ended first). Display only: older events stay in the data files.
+const PAST_EVENTS_LIMIT = 10;
+const endedEvents  = enriched.filter(f => f.status === "ENDED").slice(0, PAST_EVENTS_LIMIT);
+const activeEvents = enriched.filter(f => f.status !== "ENDED");
+
+// Filter options come from the events the page lists, so no option matches nothing.
+const listed = [...activeEvents, ...endedEvents];
+const listedCountries = new Set(listed.map(f => f.country));
+const countries = ["All", ...Array.from(new Set(events.map(f => f.country).filter(Boolean))).filter(c => listedCountries.has(c))];
+
+// LCP hint: the first active card with an image is the likely largest-paint
+// element. Preload it (fetchpriority high) so the browser fetches it early
+// instead of waiting for the CSS background-image to be discovered.
+const lcpImage = activeEvents.find(f => f.image)?.image ?? null;
+
+const { ngo } = ngos;
+const { sponsor } = sponsors;
+
+function splitLines(text: string) {
+  return text.split(";").map(s => s.trim()).filter(Boolean);
+}
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  {lcpImage && <link rel="preload" as="image" href={lcpImage} fetchpriority="high" />}
+  <title>countdowns.co — Caribbean (light version)</title>
+  <meta name="robots" content="noindex, follow" />
+  <meta name="description" content="Live countdowns to Caribbean festivals, carnivals and regattas — dates, tickets and eco scores for 75+ events across the Caribbean, in 4 languages." />
+  <style>.t-fr,.t-kr,.t-es{display:none}</style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .is-hidden{display:none!important}
+    .logo-chip{height:52px;vertical-align:middle;border-radius:4px;background:#fff;padding:3px 7px}
+    .foot-center{text-align:center;padding:32px 0 8px}
+    .hit-img{height:20px;width:auto;opacity:.5}
+    .foot-links{text-align:center;padding:0 0 10px;font-size:11px}
+    .foot-a{color: #999999;text-decoration:underline}
+    .foot-center2{text-align:center;padding:0 0 10px}
+    .foot-impact-a{display:inline-block}
+    .foot-credit{text-align:center;padding:0 0 24px;font-size:11px}
+    .foot-credit-a{color: #999999;text-decoration:none}
+    .ext-toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #333;border-radius:4px;padding:8px 16px;font-size:12px;color:#999;pointer-events:none;white-space:nowrap;z-index:100}
+
+    body {
+      background: #0f0f0f;
+      color: #e0e0e0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .site-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+
+    .site-subtitle {
+      font-size: 13px;
+      color: #fff;
+      margin-bottom: 32px;
+    }
+
+    /* Language buttons */
+    .lang-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 18px;
+      letter-spacing: 0;
+      padding: 2px 6px;
+      color: #aaa;
+      font-family: inherit;
+      transition: all 0.15s;
+      opacity: 0.75;
+    }
+
+    .lang-btn:hover { border-color: #888; opacity: 0.8; }
+
+    .lang-btn.active {
+      background: #1a1a1a;
+      border-color: #555;
+      opacity: 1;
+    }
+
+    /* Search + filter row */
+    .search-filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999999;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: #161616;
+      border: 1px solid #2e2e2e;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 8px 112px 8px 34px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input::placeholder { color: #999999; }
+    .search-input:focus { border-color: #444; }
+
+    .filter-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 5px;
+      color: #888;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .filter-toggle:hover { border-color: #444; color: #ccc; }
+    .filter-toggle.has-active { border-color: #2d6aa0; color: #7ec8e3; }
+
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #2d6aa0;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      padding: 0 4px;
+    }
+
+    .filter-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      padding: 14px 16px;
+      z-index: 20;
+      display: none;
+    }
+
+    .filter-panel.open { display: block; }
+
+    .filter-panel-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .filter-panel-group:last-child { margin-bottom: 0; }
+
+    .filter-panel-label {
+      font-size: 11px;
+      color: #999999;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      min-width: 52px;
+      padding-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .filter-chip {
+      cursor: pointer;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #888;
+      font-size: 11px;
+      font-family: inherit;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .filter-chip:hover { border-color: #555; color: #ccc; }
+
+    .filter-chip.active {
+      background: #0d1f35;
+      border-color: #2d6aa0;
+      color: #7ec8e3;
+    }
+
+    /* Live banner */
+    .live-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a0a0a;
+      border: 1px solid #3a1010;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin-bottom: 32px;
+      font-size: 13px;
+      color: #f87171;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: pulse 1.4s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .divider { border: none; border-top: 1px solid #2e2e2e; margin: 0; }
+
+    .info-bar {
+      font-size: 12px;
+      color: #999999;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 0;
+      flex-direction: column;
+    }
+
+    .info-bar a { color: #999999; text-decoration: underline; }
+    .info-bar a:hover { color: #999; }
+
+    /* Sponsor band */
+    .sponsor-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0a1a18;
+      border: 1px solid #0d3d35;
+      border-radius: 4px;
+      padding: 10px 16px;
+      margin-bottom: 32px;
+      font-size: 13px;
+      color: #5eead4;
+    }
+
+    .sponsor-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #14b8a6;
+      flex-shrink: 0;
+    }
+
+    .sponsor-cause {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+
+    .sponsor-cause-text {
+      font-size: 13px;
+      color: #5eead4;
+      flex: 1;
+    }
+
+    .sponsor-cause-text a { color: #5eead4; text-decoration: underline; }
+    .sponsor-cause-text a:hover { color: #99f6e4; }
+
+    .sponsor-cta {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 3px;
+      border: 1px solid #0d9488;
+      color: #5eead4;
+      background: #0a1a18;
+      text-decoration: none;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .sponsor-cta:hover { background: #134e4a; color: #99f6e4; text-decoration: none; }
+
+    .sponsor-logos {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Past events toggle */
+    .past-toggle-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      margin: 4px 0 4px;
+      background: transparent;
+      border: 1px solid #1a1a1a;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s;
+      outline: none;
+    }
+    .past-toggle-card:hover { border-color: #2e2e2e; background: #0a0a0a; }
+    .past-toggle-card:focus-visible { border-color: #444; }
+    .past-toggle-card.open { border-color: #2e2e2e; }
+    .past-chevron { color: #2e2e2e; font-size: 11px; flex-shrink: 0; }
+    .past-label {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: #999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .sponsor-cause {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+      }
+      .sponsor-cause-text {
+        font-size: 12px;
+        flex: unset;
+        width: 100%;
+        text-align: center;
+      }
+      .sponsor-cta {
+        padding: 5px 16px;
+        font-size: 12px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+<LiveBanner />
+  <main class="page">
+
+    <div class="header-row">
+      <h1 class="site-title">
+        Countdowns
+      </h1>
+      <div class="lang-group">
+        <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
+        <button class="lang-btn" data-lang="kr" title="Kréyol">🇭🇹</button>
+        <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
+        <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
+      </div>
+    </div>
+
+    <p class="site-subtitle">
+      <span class="t-en">Live countdowns to music festivals and cultural events across the Caribbean.</span>
+      <span class="t-fr">Compte à rebours des événements à venir de la Caraïbe — festivals, carnavals, régates...</span>
+      <span class="t-kr">Kont a rebò pou festival mizik epi gro evènman an Karayib la.</span>
+      <span class="t-es">Cuenta regresiva de festivales de música y eventos en el Caribe.</span>
+    </p>
+
+    <div class="info-bar">
+      <span>
+        <span class="t-en">Last update: {lastUpdateEn}</span>
+        <span class="t-fr">Dernière mise à jour : {lastUpdateFr}</span>
+        <span class="t-kr">Dènye mizajou : {lastUpdateFr}</span>
+        <span class="t-es">Última actualización: {lastUpdateEs}</span>
+      </span>
+      <span>
+        <span class="t-en">Want to add an event? <a href="/suggest-event/">Use the form</a>.</span>
+        <span class="t-fr">Ajouter un évènement ? <a href="/suggest-event/">Utiliser le formulaire</a>.</span>
+        <span class="t-kr">Vou vle mete yon evènman ? <a href="/suggest-event/">Sèvi ak fòmilè a</a>.</span>
+        <span class="t-es">¿Agregar un evento? <a href="/suggest-event/">Usa el formulario</a>.</span>
+      </span>
+      <span>
+        <a href="/">
+          <span class="t-en">New design</span>
+          <span class="t-fr">Nouveau design</span>
+          <span class="t-kr">Nouvo dizayn</span>
+          <span class="t-es">Nuevo diseño</span>
+        </a>
+      </span>
+    </div>
+
+    <!-- Sponsor band -->
+    <div class="sponsor-footer">
+      <div class="sponsor-cause">
+        <span class="sponsor-cause-text">
+          <span class="t-en">This site supports the NGO <a href="/ngo/">{ngo.name}</a><br />Thanks to the sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
+          <span class="t-fr">Ce site soutient l'ONG <a href="/ngo/">{ngo.name}</a><br />Merci au sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
+          <span class="t-kr">Sit sa a sipote ONG <a href="/ngo/">{ngo.name}</a><br />Mèsi bay sponsor a <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
+          <span class="t-es">Este sitio apoya a la ONG <a href="/ngo/">{ngo.name}</a><br />Gracias al sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
+        </span>
+        <div class="sponsor-logos">
+          <a href="/ngo/">
+            <img src={ngo.logo} alt={ngo.name} width="142" height="52" class="logo-chip" />
+          </a>
+          <a href={sponsor.website} target="_blank" rel="noopener noreferrer">
+            <img src={sponsor.logo} alt={sponsor.name} width="147" height="52" class="logo-chip" />
+          </a>
+        </div>
+        <a class="sponsor-cta" href="/sponsor/">
+          <span class="t-en">Become a sponsor</span>
+          <span class="t-fr">Devenir sponsor</span>
+          <span class="t-kr">Vin yon sponsor</span>
+          <span class="t-es">Ser patrocinador</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Live banner -->
+    {liveEvents.length > 0 && (
+      <div class="live-banner">
+        <span class="live-dot"></span>
+        <span>
+          <span class="t-en"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "event is" : "events are"} happening now.</span>
+          <span class="t-fr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "évènement est" : "évènements sont"} en cours.</span>
+          <span class="t-kr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evènman ap" : "evènman ap"} fèt kounye a.</span>
+          <span class="t-es"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evento está" : "eventos están"} ocurriendo ahora.</span>
+        </span>
+      </div>
+    )}
+
+    <!-- Search + Filters -->
+    <div class="search-filter-row">
+      <div class="search-input-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search events..." autocomplete="off" spellcheck="false" />
+        <button id="filterToggle" class="filter-toggle" type="button">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="t-en">Filters</span>
+          <span class="t-fr">Filtres</span>
+          <span class="t-kr">Filtre</span>
+          <span class="t-es">Filtros</span>
+          <span id="filterBadge" class="filter-badge is-hidden">0</span>
+        </button>
+
+        <div id="filterPanel" class="filter-panel">
+          <div class="filter-panel-group">
+            <span class="filter-panel-label">
+              <span class="t-en">Type</span>
+              <span class="t-fr">Type</span>
+              <span class="t-kr">Kalite</span>
+              <span class="t-es">Tipo</span>
+            </span>
+            <div class="filter-chips">
+              {eventTypes.map(t => (
+                <button class={`filter-chip${t === "All" ? " active" : ""}`} data-filter-type="type" data-value={t} type="button">
+                  <span class="t-en">{eventTypeLabels[t].en}</span>
+                  <span class="t-fr">{eventTypeLabels[t].fr}</span>
+                  <span class="t-kr">{eventTypeLabels[t].kr}</span>
+                  <span class="t-es">{eventTypeLabels[t].es}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="filter-panel-group">
+            <span class="filter-panel-label">
+              <span class="t-en">Country</span>
+              <span class="t-fr">Pays</span>
+              <span class="t-kr">Peyi</span>
+              <span class="t-es">País</span>
+            </span>
+            <div class="filter-chips">
+              {countries.map(c => (
+                <button class={`filter-chip${c === "All" ? " active" : ""}`} data-filter-type="country" data-value={c} type="button">
+                  <span class="t-en">{c === "All" ? "All countries" : c}</span>
+                  <span class="t-fr">{c === "All" ? "Tous les pays" : c}</span>
+                  <span class="t-kr">{c === "All" ? "Tout peyi" : c}</span>
+                  <span class="t-es">{c === "All" ? "Todos los países" : c}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="filter-panel-group">
+            <span class="filter-panel-label">
+              <span class="t-en">Eco grade</span>
+              <span class="t-fr">Note éco</span>
+              <span class="t-kr">Nòt eko</span>
+              <span class="t-es">Nota eco</span>
+            </span>
+            <div class="filter-chips">
+              {ecoGrades.map(g => (
+                <button class={`filter-chip${g === "All" ? " active" : ""}`} data-filter-type="eco" data-value={g} type="button">
+                  {g === "All" ? (
+                    <span>
+                      <span class="t-en">All grades</span>
+                      <span class="t-fr">Toutes les notes</span>
+                      <span class="t-kr">Tout nòt</span>
+                      <span class="t-es">Todas las notas</span>
+                    </span>
+                  ) : (
+                    <span>♻️ {g}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Event list — active events (first 3 eager for LCP; rest lazy) -->
+    {activeEvents.map((event, i) => (
+      <EventRow event={event} eager={i < 3 || event.image === lcpImage} />
+    ))}
+
+    <!-- Past events toggle card -->
+    {endedEvents.length > 0 && (
+      <div id="past-toggle-card" class="past-toggle-card" role="button" tabindex="0" aria-expanded="false">
+        <span class="past-chevron past-chevron-l">▶</span>
+        <span class="past-label">
+          <span class="t-en">Last {endedEvents.length} events</span>
+          <span class="t-fr">{endedEvents.length} derniers événements</span>
+          <span class="t-kr">{endedEvents.length} dènyé evènman</span>
+          <span class="t-es">Últimos {endedEvents.length} eventos</span>
+        </span>
+        <span class="past-chevron past-chevron-r">◀</span>
+      </div>
+    )}
+
+    <!-- Past events — hidden by default -->
+    {endedEvents.length > 0 && (
+      <div id="past-events-section" class="is-hidden">
+        {endedEvents.map(event => (
+          <EventRow event={event} />
+        ))}
+      </div>
+    )}
+
+    <div class="foot-center">
+      <!-- Compteur first-party : workers/visits (aucune IP stockée, hash salé quotidien) -->
+      <img src="/api/hit" alt="visitor count" width="88" height="20" class="hit-img" />
+      <!-- Option B : hits.seeyoufarm.com -->
+      {/* <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fcaribbean-countdowns.co&count_bg=%23333333&title_bg=%23111111&title=visitors&edge_flat=true" alt="visitor count" style="height:18px;opacity:0.5;" /> */}
+    </div>
+
+    <div class="foot-links">
+      <a href="/sponsor/" class="foot-a">
+        <span class="t-en">Become a sponsor</span>
+        <span class="t-fr">Devenir sponsor</span>
+        <span class="t-kr">Vin yon sponsor</span>
+        <span class="t-es">Ser patrocinador</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/suggest-event/" class="foot-a">
+        <span class="t-en">Add an event</span>
+        <span class="t-fr">Ajouter un événement</span>
+        <span class="t-kr">Ajoute yon evènman</span>
+        <span class="t-es">Agregar un evento</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/eco-evaluator/" class="foot-a">
+        <span class="t-en">Evaluate an event</span>
+        <span class="t-fr">Évaluer un événement</span>
+        <span class="t-kr">Evalye yon evènman</span>
+        <span class="t-es">Evaluar un evento</span>
+      </a>
+    </div>
+    <div class="foot-links">
+      <a href="/legal/" class="foot-a">
+        <span class="t-en">Legal notice</span>
+        <span class="t-fr">Mentions légales</span>
+        <span class="t-kr">Avi legal</span>
+        <span class="t-es">Aviso legal</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/security/" class="foot-a">
+        <span class="t-en">Security</span>
+        <span class="t-fr">Sécurité</span>
+        <span class="t-kr">Sekirite</span>
+        <span class="t-es">Seguridad</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/impact/" class="foot-a">
+        <span class="t-en">Impact</span>
+        <span class="t-fr">Impact</span>
+        <span class="t-kr">Enpak</span>
+        <span class="t-es">Impacto</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/accessibility-statement/" class="foot-a">
+        <span class="t-en">Accessibility</span>
+        <span class="t-fr">Accessibilité</span>
+        <span class="t-kr">Aksesiblite</span>
+        <span class="t-es">Accesibilidad</span>
+      </a>
+      &nbsp;·&nbsp;
+      <a href="/blog/" class="foot-a">
+        <span class="t-en">Blog</span>
+        <span class="t-fr">Blog</span>
+        <span class="t-kr">Blog</span>
+        <span class="t-es">Blog</span>
+      </a>
+    </div>
+    <div class="foot-center2">
+      <a href="/impact/" class="foot-impact-a">
+        <img src="/images/greenweb.webp" alt="This website runs on green hosting - verified by thegreenwebfoundation.org" width="200" height="95" loading="lazy" />
+      </a>
+    </div>
+    <div class="foot-credit">
+      <a href="https://countdowns.co" target="_blank" rel="noopener noreferrer" class="foot-credit-a">countdowns.co</a>
+    </div>
+
+  </main>
+
+<div id="extToast" class="ext-toast"></div>
+
+  <script is:inline src="/scripts/index.js" defer></script>
+</body>
+</html>

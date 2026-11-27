@@ -1,0 +1,38 @@
+---
+// Bande « Coming up » : les 8 prochains événements, avec le drapeau du pays en filigrane (<img> à 5 % d'opacité,
+// object-fit: cover, comme un fond « cover »). Aucun style="" (CSP style-src 'self').
+import { tzDayStart } from "../utils/tz";
+import { flagEmoji, flagFile, shortName } from "../utils/geo";
+
+const { events, typeLabels } = Astro.props;
+
+const tiles = events.map((e: any) => {
+  const [y, m, d] = e.startDate.split("-").map(Number);
+  const mon = new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
+  return {
+    e,
+    date: `${mon} ${d}`,
+    start: tzDayStart(e.startDate, e.timezone ?? "America/Martinique"),
+    flag: flagFile(e.country),
+    tl: typeLabels[e.type] ?? typeLabels.other,
+  };
+});
+---
+
+<h2 class="sec">
+  <span class="t-en">Coming up</span><span class="t-fr">À venir</span><span class="t-kr">K ap vini</span><span class="t-es">Próximamente</span>
+</h2>
+<div class="strip">
+  {tiles.map((t: any) => (
+    <a class="tile" href={t.e.website} target="_blank" rel="noopener noreferrer">
+      {t.flag && <img class="tile-flag" src={t.flag} alt="" width="40" height="30" loading="lazy" decoding="async" />}
+      <div class="tn">{t.e.name}</div>
+      <div class="twhere">{flagEmoji(t.e.country)} {shortName(t.e.country)}</div>
+      <div class="tm">
+        {t.date} ·
+        <span class="t-en">{t.tl.en}</span><span class="t-fr">{t.tl.fr}</span><span class="t-kr">{t.tl.kr}</span><span class="t-es">{t.tl.es}</span>
+      </div>
+      <div class="tmini" data-start={t.start}>0d 00h 00m 00s</div>
+    </a>
+  ))}
+</div>

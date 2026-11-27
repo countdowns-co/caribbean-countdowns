@@ -4,6 +4,7 @@
 import ecoCriteria from "../data/eco-criteria.json";
 import { tzDayStart, tzDayEnd } from "../utils/tz";
 import { computeEcoGrade } from "../utils/eco";
+import { flagEmoji, shortName } from "../utils/geo";
 
 const { event, eager = false, typeLabels } = Astro.props;
 
@@ -22,21 +23,34 @@ const ecoGrade = computeEcoGrade(event.eco, ecoCriteria as any[]);
 const [sy, sm, sd] = event.startDate.split("-").map(Number);
 const monthShort = new Date(Date.UTC(sy, sm - 1, sd, 12)).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
 const tl = typeLabels[event.type] ?? typeLabels.other;
-const place = event.city ? `${event.city}, ${event.country}` : event.country;
-const searchText = `${event.name} ${event.city ?? ""} ${event.country ?? ""}`.toLowerCase();
+const place = event.city ? `${event.city}, ${shortName(event.country)}` : shortName(event.country);
+const showImage = Boolean(event.image) && status !== "ENDED";
+// Texte de recherche : nom, ville, pays et genres (reggae, soca, régate...), comme le filtre « details » de l'ancien accueil
+const searchText = `${event.name} ${event.city ?? ""} ${event.country ?? ""} ${(event.details ?? []).filter(Boolean).join(" ")}`.toLowerCase();
+// Plage de dates lisible (même format que l'ancien accueil), pour les événements de plusieurs jours
+const [ey, em, ed] = event.endDate.split("-").map(Number);
+const monthLong = (y: number, m: number, d: number) =>
+  new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
+const dateRange =
+  event.startDate === event.endDate
+    ? `${monthLong(sy, sm, sd)} ${sd}, ${sy}`
+    : sy === ey && sm === em
+      ? `${monthLong(sy, sm, sd)} ${sd}–${ed}, ${sy}`
+      : `${monthLong(sy, sm, sd)} ${sd}, ${sy} – ${monthLong(ey, em, ed)} ${ed}, ${ey}`;
 ---
 
 <article
-  class={`dcard${status === "LIVE" ? " islive" : ""}`}
+  class={`dcard${status === "LIVE" ? " islive" : ""}${status === "ENDED" ? " ended" : ""}`}
   data-type={event.type ?? ""}
   data-country={event.country ?? ""}
   data-free={showFree ? "1" : "0"}
+  data-eco={ecoGrade ?? ""}
   data-start={startMs}
   data-end={endMs}
   data-search={searchText}
 >
-  <div class={`dposter${event.image ? "" : " noimg"}`}>
-    {event.image && (
+  <div class={`dposter${showImage ? "" : " noimg"}`}>
+    {showImage && (
       <img
         class="dposter-img"
         src={eager ? event.image : undefined}
@@ -64,12 +78,13 @@ const searchText = `${event.name} ${event.city ?? ""} ${event.country ?? ""}`.to
   </div>
   <div class="dbody">
     <div class="dloc-row">
-      <span class="dloc">{place}</span>
+      <span class="dloc"><span aria-hidden="true">{flagEmoji(event.country)}</span> {place}</span>
       {ecoGrade && <a href="/sustainability" class={`deco deco-${ecoGrade}`}>♻️ {ecoGrade}</a>}
     </div>
     <h3 class="dname">
       <a href={event.website} target="_blank" rel="noopener noreferrer">{event.name} <span class="ext-icon" aria-hidden="true">↗</span></a>
     </h3>
+    <div class="ddates">{dateRange}</div>
     {(registerLinks.length > 0 || ticketLinks.length > 0) && (
       <div class="dlinks">
         {registerLinks.map((t: Link, i: number) => (
@@ -95,14 +110,17 @@ const searchText = `${event.name} ${event.city ?? ""} ${event.country ?? ""}`.to
     )}
     <div class="dcd">
       <span class="dcd-l">
-        <span class={`lb-start${status === "LIVE" ? " is-hidden" : ""}`}>
+        <span class={`lb-start${status === "UPCOMING" ? "" : " is-hidden"}`}>
           <span class="t-en">starts in</span><span class="t-fr">commence dans</span><span class="t-kr">ka koumansé adan</span><span class="t-es">empieza en</span>
         </span>
         <span class={`lb-end${status === "LIVE" ? "" : " is-hidden"}`}>
           <span class="t-en">ends in</span><span class="t-fr">se termine dans</span><span class="t-kr">ka fini adan</span><span class="t-es">termina en</span>
         </span>
+        <span class={`lb-done${status === "ENDED" ? "" : " is-hidden"}`}>
+          <span class="t-en">ended</span><span class="t-fr">terminé</span><span class="t-kr">fini</span><span class="t-es">terminado</span>
+        </span>
       </span>
-      <span class="dcd-v" data-start={startMs} data-end={endMs}>0d 00h 00m 00s</span>
+      <span class="dcd-v" data-start={startMs} data-end={endMs}>{status === "ENDED" ? "—" : "0d 00h 00m 00s"}</span>
     </div>
   </div>
 </article>
