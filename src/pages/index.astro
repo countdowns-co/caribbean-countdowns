@@ -146,7 +146,7 @@ let imageIndex = 0;
     .hl-top{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
     .hl-top::before{content:"";width:28px;height:2px;background:var(--accent);border-radius:2px;flex:none}
     .hl-top b{color:var(--text);letter-spacing:.08em}
-    .hl-up{font-size:13px;color:var(--muted)}.hl-up b{color:var(--text)}.hl-up a{color:var(--accent);margin-left:6px}
+    .hl-up{font-size:13px;color:var(--muted)}.hl-up b{color:var(--text)}.hl-up a{color:var(--accent)}.hl-suggest{margin-top:2px}
     .hero h1{font-size:clamp(28px,3.6vw,52px);line-height:1.05;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
     .hero h1 em{font-style:normal;color:var(--accent)}
     .hero p{color:var(--muted);max-width:640px;margin:0;font-size:17px}
@@ -206,7 +206,7 @@ let imageIndex = 0;
     @keyframes live-pulse{0%,100%{opacity:1}50%{opacity:.55}}
     .dcard.islive{border-color:var(--islive-line);animation:live-ring 2.4s ease-in-out infinite}
     .dcard.islive .dcd-v{color:var(--islive-cd);text-shadow:var(--glow-live);animation:live-pulse 1.4s infinite}
-    .dposter{height:150px;background:linear-gradient(135deg,#0d9488,#134e4a);position:relative;overflow:hidden}
+    .dposter{aspect-ratio:5 / 2;background:linear-gradient(135deg,#0d9488,#134e4a);position:relative;overflow:hidden}
     .dposter-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
     .dbadge{position:absolute;left:10px;top:10px;background:#000c;color:#fff;border-radius:8px;padding:4px 9px;text-align:center;line-height:1.1;font-size:11px;text-transform:uppercase}
     .dbadge b{display:block;font-size:20px}
@@ -240,8 +240,9 @@ let imageIndex = 0;
     .hit-img{height:20px;width:auto;opacity:.5}
     .foot-badge{display:inline-block;margin-top:6px}.foot-badge img{width:100px;height:auto}
     @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.hero-grid{grid-template-columns:1fr;gap:16px}.cmap figcaption{text-align:left}}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
     @media (max-width:560px){
-      .grid{grid-template-columns:1fr}.hero{padding:30px 0 20px}.hero p{font-size:15px}
+      .hero{padding:30px 0 20px}.hero p{font-size:15px}
       .sponsor .logos{margin-left:0}.addlink{display:none}.tile{flex-basis:150px}
     }
     @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}.dcard.islive,.dcard.islive .dcd-v,.dlive{animation:none}.cmap .pulse{animation:none;opacity:.35;transform:scale(2)}.cmap .pulse.p2{display:none}}
@@ -277,17 +278,18 @@ let imageIndex = 0;
               <span class="t-kr">Dènye mizajou : {lastUpdateFr}</span><span class="t-es">Última actualización: {lastUpdateEs}</span>
             </b></div>
             <div class="hl-up">
-              <span class="t-en"><b id="st-all">{activeEvents.length}</b> upcoming or live events in <b id="st-countries">{activeCountries.size}</b> countries</span>
-              <span class="t-fr"><b>{activeEvents.length}</b> événements à venir ou en cours dans <b>{activeCountries.size}</b> pays</span>
-              <span class="t-kr"><b>{activeEvents.length}</b> evènman talè oswa an kou nan <b>{activeCountries.size}</b> peyi</span>
-              <span class="t-es"><b>{activeEvents.length}</b> eventos próximos o en vivo en <b>{activeCountries.size}</b> países</span>
-              <a href="/suggest-event/">
-                <span class="t-en">Know one we missed? Suggest an event ›</span><span class="t-fr">Un événement manque ? Proposez-le ›</span>
-                <span class="t-kr">Ou konnen yon evènman nou pa gen ? Pwopoze l ›</span><span class="t-es">¿Falta alguno? Sugiere un evento ›</span>
-              </a>
-              <a href="/lite/">
-                <span class="t-en">Light version ›</span><span class="t-fr">Version légère ›</span><span class="t-kr">Vèsyon lejè ›</span><span class="t-es">Versión ligera ›</span>
-              </a>
+              <div class="hl-count">
+                <span class="t-en"><b id="st-all">{activeEvents.length}</b> upcoming or live events in <b id="st-countries">{activeCountries.size}</b> countries</span>
+                <span class="t-fr"><b>{activeEvents.length}</b> événements à venir ou en cours dans <b>{activeCountries.size}</b> pays</span>
+                <span class="t-kr"><b>{activeEvents.length}</b> evènman talè oswa an kou nan <b>{activeCountries.size}</b> peyi</span>
+                <span class="t-es"><b>{activeEvents.length}</b> eventos próximos o en vivo en <b>{activeCountries.size}</b> países</span>
+              </div>
+              <div class="hl-suggest">
+                <a href="/suggest-event/">
+                  <span class="t-en">Know one we missed? Suggest an event ›</span><span class="t-fr">Un événement manque ? Proposez-le ›</span>
+                  <span class="t-kr">Ou konnen yon evènman nou pa gen ? Pwopoze l ›</span><span class="t-es">¿Falta alguno? Sugiere un evento ›</span>
+                </a>
+              </div>
             </div>
           </div>
           <h1>
