@@ -1,5 +1,11 @@
 ---
+// Accueil — nouveau design (tranche 2 : carte, bande « Coming up » avec drapeaux, filtre écologique, derniers événements).
+// L'ancien design reste disponible sur /lite/ (version légère). Mêmes données et mêmes règles de statut que l'ancien accueil.
+// CSS et JavaScript externes uniquement (CSP : script-src 'self'; style-src 'self') : aucun style="" ni script en ligne.
 import LiveBanner from "../components/LiveBanner.astro";
+import EventCard from "../components/EventCard.astro";
+import ComingUp from "../components/ComingUp.astro";
+import CaribbeanMap from "../components/CaribbeanMap.astro";
 import events2026 from "../data/events-2026.json";
 import events2027 from "../data/events-2027.json";
 import sponsors from "../data/sponsors.json";
@@ -7,726 +13,442 @@ import ngos from "../data/ngos.json";
 import { tzDayStart, tzDayEnd } from "../utils/tz";
 
 const events = [...events2026, ...events2027];
-
-import EventRow from "../components/EventRow.astro";
-
-function getStatus(f: any) {
+const nowMs = Date.now();
+const withStatus = events.map((f: any) => {
   const tz = f.timezone ?? "America/Martinique";
-  const nowMs = Date.now();
-  if (nowMs > tzDayEnd(f.endDate, tz)) return "ENDED";
-  if (nowMs >= tzDayStart(f.startDate, tz)) return "LIVE";
-  return "UPCOMING";
+  const status = nowMs > tzDayEnd(f.endDate, tz) ? "ENDED" : nowMs >= tzDayStart(f.startDate, tz) ? "LIVE" : "UPCOMING";
+  return { ...f, status };
+});
+
+// Actifs (en cours ou à venir) : début le plus proche d'abord. Terminés : seuls les plus récents sont listés (affichage seulement).
+const PAST_EVENTS_LIMIT = 10;
+const activeEvents = withStatus
+  .filter((f: any) => f.status !== "ENDED")
+  .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+const endedEvents = withStatus
+  .filter((f: any) => f.status === "ENDED")
+  .sort(
+    (a: any, b: any) =>
+      new Date(b.endDate).getTime() - new Date(a.endDate).getTime() ||
+      new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+  )
+  .slice(0, PAST_EVENTS_LIMIT);
+
+const typeLabels: Record<string, Record<string, string>> = {
+  music: { en: "Music", fr: "Musique", kr: "Mizik", es: "Música" },
+  sport: { en: "Sport", fr: "Sport", kr: "Spo", es: "Deporte" },
+  sailing: { en: "Sailing", fr: "Voile", kr: "Vwal", es: "Vela" },
+  art: { en: "Art", fr: "Art", kr: "Atizay", es: "Arte" },
+  carnival: { en: "Carnival", fr: "Carnaval", kr: "Kanaval", es: "Carnaval" },
+  culture: { en: "Culture", fr: "Culture", kr: "Kilti", es: "Cultura" },
+  food: { en: "Food", fr: "Gastronomie", kr: "Bon manjé", es: "Gastronomía" },
+  other: { en: "Other", fr: "Autre", kr: "Le restan", es: "Otro" },
+};
+const typeOrder = ["music", "carnival", "sport", "sailing", "art", "culture", "food"];
+
+// Regroupement par mois de début
+const byMonth = new Map<string, any[]>();
+for (const f of activeEvents) {
+  const key = f.startDate.slice(0, 7);
+  if (!byMonth.has(key)) byMonth.set(key, []);
+  byMonth.get(key)!.push(f);
 }
-
-const enriched = events
-  .map(f => ({ ...f, status: getStatus(f) }))
-  .sort((a, b) => {
-    if (a.status === "ENDED" && b.status !== "ENDED") return 1;
-    if (a.status !== "ENDED" && b.status === "ENDED") return -1;
-    // Ended events: most recently ended first. Active events: soonest start first.
-    if (a.status === "ENDED") {
-      return new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
-        || new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
-    }
-    return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-  });
-
-const eventTypes = ["All", "music", "sport", "sailing", "art", "carnival", "culture", "food", "other"];
-const eventTypeLabels: Record<string, Record<string, string>> = {
-  "All":     { en: "All types",   fr: "Tous les types", kr: "Tout kalité",  es: "Todos los tipos" },
-  "music":   { en: "Music",       fr: "Musique",        kr: "Mizik",        es: "Música" },
-  "sport":   { en: "Sport",       fr: "Sport",          kr: "Spo",          es: "Deporte" },
-  "sailing": { en: "Sailing",     fr: "Voile",          kr: "Vwal",         es: "Vela" },
-  "art":     { en: "Art",         fr: "Art",            kr: "Atizay",       es: "Arte" },
-  "carnival": { en: "Carnival",    fr: "Carnaval",       kr: "Kanaval",      es: "Carnaval" },
-  "culture": { en: "Culture",     fr: "Culture",        kr: "Kilti",        es: "Cultura" },
-  "food":    { en: "Food",        fr: "Gastronomie",    kr: "Bon manjé",    es: "Gastronomía" },
-  "other":   { en: "Other",       fr: "Autre",          kr: "Le restan",    es: "Otro" },
+const monthLabel = (key: string, loc: string) => {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, 1, 12)).toLocaleDateString(loc, { month: "long", year: "numeric", timeZone: "UTC" });
 };
 
-const details = ["All", ...Array.from(new Set(events.flatMap(f => f.details ?? []).filter(v => v)))];
+// Pays proposés dans le filtre : ceux des événements listés ; carte : tous les pays des données (point creux si rien à venir)
+const listed = [...activeEvents, ...endedEvents];
+const countries = Array.from(new Set(listed.map((f: any) => f.country).filter(Boolean))).sort() as string[];
+const stats: Record<string, { n: number; live: number }> = {};
+for (const f of withStatus as any[]) {
+  if (!f.country) continue;
+  stats[f.country] ??= { n: 0, live: 0 };
+  if (f.status !== "ENDED") stats[f.country].n += 1;
+  if (f.status === "LIVE") stats[f.country].live += 1;
+}
+const activeCountries = new Set(activeEvents.map((f: any) => f.country).filter(Boolean));
 
-// All grades A–F always shown; the filter matches each event by its computed grade
-// (data-eco-grade on the row, set in EventRow). Chips for grades with no event
-// yet simply match nothing until events are graded.
-const ecoGrades = ["All", "A", "B", "C", "D", "F"];
+const upcoming = activeEvents.filter((f: any) => f.status === "UPCOMING");
+const next = upcoming[0] ?? activeEvents[0];
+const comingUp = upcoming.slice(0, 8);
+// Garde-fou : sans aucun événement actif, le bloc « prochain événement » est omis (la construction ne doit jamais échouer ici).
+const nextStart = next ? tzDayStart(next.startDate, next.timezone ?? "America/Martinique") : 0;
+const nextPlace = next ? (next.city ? `${next.city}, ${next.country}` : next.country) : "";
+const [ny, nm, nd] = next ? next.startDate.split("-").map(Number) : [1970, 1, 1];
+const nextDate = new Date(Date.UTC(ny, nm - 1, nd, 12)).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
 const lastUpdateEn = new Date().toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
 const lastUpdateFr = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 const lastUpdateEs = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
 
-const liveEvents   = enriched.filter(f => f.status === "LIVE");
-// Past events: only the most recent ones are listed (enriched is sorted most recently
-// ended first). Display only: older events stay in the data files.
-const PAST_EVENTS_LIMIT = 10;
-const endedEvents  = enriched.filter(f => f.status === "ENDED").slice(0, PAST_EVENTS_LIMIT);
-const activeEvents = enriched.filter(f => f.status !== "ENDED");
-
-// Filter options come from the events the page lists, so no option matches nothing.
-const listed = [...activeEvents, ...endedEvents];
-const listedCountries = new Set(listed.map(f => f.country));
-const countries = ["All", ...Array.from(new Set(events.map(f => f.country).filter(Boolean))).filter(c => listedCountries.has(c))];
-
-// LCP hint: the first active card with an image is the likely largest-paint
-// element. Preload it (fetchpriority high) so the browser fetches it early
-// instead of waiting for the CSS background-image to be discovered.
-const lcpImage = activeEvents.find(f => f.image)?.image ?? null;
-
 const { ngo } = ngos;
 const { sponsor } = sponsors;
-
-function splitLines(text: string) {
-  return text.split(";").map(s => s.trim()).filter(Boolean);
-}
+let imageIndex = 0;
 ---
 
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="referrer" content="no-referrer" />
-  {lcpImage && <link rel="preload" as="image" href={lcpImage} fetchpriority="high" />}
   <title>countdowns.co — Caribbean</title>
   <meta name="description" content="Live countdowns to Caribbean festivals, carnivals and regattas — dates, tickets and eco scores for 75+ events across the Caribbean, in 4 languages." />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2" crossorigin />
   <style>.t-fr,.t-kr,.t-es{display:none}</style>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <style is:global>
+    @font-face{font-family:"Plus Jakarta Sans";src:url("/fonts/plus-jakarta-sans-latin-wght-normal.woff2") format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
+    /* police de repli ajustée (largeur mesurée : Arial est 2 à 5 % plus étroite) pour limiter le saut de mise en page */
+    @font-face{font-family:"Plus Jakarta Fallback";src:local("Arial");size-adjust:104%}
+    :root{
+      --bg:#0b0f0e;--panel:#111817;--line:#1f2b29;--text:#e9f1ef;--muted:#8fa6a2;--accent:#2dd4bf;--accent2:#0f766e;
+      --live:#ef4444;--free:#22c55e;--hero-top:#0d948826;--sp-bg:#06201d;--sp-line:#134e4a;--sp-fg:#99f6e4;--sp-link:#5eead4;
+      --islive-line:#7f1d1d;--ring-a:#7f1d1d;--ring-b:#ef4444;--ring-glow:#ef444466;--islive-cd:#fca5a5;--glow:0 0 14px #2dd4bf33;--glow-live:0 0 14px #ef444455;
+      --land:#1c2a28;--land-line:#2b3d3a;--tip-bg:#0b0f0e;--tip-fg:#e9f1ef;
+      --eA-bg:#0d2a0d;--eA-fg:#4ade80;--eA-bd:#166534;--eB-bg:#1a2a08;--eB-fg:#a3e635;--eB-bd:#365314;--eC-bg:#2a1f00;--eC-fg:#facc15;--eC-bd:#78350f;
+      --eD-bg:#2a1200;--eD-fg:#fb923c;--eD-bd:#7c2d12;--eF-bg:#2a0000;--eF-fg:#f87171;--eF-bd:#7f1d1d;color-scheme:dark;
+    }
+    :root[data-theme="light"]{
+      --bg:#f6f8f7;--panel:#fff;--line:#dfe7e5;--text:#10201d;--muted:#5b716d;--accent:#0d9488;--accent2:#0f766e;--live:#dc2626;
+      --hero-top:#0d948826;--sp-bg:#ecfdf5;--sp-line:#99f6e4;--sp-fg:#134e4a;--sp-link:#0f766e;--islive-line:#fca5a5;--ring-a:#fca5a5;--ring-b:#dc2626;--ring-glow:#dc262640;
+      --islive-cd:#b91c1c;--glow:none;--glow-live:none;--land:#d3dedb;--land-line:#aebfbb;--tip-bg:#fff;--tip-fg:#10201d;
+      --eA-bg:#dcfce7;--eA-fg:#166534;--eA-bd:#86efac;--eB-bg:#ecfccb;--eB-fg:#3f6212;--eB-bd:#bef264;--eC-bg:#fef9c3;--eC-fg:#854d0e;--eC-bd:#fde047;
+      --eD-bg:#ffedd5;--eD-fg:#9a3412;--eD-bd:#fdba74;--eF-bg:#fee2e2;--eF-fg:#991b1b;--eF-bd:#fca5a5;color-scheme:light;
+    }
+    @media (prefers-color-scheme: light){
+      :root[data-theme="auto"]{
+        --bg:#f6f8f7;--panel:#fff;--line:#dfe7e5;--text:#10201d;--muted:#5b716d;--accent:#0d9488;--accent2:#0f766e;--live:#dc2626;
+        --hero-top:#0d948826;--sp-bg:#ecfdf5;--sp-line:#99f6e4;--sp-fg:#134e4a;--sp-link:#0f766e;--islive-line:#fca5a5;--ring-a:#fca5a5;--ring-b:#dc2626;--ring-glow:#dc262640;
+        --islive-cd:#b91c1c;--glow:none;--glow-live:none;--land:#d3dedb;--land-line:#aebfbb;--tip-bg:#fff;--tip-fg:#10201d;
+        --eA-bg:#dcfce7;--eA-fg:#166534;--eA-bd:#86efac;--eB-bg:#ecfccb;--eB-fg:#3f6212;--eB-bd:#bef264;--eC-bg:#fef9c3;--eC-fg:#854d0e;--eC-bd:#fde047;
+        --eD-bg:#ffedd5;--eD-fg:#9a3412;--eD-bd:#fdba74;--eF-bg:#fee2e2;--eF-fg:#991b1b;--eF-bd:#fca5a5;color-scheme:light;
+      }
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Plus Jakarta Sans","Plus Jakarta Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip}
+    a{color:inherit}
     .is-hidden{display:none!important}
-    .logo-chip{height:52px;vertical-align:middle;border-radius:4px;background:#fff;padding:3px 7px}
-    .foot-center{text-align:center;padding:32px 0 8px}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+    header.site{border-bottom:1px solid var(--line);background:var(--panel)}
+    .site-in{display:flex;align-items:center;gap:12px;padding:12px 0}
+    .brand{font-weight:800;letter-spacing:.02em;font-size:18px;text-decoration:none}
+    .sp{flex:1}
+    .addlink{font-size:13px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+    .lang-group{display:flex;gap:4px}
+    .lang-btn,.theme-btn{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:6px;padding:4px 8px;cursor:pointer;font:inherit}
+    .lang-btn.active{border-color:var(--accent)}
+    .hero{padding:48px 0 32px;position:relative;isolation:isolate}
+    .hero::before{content:"";position:absolute;z-index:-1;top:0;bottom:-30px;left:50%;margin-left:-50vw;width:100vw;background:linear-gradient(180deg,var(--hero-top) 0%,var(--hero-top) 6%,transparent 78%);pointer-events:none}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:center}
+    .hl{margin:0 0 18px;max-width:640px}
+    .hl-top{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .hl-top::before{content:"";width:28px;height:2px;background:var(--accent);border-radius:2px;flex:none}
+    .hl-top b{color:var(--text);letter-spacing:.08em}
+    .hl-up{font-size:13px;color:var(--muted)}.hl-up b{color:var(--text)}.hl-up a{color:var(--accent);margin-left:6px}
+    .hero h1{font-size:clamp(28px,3.6vw,52px);line-height:1.05;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
+    .hero h1 em{font-style:normal;color:var(--accent)}
+    .hero p{color:var(--muted);max-width:640px;margin:0;font-size:17px}
+    .cmap{margin:0}
+    .cmap svg{width:100%;height:auto;display:block}
+    .cmap figcaption{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;letter-spacing:.04em}
+    .cmap .land{fill:var(--land);stroke:var(--land-line);stroke-width:.6}
+    .cmap .dot{fill:var(--accent);fill-opacity:.5;stroke:var(--accent);stroke-width:1.2;cursor:pointer;transition:fill-opacity .15s}
+    .cmap .dot:hover,.cmap .dot.sel{fill-opacity:.95;stroke:#fff}
+    .cmap .dot.sel{stroke-width:2}
+    .cmap .dot:focus{outline:none;stroke:#fff;stroke-width:2}
+    .cmap .dot.hollow{fill:transparent;fill-opacity:0;stroke-dasharray:2.5 2.5;stroke-width:1.4}
+    .cmap .dot.hollow:hover,.cmap .dot.hollow.sel{fill:var(--accent);fill-opacity:.35}
+    .cmap .dot.live{fill:var(--live);fill-opacity:.9;stroke:#fecaca}
+    .cmap .pulse{fill:var(--live);fill-opacity:.55;transform-box:fill-box;transform-origin:center;animation:cpulse 2s ease-out infinite;pointer-events:none}
+    .cmap .pulse.p2{animation-delay:1s}
+    @keyframes cpulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(3.4);opacity:0}}
+    #cmap-tip rect{fill:var(--tip-bg);stroke:var(--accent);stroke-width:1;fill-opacity:.94}
+    #cmap-tip text{fill:var(--tip-fg);font:600 14px "Plus Jakarta Sans","Plus Jakarta Fallback",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+    .next{margin-top:26px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+    .next .lbl{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+    .next .nm{font-size:20px;font-weight:700}
+    .next .where{color:var(--muted);font-size:13px}
+    .cdbig{font:700 22px ui-monospace,Menlo,monospace;color:var(--accent)}
+    .sponsor{margin:14px 0 0;border:1px solid var(--sp-line);background:var(--sp-bg);border-radius:12px;padding:12px 18px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--sp-fg)}
+    .sponsor a{color:var(--sp-link)}
+    .sponsor .logos{display:flex;gap:10px;margin-left:auto}
+    .sponsor .logo{background:#fff;border-radius:8px;height:48px;padding:5px 10px;display:flex;align-items:center}
+    .sponsor .logo img{height:100%;width:auto}
+    .sponsor .btn{border:1px solid var(--accent2);color:var(--sp-link);border-radius:8px;padding:6px 12px;text-decoration:none;font-size:13px}
+    h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:26px 0 8px}
+    .strip{display:flex;gap:10px;overflow-x:auto;padding:6px 0 14px;scroll-snap-type:x mandatory}
+    .tile{position:relative;overflow:hidden;isolation:isolate;flex:0 0 170px;scroll-snap-align:start;text-decoration:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .tile:hover{border-color:var(--accent)}
+    .tile-flag{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.05;z-index:-1;pointer-events:none}
+    .tn{font-size:15px;font-weight:700;line-height:1.25;min-height:2.5em;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .twhere{font-size:12px;font-weight:600;color:var(--text);margin:-2px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tm{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+    .tmini{font:700 12px ui-monospace,Menlo,monospace;color:var(--accent);margin-top:8px}
+    .controls{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-top:14px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .row + .row{margin-top:8px}
+    .chip{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
+    .chip[aria-pressed="true"]{background:var(--accent2);border-color:var(--accent);color:#fff}
+    .controls input,.controls select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+    .controls input{flex:1;min-width:160px}
+    .count{color:var(--muted);font-size:13px;margin-left:auto}
+    .month{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px;display:flex;gap:12px;align-items:center}
+    .month::after{content:"";flex:1;height:1px;background:var(--line)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .dcard{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);display:flex;flex-direction:column;min-height:250px}
+    .dcard:hover{border-color:var(--accent)}
+    .dcard.ended{opacity:.8}
+    .dcard.ended .dcd-v{color:var(--muted);text-shadow:none;font-size:15px}
+    /* carte en cours : le contour pulse en rouge, la pastille LIVE et le compteur clignotent doucement (pulse 1,4 s comme l'ancien accueil) */
+    @keyframes live-ring{0%,100%{border-color:var(--ring-a);box-shadow:0 0 0 0 transparent}50%{border-color:var(--ring-b);box-shadow:0 0 14px 1px var(--ring-glow)}}
+    @keyframes live-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+    .dcard.islive{border-color:var(--islive-line);animation:live-ring 2.4s ease-in-out infinite}
+    .dcard.islive .dcd-v{color:var(--islive-cd);text-shadow:var(--glow-live);animation:live-pulse 1.4s infinite}
+    .dposter{height:150px;background:linear-gradient(135deg,#0d9488,#134e4a);position:relative;overflow:hidden}
+    .dposter-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+    .dbadge{position:absolute;left:10px;top:10px;background:#000c;color:#fff;border-radius:8px;padding:4px 9px;text-align:center;line-height:1.1;font-size:11px;text-transform:uppercase}
+    .dbadge b{display:block;font-size:20px}
+    .dtag{position:absolute;left:10px;bottom:10px;background:#000c;color:#fff;border-radius:6px;padding:2px 8px;font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+    .dfree{position:absolute;right:10px;top:10px;background:var(--free);color:#04210f;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:.08em}
+    .dlive{position:absolute;right:10px;bottom:10px;background:#dc2626;color:#fff;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:.08em;animation:live-pulse 1.4s infinite}
+    .dlive::before{content:"●";margin-right:4px;font-size:8px;vertical-align:1px}
+    .dbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
+    .dloc-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .dloc{font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+    .dname{font-weight:700;font-size:16px;line-height:1.25;margin:0}
+    .dname a{text-decoration:none}.dname a:hover{text-decoration:underline}
+    .ext-icon{font-size:12px;color:var(--muted)}
+    .ddates{font-size:12px;color:var(--muted)}
+    .dlinks{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .dlink{border:1px solid var(--accent2);color:var(--accent);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;text-decoration:none}
+    .dlink:hover{background:var(--accent2);color:#fff}
+    .dcd{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:1px dashed var(--line)}
+    .dcd-l{font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+    .dcd-v{font:800 19px ui-monospace,Menlo,monospace;color:var(--accent);text-shadow:var(--glow)}
+    .deco{font-size:11px;border-radius:6px;padding:1px 7px;text-decoration:none;white-space:nowrap}
+    .deco-A{background:var(--eA-bg);color:var(--eA-fg);border:1px solid var(--eA-bd)}
+    .deco-B{background:var(--eB-bg);color:var(--eB-fg);border:1px solid var(--eB-bd)}
+    .deco-C{background:var(--eC-bg);color:var(--eC-fg);border:1px solid var(--eC-bd)}
+    .deco-D{background:var(--eD-bg);color:var(--eD-fg);border:1px solid var(--eD-bd)}
+    .deco-F{background:var(--eF-bg);color:var(--eF-fg);border:1px solid var(--eF-bd)}
+    .dempty{padding:40px;text-align:center;color:var(--muted)}
+    .foot{text-align:center;padding:40px 0 32px;font-size:12px;color:var(--muted)}
+    .foot a{color:inherit}
+    .foot-row{padding:0 0 10px}
     .hit-img{height:20px;width:auto;opacity:.5}
-    .foot-links{text-align:center;padding:0 0 10px;font-size:11px}
-    .foot-a{color: #999999;text-decoration:underline}
-    .foot-center2{text-align:center;padding:0 0 10px}
-    .foot-impact-a{display:inline-block}
-    .foot-credit{text-align:center;padding:0 0 24px;font-size:11px}
-    .foot-credit-a{color: #999999;text-decoration:none}
-    .ext-toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #333;border-radius:4px;padding:8px 16px;font-size:12px;color:#999;pointer-events:none;white-space:nowrap;z-index:100}
-
-    body {
-      background: #0f0f0f;
-      color: #e0e0e0;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-      min-height: 100vh;
+    .foot-badge{display:inline-block;margin-top:6px}.foot-badge img{width:100px;height:auto}
+    @media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.hero-grid{grid-template-columns:1fr;gap:16px}.cmap figcaption{text-align:left}}
+    @media (max-width:560px){
+      .grid{grid-template-columns:1fr}.hero{padding:30px 0 20px}.hero p{font-size:15px}
+      .sponsor .logos{margin-left:0}.addlink{display:none}.tile{flex-basis:150px}
     }
-
-    a { color: inherit; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
-
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .site-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      color: #fff;
-    }
-
-    .site-subtitle {
-      font-size: 13px;
-      color: #fff;
-      margin-bottom: 32px;
-    }
-
-    /* Language buttons */
-    .lang-group {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .lang-btn {
-      background: transparent;
-      border: 1px solid #555;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 18px;
-      letter-spacing: 0;
-      padding: 2px 6px;
-      color: #aaa;
-      font-family: inherit;
-      transition: all 0.15s;
-      opacity: 0.75;
-    }
-
-    .lang-btn:hover { border-color: #888; opacity: 0.8; }
-
-    .lang-btn.active {
-      background: #1a1a1a;
-      border-color: #555;
-      opacity: 1;
-    }
-
-    /* Search + filter row */
-    .search-filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 28px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .search-input-wrap {
-      flex: 1;
-      min-width: 180px;
-      position: relative;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #999999;
-      pointer-events: none;
-    }
-
-    .search-input {
-      width: 100%;
-      background: #161616;
-      border: 1px solid #2e2e2e;
-      border-radius: 6px;
-      color: #e0e0e0;
-      font-family: inherit;
-      font-size: 13px;
-      padding: 8px 112px 8px 34px;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .search-input::placeholder { color: #999999; }
-    .search-input:focus { border-color: #444; }
-
-    .filter-toggle {
-      position: absolute;
-      right: 6px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 5px;
-      color: #888;
-      font-family: inherit;
-      font-size: 12px;
-      padding: 4px 10px;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-      white-space: nowrap;
-    }
-
-    .filter-toggle:hover { border-color: #444; color: #ccc; }
-    .filter-toggle.has-active { border-color: #2d6aa0; color: #7ec8e3; }
-
-    .filter-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #2d6aa0;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      min-width: 16px;
-      height: 16px;
-      border-radius: 8px;
-      padding: 0 4px;
-    }
-
-    .filter-panel {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      right: 0;
-      background: #1a1a1a;
-      border: 1px solid #2e2e2e;
-      border-radius: 8px;
-      padding: 14px 16px;
-      z-index: 20;
-      display: none;
-    }
-
-    .filter-panel.open { display: block; }
-
-    .filter-panel-group {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .filter-panel-group:last-child { margin-bottom: 0; }
-
-    .filter-panel-label {
-      font-size: 11px;
-      color: #999999;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      min-width: 52px;
-      padding-top: 4px;
-      flex-shrink: 0;
-    }
-
-    .filter-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-
-    .filter-chip {
-      cursor: pointer;
-      padding: 3px 10px;
-      border-radius: 4px;
-      border: 1px solid #333;
-      background: transparent;
-      color: #888;
-      font-size: 11px;
-      font-family: inherit;
-      transition: all 0.15s;
-      user-select: none;
-    }
-
-    .filter-chip:hover { border-color: #555; color: #ccc; }
-
-    .filter-chip.active {
-      background: #0d1f35;
-      border-color: #2d6aa0;
-      color: #7ec8e3;
-    }
-
-    /* Live banner */
-    .live-banner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #1a0a0a;
-      border: 1px solid #3a1010;
-      border-radius: 4px;
-      padding: 10px 16px;
-      margin-bottom: 32px;
-      font-size: 13px;
-      color: #f87171;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ef4444;
-      animation: pulse 1.4s infinite;
-      flex-shrink: 0;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .divider { border: none; border-top: 1px solid #2e2e2e; margin: 0; }
-
-    .info-bar {
-      font-size: 12px;
-      color: #999999;
-      margin-bottom: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 0;
-      flex-direction: column;
-    }
-
-    .info-bar a { color: #999999; text-decoration: underline; }
-    .info-bar a:hover { color: #999; }
-
-    /* Sponsor band */
-    .sponsor-footer {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #0a1a18;
-      border: 1px solid #0d3d35;
-      border-radius: 4px;
-      padding: 10px 16px;
-      margin-bottom: 32px;
-      font-size: 13px;
-      color: #5eead4;
-    }
-
-    .sponsor-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #14b8a6;
-      flex-shrink: 0;
-    }
-
-    .sponsor-cause {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      flex: 1;
-    }
-
-    .sponsor-cause-text {
-      font-size: 13px;
-      color: #5eead4;
-      flex: 1;
-    }
-
-    .sponsor-cause-text a { color: #5eead4; text-decoration: underline; }
-    .sponsor-cause-text a:hover { color: #99f6e4; }
-
-    .sponsor-cta {
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 3px;
-      border: 1px solid #0d9488;
-      color: #5eead4;
-      background: #0a1a18;
-      text-decoration: none;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .sponsor-cta:hover { background: #134e4a; color: #99f6e4; text-decoration: none; }
-
-    .sponsor-logos {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    /* Past events toggle */
-    .past-toggle-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 16px;
-      margin: 4px 0 4px;
-      background: transparent;
-      border: 1px solid #1a1a1a;
-      border-radius: 5px;
-      cursor: pointer;
-      user-select: none;
-      transition: border-color 0.15s, background 0.15s;
-      outline: none;
-    }
-    .past-toggle-card:hover { border-color: #2e2e2e; background: #0a0a0a; }
-    .past-toggle-card:focus-visible { border-color: #444; }
-    .past-toggle-card.open { border-color: #2e2e2e; }
-    .past-chevron { color: #2e2e2e; font-size: 11px; flex-shrink: 0; }
-    .past-label {
-      flex: 1;
-      text-align: center;
-      font-size: 11px;
-      color: #999999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    @media (max-width: 600px) {
-      .sponsor-cause {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        text-align: center;
-      }
-      .sponsor-cause-text {
-        font-size: 12px;
-        flex: unset;
-        width: 100%;
-        text-align: center;
-      }
-      .sponsor-cta {
-        padding: 5px 16px;
-        font-size: 12px;
-      }
-    }
-
+    @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}.dcard.islive,.dcard.islive .dcd-v,.dlive{animation:none}.cmap .pulse{animation:none;opacity:.35;transform:scale(2)}.cmap .pulse.p2{display:none}}
   </style>
 </head>
 
 <body>
-<LiveBanner />
-  <main class="page">
-
-    <div class="header-row">
-      <h1 class="site-title">
-        Countdowns
-      </h1>
+  <LiveBanner variant="alert" />
+  <header class="site">
+    <div class="wrap site-in">
+      <a class="brand" href="/">Caribbean</a>
+      <div class="sp"></div>
+      <a class="addlink" href="/suggest-event/">
+        <span class="t-en">+ Suggest an event</span><span class="t-fr">+ Proposer un événement</span><span class="t-kr">+ Pwopoze yon evènman</span><span class="t-es">+ Sugerir un evento</span>
+      </a>
       <div class="lang-group">
         <button class="lang-btn" data-lang="en" title="English">🇬🇧</button>
         <button class="lang-btn" data-lang="kr" title="Kréyol">🇭🇹</button>
         <button class="lang-btn" data-lang="fr" title="Français">🇫🇷</button>
         <button class="lang-btn" data-lang="es" title="Español">🇪🇸</button>
       </div>
+      <button id="themeBtn" class="theme-btn" type="button" aria-label="Theme" title="Theme: auto">◐</button>
     </div>
+  </header>
 
-    <p class="site-subtitle">
-      <span class="t-en">Live countdowns to music festivals and cultural events across the Caribbean.</span>
-      <span class="t-fr">Compte à rebours des événements à venir de la Caraïbe — festivals, carnavals, régates...</span>
-      <span class="t-kr">Kont a rebò pou festival mizik epi gro evènman an Karayib la.</span>
-      <span class="t-es">Cuenta regresiva de festivales de música y eventos en el Caribe.</span>
-    </p>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="hl">
+            <div class="hl-top"><b>
+              <span class="t-en">Last update: {lastUpdateEn}</span><span class="t-fr">Dernière mise à jour : {lastUpdateFr}</span>
+              <span class="t-kr">Dènye mizajou : {lastUpdateFr}</span><span class="t-es">Última actualización: {lastUpdateEs}</span>
+            </b></div>
+            <div class="hl-up">
+              <span class="t-en"><b id="st-all">{activeEvents.length}</b> upcoming or live events in <b id="st-countries">{activeCountries.size}</b> countries</span>
+              <span class="t-fr"><b>{activeEvents.length}</b> événements à venir ou en cours dans <b>{activeCountries.size}</b> pays</span>
+              <span class="t-kr"><b>{activeEvents.length}</b> evènman talè oswa an kou nan <b>{activeCountries.size}</b> peyi</span>
+              <span class="t-es"><b>{activeEvents.length}</b> eventos próximos o en vivo en <b>{activeCountries.size}</b> países</span>
+              <a href="/suggest-event/">
+                <span class="t-en">Know one we missed? Suggest an event ›</span><span class="t-fr">Un événement manque ? Proposez-le ›</span>
+                <span class="t-kr">Ou konnen yon evènman nou pa gen ? Pwopoze l ›</span><span class="t-es">¿Falta alguno? Sugiere un evento ›</span>
+              </a>
+              <a href="/lite/">
+                <span class="t-en">Light version ›</span><span class="t-fr">Version légère ›</span><span class="t-kr">Vèsyon lejè ›</span><span class="t-es">Versión ligera ›</span>
+              </a>
+            </div>
+          </div>
+          <h1>
+            <span class="t-en">Every Caribbean event, <em>counting down.</em></span>
+            <span class="t-fr">Tous les événements de la Caraïbe, <em>en compte à rebours.</em></span>
+            <span class="t-kr">Tout evènman Karayib, <em>ap konte a rebò.</em></span>
+            <span class="t-es">Todos los eventos del Caribe, <em>en cuenta regresiva.</em></span>
+          </h1>
+          <p>
+            <span class="t-en">Dates, free-to-watch broadcasts and eco scores for music, carnival, sailing and culture across the islands. In four languages.</span>
+            <span class="t-fr">Dates, diffusions gratuites et notes écologiques pour la musique, le carnaval, la voile et la culture à travers les îles. En quatre langues.</span>
+            <span class="t-kr">Dat, difizyon gratis ak nòt ekolojik pou mizik, kanaval, vwal ak kilti atravè tout zile yo. An kat lang.</span>
+            <span class="t-es">Fechas, transmisiones gratuitas y notas ecológicas de música, carnaval, vela y cultura en las islas. En cuatro idiomas.</span>
+          </p>
+        </div>
+        <CaribbeanMap stats={stats} />
+      </div>
 
-    <div class="info-bar">
-      <span>
-        <span class="t-en">Last update: {lastUpdateEn}</span>
-        <span class="t-fr">Dernière mise à jour : {lastUpdateFr}</span>
-        <span class="t-kr">Dènye mizajou : {lastUpdateFr}</span>
-        <span class="t-es">Última actualización: {lastUpdateEs}</span>
-      </span>
-      <span>
-        <span class="t-en">Want to add an event? <a href="/suggest-event/">Use the form</a>.</span>
-        <span class="t-fr">Ajouter un évènement ? <a href="/suggest-event/">Utiliser le formulaire</a>.</span>
-        <span class="t-kr">Vou vle mete yon evènman ? <a href="/suggest-event/">Sèvi ak fòmilè a</a>.</span>
-        <span class="t-es">¿Agregar un evento? <a href="/suggest-event/">Usa el formulario</a>.</span>
-      </span>
-    </div>
+      {next && (
+        <div class="next">
+          <div>
+            <div class="lbl">
+              <span class="t-en">Next event</span><span class="t-fr">Prochain événement</span><span class="t-kr">Pwochen evènman</span><span class="t-es">Próximo evento</span>
+            </div>
+            <div class="nm">{next.name}</div>
+            <div class="where">{nextPlace} · {nextDate}</div>
+          </div>
+          <div class="sp"></div>
+          <div>
+            <div class="lbl">
+              <span class="t-en">Starts in</span><span class="t-fr">Commence dans</span><span class="t-kr">Ka koumansé adan</span><span class="t-es">Empieza en</span>
+            </div>
+            <div class="cdbig" id="next-cd" data-start={nextStart}>0d 00h 00m 00s</div>
+          </div>
+        </div>
+      )}
 
-    <!-- Sponsor band -->
-    <div class="sponsor-footer">
-      <div class="sponsor-cause">
-        <span class="sponsor-cause-text">
+      <div class="sponsor">
+        <span class="stext">
           <span class="t-en">This site supports the NGO <a href="/ngo/">{ngo.name}</a><br />Thanks to the sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
           <span class="t-fr">Ce site soutient l'ONG <a href="/ngo/">{ngo.name}</a><br />Merci au sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
           <span class="t-kr">Sit sa a sipote ONG <a href="/ngo/">{ngo.name}</a><br />Mèsi bay sponsor a <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
           <span class="t-es">Este sitio apoya a la ONG <a href="/ngo/">{ngo.name}</a><br />Gracias al sponsor <a href={sponsor.website} target="_blank" rel="noopener noreferrer">{sponsor.name}</a></span>
         </span>
-        <div class="sponsor-logos">
-          <a href="/ngo/">
-            <img src={ngo.logo} alt={ngo.name} width="142" height="52" class="logo-chip" />
-          </a>
-          <a href={sponsor.website} target="_blank" rel="noopener noreferrer">
-            <img src={sponsor.logo} alt={sponsor.name} width="147" height="52" class="logo-chip" />
-          </a>
-        </div>
-        <a class="sponsor-cta" href="/sponsor/">
-          <span class="t-en">Become a sponsor</span>
-          <span class="t-fr">Devenir sponsor</span>
-          <span class="t-kr">Vin yon sponsor</span>
-          <span class="t-es">Ser patrocinador</span>
+        <span class="logos">
+          <a class="logo" href="/ngo/"><img src={ngo.logo} alt={ngo.name} width="142" height="52" /></a>
+          <a class="logo" href={sponsor.website} target="_blank" rel="noopener noreferrer"><img src={sponsor.logo} alt={sponsor.name} width="147" height="52" /></a>
+        </span>
+        <a class="btn" href="/sponsor/">
+          <span class="t-en">Become a sponsor</span><span class="t-fr">Devenir sponsor</span><span class="t-kr">Vin yon sponsor</span><span class="t-es">Ser patrocinador</span>
         </a>
       </div>
-    </div>
+    </section>
 
-    <!-- Live banner -->
-    {liveEvents.length > 0 && (
-      <div class="live-banner">
-        <span class="live-dot"></span>
-        <span>
-          <span class="t-en"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "event is" : "events are"} happening now.</span>
-          <span class="t-fr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "évènement est" : "évènements sont"} en cours.</span>
-          <span class="t-kr"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evènman ap" : "evènman ap"} fèt kounye a.</span>
-          <span class="t-es"><strong>{liveEvents.length}</strong> {liveEvents.length === 1 ? "evento está" : "eventos están"} ocurriendo ahora.</span>
-        </span>
-      </div>
-    )}
+    {comingUp.length > 0 && <ComingUp events={comingUp} typeLabels={typeLabels} />}
 
-    <!-- Search + Filters -->
-    <div class="search-filter-row">
-      <div class="search-input-wrap">
-        <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search events..." autocomplete="off" spellcheck="false" />
-        <button id="filterToggle" class="filter-toggle" type="button">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <span class="t-en">Filters</span>
-          <span class="t-fr">Filtres</span>
-          <span class="t-kr">Filtre</span>
-          <span class="t-es">Filtros</span>
-          <span id="filterBadge" class="filter-badge is-hidden">0</span>
+    <div class="controls" id="controls">
+      <div class="row" id="chips">
+        <button class="chip" type="button" data-filter="type" data-value="" aria-pressed="true">
+          <span class="t-en">All</span><span class="t-fr">Tous</span><span class="t-kr">Tout</span><span class="t-es">Todos</span>
         </button>
-
-        <div id="filterPanel" class="filter-panel">
-          <div class="filter-panel-group">
-            <span class="filter-panel-label">
-              <span class="t-en">Type</span>
-              <span class="t-fr">Type</span>
-              <span class="t-kr">Kalite</span>
-              <span class="t-es">Tipo</span>
-            </span>
-            <div class="filter-chips">
-              {eventTypes.map(t => (
-                <button class={`filter-chip${t === "All" ? " active" : ""}`} data-filter-type="type" data-value={t} type="button">
-                  <span class="t-en">{eventTypeLabels[t].en}</span>
-                  <span class="t-fr">{eventTypeLabels[t].fr}</span>
-                  <span class="t-kr">{eventTypeLabels[t].kr}</span>
-                  <span class="t-es">{eventTypeLabels[t].es}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div class="filter-panel-group">
-            <span class="filter-panel-label">
-              <span class="t-en">Country</span>
-              <span class="t-fr">Pays</span>
-              <span class="t-kr">Peyi</span>
-              <span class="t-es">País</span>
-            </span>
-            <div class="filter-chips">
-              {countries.map(c => (
-                <button class={`filter-chip${c === "All" ? " active" : ""}`} data-filter-type="country" data-value={c} type="button">
-                  <span class="t-en">{c === "All" ? "All countries" : c}</span>
-                  <span class="t-fr">{c === "All" ? "Tous les pays" : c}</span>
-                  <span class="t-kr">{c === "All" ? "Tout peyi" : c}</span>
-                  <span class="t-es">{c === "All" ? "Todos los países" : c}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div class="filter-panel-group">
-            <span class="filter-panel-label">
-              <span class="t-en">Eco grade</span>
-              <span class="t-fr">Note éco</span>
-              <span class="t-kr">Nòt eko</span>
-              <span class="t-es">Nota eco</span>
-            </span>
-            <div class="filter-chips">
-              {ecoGrades.map(g => (
-                <button class={`filter-chip${g === "All" ? " active" : ""}`} data-filter-type="eco" data-value={g} type="button">
-                  {g === "All" ? (
-                    <span>
-                      <span class="t-en">All grades</span>
-                      <span class="t-fr">Toutes les notes</span>
-                      <span class="t-kr">Tout nòt</span>
-                      <span class="t-es">Todas las notas</span>
-                    </span>
-                  ) : (
-                    <span>♻️ {g}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-        </div>
+        {typeOrder.map((t) => (
+          <button class="chip" type="button" data-filter="type" data-value={t} aria-pressed="false">
+            <span class="t-en">{typeLabels[t].en}</span><span class="t-fr">{typeLabels[t].fr}</span><span class="t-kr">{typeLabels[t].kr}</span><span class="t-es">{typeLabels[t].es}</span>
+          </button>
+        ))}
+        <button class="chip" type="button" data-filter="free" aria-pressed="false">
+          <span class="t-en">Free to watch</span><span class="t-fr">Gratuit à regarder</span><span class="t-kr">Pou ayen</span><span class="t-es">Gratis para ver</span>
+        </button>
+        <button class="chip" type="button" data-filter="live" aria-pressed="false">
+          <span class="t-en">Live now</span><span class="t-fr">En cours</span><span class="t-kr">An kou</span><span class="t-es">En vivo</span>
+        </button>
+        {endedEvents.length > 0 && (
+          <button class="chip" type="button" data-filter="ended" aria-pressed="false">
+            <span class="t-en">Ended</span><span class="t-fr">Terminés</span><span class="t-kr">Fini</span><span class="t-es">Terminados</span>
+          </button>
+        )}
+      </div>
+      <div class="row">
+        <input id="q" type="search" placeholder="Search events or cities…" aria-label="Search events" autocomplete="off" spellcheck="false" />
+        <select id="country" aria-label="Country" data-all-en="All countries" data-all-fr="Tous les pays" data-all-kr="Tout peyi" data-all-es="Todos los países">
+          <option value="">All countries</option>
+          {countries.map((c) => <option value={c}>{c}</option>)}
+        </select>
+        <select id="eco" aria-label="Eco grade" data-all-en="All eco grades" data-all-fr="Toutes les notes" data-all-kr="Tout nòt" data-all-es="Todas las notas">
+          <option value="">All eco grades</option>
+          {["A", "B", "C", "D", "F"].map((g) => <option value={g}>♻️ {g}</option>)}
+        </select>
+        <span class="count"><span id="count">{activeEvents.length}</span>{" "}
+          <span class="t-en">events</span><span class="t-fr">événements</span><span class="t-kr">evènman</span><span class="t-es">eventos</span></span>
       </div>
     </div>
 
-    <hr class="divider" />
-
-    <!-- Event list — active events (first 3 eager for LCP; rest lazy) -->
-    {activeEvents.map((event, i) => (
-      <EventRow event={event} eager={i < 3 || event.image === lcpImage} />
+    {Array.from(byMonth.entries()).map(([key, list]) => (
+      <section class="msec" data-month={key}>
+        <h2 class="month">
+          <span class="t-en">{monthLabel(key, "en-US")}</span>
+          <span class="t-fr">{monthLabel(key, "fr-FR")}</span>
+          <span class="t-kr">{monthLabel(key, "fr-FR")}</span>
+          <span class="t-es">{monthLabel(key, "es-ES")}</span>
+        </h2>
+        <div class="grid">
+          {list.map((f: any) => <EventCard event={f} eager={imageIndex++ < 3} typeLabels={typeLabels} />)}
+        </div>
+      </section>
     ))}
 
-    <!-- Past events toggle card -->
     {endedEvents.length > 0 && (
-      <div id="past-toggle-card" class="past-toggle-card" role="button" tabindex="0" aria-expanded="false">
-        <span class="past-chevron past-chevron-l">▶</span>
-        <span class="past-label">
-          <span class="t-en">Last {endedEvents.length} events</span>
-          <span class="t-fr">{endedEvents.length} derniers événements</span>
-          <span class="t-kr">{endedEvents.length} dènyé evènman</span>
-          <span class="t-es">Últimos {endedEvents.length} eventos</span>
-        </span>
-        <span class="past-chevron past-chevron-r">◀</span>
-      </div>
+      <section class="msec is-hidden" id="ended">
+        <h2 class="month">
+          <span class="t-en">Last {endedEvents.length} events</span><span class="t-fr">{endedEvents.length} derniers événements</span>
+          <span class="t-kr">{endedEvents.length} dènyé evènman</span><span class="t-es">Últimos {endedEvents.length} eventos</span>
+        </h2>
+        <div class="grid">
+          {endedEvents.map((f: any) => <EventCard event={f} typeLabels={typeLabels} />)}
+        </div>
+      </section>
     )}
 
-    <!-- Past events — hidden by default -->
-    {endedEvents.length > 0 && (
-      <div id="past-events-section" class="is-hidden">
-        {endedEvents.map(event => (
-          <EventRow event={event} />
-        ))}
+    <div class="dempty is-hidden" id="empty">
+      <span class="t-en">No event matches these filters.</span><span class="t-fr">Aucun événement ne correspond à ces filtres.</span>
+      <span class="t-kr">Pa gen evènman ki koresponn ak filt sa yo.</span><span class="t-es">Ningún evento coincide con estos filtros.</span>
+    </div>
+
+    <footer class="foot">
+      <div class="foot-row">
+        <!-- Compteur first-party : workers/visits (aucune IP stockée, hash salé quotidien) -->
+        <img src="/api/hit" alt="visitor count" width="88" height="20" class="hit-img" />
       </div>
-    )}
-
-    <div class="foot-center">
-      <!-- Compteur first-party : workers/visits (aucune IP stockée, hash salé quotidien) -->
-      <img src="/api/hit" alt="visitor count" width="88" height="20" class="hit-img" />
-      <!-- Option B : hits.seeyoufarm.com -->
-      {/* <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fcaribbean-countdowns.co&count_bg=%23333333&title_bg=%23111111&title=visitors&edge_flat=true" alt="visitor count" style="height:18px;opacity:0.5;" /> */}
-    </div>
-
-    <div class="foot-links">
-      <a href="/sponsor/" class="foot-a">
-        <span class="t-en">Become a sponsor</span>
-        <span class="t-fr">Devenir sponsor</span>
-        <span class="t-kr">Vin yon sponsor</span>
-        <span class="t-es">Ser patrocinador</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/suggest-event/" class="foot-a">
-        <span class="t-en">Add an event</span>
-        <span class="t-fr">Ajouter un événement</span>
-        <span class="t-kr">Ajoute yon evènman</span>
-        <span class="t-es">Agregar un evento</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/eco-evaluator/" class="foot-a">
-        <span class="t-en">Evaluate an event</span>
-        <span class="t-fr">Évaluer un événement</span>
-        <span class="t-kr">Evalye yon evènman</span>
-        <span class="t-es">Evaluar un evento</span>
-      </a>
-    </div>
-    <div class="foot-links">
-      <a href="/legal/" class="foot-a">
-        <span class="t-en">Legal notice</span>
-        <span class="t-fr">Mentions légales</span>
-        <span class="t-kr">Avi legal</span>
-        <span class="t-es">Aviso legal</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/security/" class="foot-a">
-        <span class="t-en">Security</span>
-        <span class="t-fr">Sécurité</span>
-        <span class="t-kr">Sekirite</span>
-        <span class="t-es">Seguridad</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/impact/" class="foot-a">
-        <span class="t-en">Impact</span>
-        <span class="t-fr">Impact</span>
-        <span class="t-kr">Enpak</span>
-        <span class="t-es">Impacto</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/accessibility-statement/" class="foot-a">
-        <span class="t-en">Accessibility</span>
-        <span class="t-fr">Accessibilité</span>
-        <span class="t-kr">Aksesiblite</span>
-        <span class="t-es">Accesibilidad</span>
-      </a>
-      &nbsp;·&nbsp;
-      <a href="/blog/" class="foot-a">
-        <span class="t-en">Blog</span>
-        <span class="t-fr">Blog</span>
-        <span class="t-kr">Blog</span>
-        <span class="t-es">Blog</span>
-      </a>
-    </div>
-    <div class="foot-center2">
-      <a href="/impact/" class="foot-impact-a">
-        <img src="/images/greenweb.webp" alt="This website runs on green hosting - verified by thegreenwebfoundation.org" width="200" height="95" loading="lazy" />
-      </a>
-    </div>
-    <div class="foot-credit">
-      <a href="https://countdowns.co" target="_blank" rel="noopener noreferrer" class="foot-credit-a">countdowns.co</a>
-    </div>
-
+      <div class="foot-row">
+        <a href="/sponsor/"><span class="t-en">Become a sponsor</span><span class="t-fr">Devenir sponsor</span><span class="t-kr">Vin yon sponsor</span><span class="t-es">Ser patrocinador</span></a>
+        &nbsp;·&nbsp;
+        <a href="/suggest-event/"><span class="t-en">Add an event</span><span class="t-fr">Ajouter un événement</span><span class="t-kr">Ajoute yon evènman</span><span class="t-es">Agregar un evento</span></a>
+        &nbsp;·&nbsp;
+        <a href="/eco-evaluator/"><span class="t-en">Evaluate an event</span><span class="t-fr">Évaluer un événement</span><span class="t-kr">Evalye yon evènman</span><span class="t-es">Evaluar un evento</span></a>
+        &nbsp;·&nbsp;
+        <a href="/lite/"><span class="t-en">Light version</span><span class="t-fr">Version légère</span><span class="t-kr">Vèsyon lejè</span><span class="t-es">Versión ligera</span></a>
+      </div>
+      <div class="foot-row">
+        <a href="/legal/"><span class="t-en">Legal notice</span><span class="t-fr">Mentions légales</span><span class="t-kr">Avi legal</span><span class="t-es">Aviso legal</span></a>
+        &nbsp;·&nbsp;
+        <a href="/security/"><span class="t-en">Security</span><span class="t-fr">Sécurité</span><span class="t-kr">Sekirite</span><span class="t-es">Seguridad</span></a>
+        &nbsp;·&nbsp;
+        <a href="/impact/"><span class="t-en">Impact</span><span class="t-fr">Impact</span><span class="t-kr">Enpak</span><span class="t-es">Impacto</span></a>
+        &nbsp;·&nbsp;
+        <a href="/accessibility-statement/"><span class="t-en">Accessibility</span><span class="t-fr">Accessibilité</span><span class="t-kr">Aksesiblite</span><span class="t-es">Accesibilidad</span></a>
+        &nbsp;·&nbsp;
+        <a href="/blog/">Blog</a>
+      </div>
+      <div class="foot-row">
+        <a href="/impact/" class="foot-badge">
+          <img src="/images/greenweb.webp" alt="This website runs on green hosting - verified by thegreenwebfoundation.org" width="200" height="95" loading="lazy" />
+        </a>
+      </div>
+      <div class="foot-row">
+        <a href="https://countdowns.co" target="_blank" rel="noopener noreferrer">countdowns.co</a>
+      </div>
+    </footer>
   </main>
 
-<div id="extToast" class="ext-toast"></div>
-
-  <script is:inline src="/scripts/index.js" defer></script>
+  <script is:inline src="/scripts/lang.js" defer></script>
+  <script is:inline src="/scripts/home.js" defer></script>
 </body>
 </html>
